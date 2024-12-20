@@ -3,6 +3,7 @@ package ca.kebs.onloc.android
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.util.Patterns
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -128,7 +129,9 @@ fun LoginForm() {
                 isPasswordError = isPasswordError
             )
 
-            Text(error, color = MaterialTheme.colorScheme.error)
+            if (error != "") {
+                Text(error, color = MaterialTheme.colorScheme.error)
+            }
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -225,6 +228,9 @@ fun validateInputs(
 
     if (ip.isBlank()) {
         onIpError("IP is required")
+        isValid = false
+    } else if (!Patterns.WEB_URL.matcher(ip).matches()) {
+        onIpError("Invalid IP")
         isValid = false
     } else {
         onIpError("")
