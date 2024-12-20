@@ -62,4 +62,6 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
     implementation(libs.androidx.material.icons.extended.android)
     implementation(libs.okhttp)
+    implementation(libs.androidx.security.crypto)
+    implementation(libs.gson)
 }

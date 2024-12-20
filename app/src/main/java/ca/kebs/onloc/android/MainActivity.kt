@@ -1,5 +1,6 @@
 package ca.kebs.onloc.android
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -36,7 +37,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.security.crypto.EncryptedSharedPreferences
+import androidx.security.crypto.MasterKey
 import ca.kebs.onloc.android.ui.theme.OnlocAndroidTheme
+import com.google.gson.Gson
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -71,7 +75,14 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun LoginForm() {
-    var ip by remember { mutableStateOf("") }
+    val context = LocalContext.current
+    val sharedPreferences = context.getSharedPreferences("app_preferences", Context.MODE_PRIVATE)
+
+    var storedIp = sharedPreferences.getString("ip", "")
+    if (storedIp == null)
+        storedIp = ""
+
+    var ip by remember { mutableStateOf(storedIp) }
     var isIpError by remember { mutableStateOf("") }
     var username by remember { mutableStateOf("") }
     var isUsernameError by remember { mutableStateOf("") }
@@ -135,7 +146,6 @@ fun LoginForm() {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            val context = LocalContext.current
             Button(
                 onClick = {
                     val isValid = validateInputs(
@@ -151,21 +161,49 @@ fun LoginForm() {
 
                     if (isValid) {
                         val authService = AuthService()
-                        authService.login(ip, username, password, { token, user, errorMessage ->
+                        authService.login(ip, username, password) { token, user, errorMessage ->
                             if (token != null && user != null) {
-                                Log.d("RESULT", "Token: $token, Id: ${user.id}, Username: ${user.username}")
+                                Log.d(
+                                    "RESULT",
+                                    "Token: $token, Id: ${user.id}, Username: ${user.username}"
+                                )
+
+                                with(sharedPreferences.edit()) {
+                                    putString("ip", ip)
+                                    apply()
+                                }
+
+                                val masterKey = MasterKey.Builder(context)
+                                    .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+                                    .build()
+
+                                val encryptedSharedPreferences = EncryptedSharedPreferences.create(
+                                    context,
+                                    "user_credentials",
+                                    masterKey,
+                                    EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                                    EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+                                )
+
+                                encryptedSharedPreferences.edit().apply {
+                                    putString("token", token)
+                                    putString("user", Gson().toJson(user))
+                                    apply()
+                                }
+
                                 val intent = Intent(context, LocationActivity::class.java)
-                                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                                intent.flags =
+                                    Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                                 context.startActivity(intent)
                             } else {
                                 error = errorMessage ?: "Failure."
                             }
-                        })
+                        }
                     }
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Login",)
+                Text("Login")
             }
         }
     }
