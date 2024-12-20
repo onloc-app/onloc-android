@@ -1,5 +1,7 @@
 package ca.kebs.onloc.android
 
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -30,6 +32,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
@@ -74,6 +78,7 @@ fun LoginForm() {
     var isUsernameError by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var isPasswordError by remember { mutableStateOf("") }
+    var error by remember { mutableStateOf("") }
 
     Box(
         modifier = Modifier.padding(16.dp),
@@ -125,8 +130,11 @@ fun LoginForm() {
                 isPasswordError = isPasswordError
             )
 
+            Text(error, color = MaterialTheme.colorScheme.error)
+
             Spacer(modifier = Modifier.height(16.dp))
 
+            val context = LocalContext.current
             Button(
                 onClick = {
                     val isValid = validateInputs(
@@ -137,13 +145,26 @@ fun LoginForm() {
                         onUsernameError = { isUsernameError = it },
                         onPasswordError = { isPasswordError = it }
                     )
+
+                    error = ""
+
                     if (isValid) {
-                        login(ip, username, password)
+                        val authService = AuthService()
+                        authService.login(ip, username, password, { token, user, errorMessage ->
+                            if (token != null && user != null) {
+                                Log.d("RESULT", "Token: $token, Id: ${user.id}, Username: ${user.username}")
+                                val intent = Intent(context, LocationActivity::class.java)
+                                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                                context.startActivity(intent)
+                            } else {
+                                error = errorMessage ?: "Failure."
+                            }
+                        })
                     }
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Login")
+                Text("Login",)
             }
         }
     }
@@ -226,8 +247,4 @@ fun validateInputs(
     }
 
     return isValid
-}
-
-fun login(ip: String, username: String, password: String) {
-    Log.d("LoginForm", "Logging in with IP: $ip, Username: $username, Password: $password")
 }
