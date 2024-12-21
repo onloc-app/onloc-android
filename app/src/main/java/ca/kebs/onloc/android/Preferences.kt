@@ -1,7 +1,6 @@
 package ca.kebs.onloc.android
 
 import android.content.Context
-import android.content.Intent
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import com.google.gson.Gson
