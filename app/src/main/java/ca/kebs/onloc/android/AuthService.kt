@@ -72,4 +72,32 @@ class AuthService {
             }
         })
     }
+
+    fun logout(ip: String, id: Int) {
+        val url = "$ip/api/logout"
+
+        val jsonBody = JSONObject().apply {
+            put("id", id)
+        }
+
+        val requestBody = jsonBody.toString().toRequestBody("application/json; charset=utf-8".toMediaType())
+
+        val request = Request.Builder().url(url).post(requestBody).build()
+
+        client.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                e.printStackTrace()
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                response.use {
+                    if (response.isSuccessful) {
+                        println("Logged out")
+                    } else {
+                        println("Logout failed")
+                    }
+                }
+            }
+        })
+    }
 }

@@ -37,16 +37,27 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
-import androidx.security.crypto.EncryptedSharedPreferences
-import androidx.security.crypto.MasterKey
 import ca.kebs.onloc.android.ui.theme.OnlocAndroidTheme
-import com.google.gson.Gson
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
+            val context = LocalContext.current
+            val preferences = Preferences(context)
+
+            val credentials = preferences.getUserCredentials()
+            val token = credentials.first
+            val user = credentials.second
+
+            if (token != null && user != null) {
+                val intent = Intent(context, LocationActivity::class.java)
+                intent.flags =
+                    Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                context.startActivity(intent)
+            }
+
             OnlocAndroidTheme {
                 Surface(modifier = Modifier.fillMaxSize()) {
                     Column(
@@ -65,7 +76,7 @@ class MainActivity : ComponentActivity() {
                             style = MaterialTheme.typography.titleMedium,
                             modifier = Modifier.padding(bottom = 8.dp)
                         )
-                        LoginForm()
+                        LoginForm(context, preferences)
                     }
                 }
             }
@@ -74,11 +85,8 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun LoginForm() {
-    val context = LocalContext.current
-    val sharedPreferences = context.getSharedPreferences("app_preferences", Context.MODE_PRIVATE)
-
-    var storedIp = sharedPreferences.getString("ip", "")
+fun LoginForm(context: Context, preferences: Preferences) {
+    var storedIp = preferences.getIP()
     if (storedIp == null)
         storedIp = ""
 
@@ -168,28 +176,8 @@ fun LoginForm() {
                                     "Token: $token, Id: ${user.id}, Username: ${user.username}"
                                 )
 
-                                with(sharedPreferences.edit()) {
-                                    putString("ip", ip)
-                                    apply()
-                                }
-
-                                val masterKey = MasterKey.Builder(context)
-                                    .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
-                                    .build()
-
-                                val encryptedSharedPreferences = EncryptedSharedPreferences.create(
-                                    context,
-                                    "user_credentials",
-                                    masterKey,
-                                    EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-                                    EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-                                )
-
-                                encryptedSharedPreferences.edit().apply {
-                                    putString("token", token)
-                                    putString("user", Gson().toJson(user))
-                                    apply()
-                                }
+                                preferences.createIP(ip)
+                                preferences.createUserCredentials(token, user)
 
                                 val intent = Intent(context, LocationActivity::class.java)
                                 intent.flags =
