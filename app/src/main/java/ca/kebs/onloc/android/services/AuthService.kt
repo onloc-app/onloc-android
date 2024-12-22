@@ -1,5 +1,6 @@
-package ca.kebs.onloc.android
+package ca.kebs.onloc.android.services
 
+import ca.kebs.onloc.android.models.User
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.MediaType.Companion.toMediaType

@@ -3,10 +3,15 @@ package ca.kebs.onloc.android
 import android.content.Context
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
+import ca.kebs.onloc.android.models.User
 import com.google.gson.Gson
 
-class Preferences(private val context: Context) {
+const val IP_KEY = "ip"
+const val DEVICE_ID_KEY = "device_id"
+const val TOKEN_KEY = "token"
+const val USER_KEY = "user"
 
+class Preferences(private val context: Context) {
     private val masterKey: MasterKey by lazy {
         MasterKey.Builder(context)
             .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
@@ -26,19 +31,37 @@ class Preferences(private val context: Context) {
     private val sharedPreferences = context.getSharedPreferences("app_preferences", Context.MODE_PRIVATE)
 
     fun getIP(): String? {
-        return sharedPreferences.getString("ip", "")
+        return sharedPreferences.getString(IP_KEY, "")
     }
 
     fun createIP(ip: String) {
         sharedPreferences.edit().apply {
-            putString("ip", ip)
+            putString(IP_KEY, ip)
+            apply()
+        }
+    }
+
+    fun getDeviceId(): Int {
+        return sharedPreferences.getInt(DEVICE_ID_KEY, -1)
+    }
+
+    fun createDeviceId(id: Int) {
+        sharedPreferences.edit().apply {
+            putInt(DEVICE_ID_KEY, id)
+            apply()
+        }
+    }
+
+    fun deleteDeviceId() {
+        sharedPreferences.edit().apply {
+            remove(DEVICE_ID_KEY)
             apply()
         }
     }
 
     fun getUserCredentials(): Pair<String?, User?> {
-        val token = encryptedSharedPreferences.getString("token", null)
-        val userJson = encryptedSharedPreferences.getString("user", null)
+        val token = encryptedSharedPreferences.getString(TOKEN_KEY, null)
+        val userJson = encryptedSharedPreferences.getString(USER_KEY, null)
 
         return if (token != null && userJson != null) {
             val user = Gson().fromJson(userJson, User::class.java)
@@ -50,8 +73,8 @@ class Preferences(private val context: Context) {
 
     fun createUserCredentials(token: String, user: User) {
         encryptedSharedPreferences.edit().apply {
-            putString("token", token)
-            putString("user", Gson().toJson(user))
+            putString(TOKEN_KEY, token)
+            putString(USER_KEY, Gson().toJson(user))
             apply()
         }
     }

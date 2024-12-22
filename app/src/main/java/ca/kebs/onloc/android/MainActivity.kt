@@ -8,6 +8,7 @@ import android.util.Patterns
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -37,6 +38,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import ca.kebs.onloc.android.services.AuthService
 import ca.kebs.onloc.android.ui.theme.OnlocAndroidTheme
 
 class MainActivity : ComponentActivity() {
@@ -148,7 +150,7 @@ fun LoginForm(context: Context, preferences: Preferences) {
                 isPasswordError = isPasswordError
             )
 
-            if (error != "") {
+            AnimatedVisibility(error != "") {
                 Text(error, color = MaterialTheme.colorScheme.error)
             }
 
@@ -171,11 +173,6 @@ fun LoginForm(context: Context, preferences: Preferences) {
                         val authService = AuthService()
                         authService.login(ip, username, password) { token, user, errorMessage ->
                             if (token != null && user != null) {
-                                Log.d(
-                                    "RESULT",
-                                    "Token: $token, Id: ${user.id}, Username: ${user.username}"
-                                )
-
                                 preferences.createIP(ip)
                                 preferences.createUserCredentials(token, user)
 
