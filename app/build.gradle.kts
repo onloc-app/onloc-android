@@ -10,7 +10,7 @@ android {
 
     defaultConfig {
         applicationId = "ca.kebs.onloc.android"
-        minSdk = 30
+        minSdk = 31
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
@@ -64,4 +64,5 @@ dependencies {
     implementation(libs.okhttp)
     implementation(libs.androidx.security.crypto)
     implementation(libs.gson)
+    implementation(libs.androidx.work.runtime.ktx)
 }

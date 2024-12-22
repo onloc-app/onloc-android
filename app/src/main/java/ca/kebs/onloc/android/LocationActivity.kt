@@ -4,9 +4,8 @@ import android.Manifest
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.net.Uri
+import android.location.Location
 import android.os.Bundle
-import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
@@ -46,7 +45,11 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import ca.kebs.onloc.android.models.Device
 import ca.kebs.onloc.android.services.AuthService
 import ca.kebs.onloc.android.services.DevicesService
+import ca.kebs.onloc.android.services.LocationService
 import ca.kebs.onloc.android.ui.theme.OnlocAndroidTheme
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 class LocationActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
@@ -78,6 +81,53 @@ class LocationActivity : ComponentActivity() {
                         devicesErrorMessage = errorMessage
                     }
                 }
+            }
+
+            // Location permissions
+            var fineLocationGranted by remember {
+                mutableStateOf(
+                    ContextCompat.checkSelfPermission(
+                        context,
+                        Manifest.permission.ACCESS_FINE_LOCATION
+                    ) == PackageManager.PERMISSION_GRANTED
+                )
+            }
+
+            var backgroundLocationGranted by remember {
+                mutableStateOf(
+                    ContextCompat.checkSelfPermission(
+                        context,
+                        Manifest.permission.ACCESS_BACKGROUND_LOCATION
+                    ) == PackageManager.PERMISSION_GRANTED
+                )
+            }
+
+            val lifecycleOwner = LocalLifecycleOwner.current
+            DisposableEffect(lifecycleOwner) {
+                val observer = LifecycleEventObserver { _, event ->
+                    if (event == Lifecycle.Event.ON_RESUME) {
+                        fineLocationGranted = ContextCompat.checkSelfPermission(
+                            context,
+                            Manifest.permission.ACCESS_FINE_LOCATION
+                        ) == PackageManager.PERMISSION_GRANTED
+                        backgroundLocationGranted = ContextCompat.checkSelfPermission(
+                            context,
+                            Manifest.permission.ACCESS_BACKGROUND_LOCATION
+                        ) == PackageManager.PERMISSION_GRANTED
+                    }
+                }
+                lifecycleOwner.lifecycle.addObserver(observer)
+                onDispose {
+                    lifecycleOwner.lifecycle.removeObserver(observer)
+                }
+            }
+
+            var currentLocation by remember { mutableStateOf<Location?>(null) }
+            var isUpdatingLocation by remember { mutableStateOf(false) }
+            val locationService = LocationService(context) { location, isUpdating ->
+                currentLocation = location
+                isUpdatingLocation = isUpdating
+                println("Transmitting location...")
             }
 
             OnlocAndroidTheme {
@@ -119,7 +169,68 @@ class LocationActivity : ComponentActivity() {
                             .padding(innerPadding),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Permissions(context)
+                        var serviceStatus = "Stopped"
+                        if (selectedDeviceId == -1) {
+                            serviceStatus = "No device selected"
+                        }
+                        if (!fineLocationGranted || !backgroundLocationGranted) {
+                            serviceStatus = "Required permissions missing"
+                        }
+                        Text(
+                            text = "Service's status: $serviceStatus",
+                            modifier = Modifier.padding(16.dp)
+                        )
+                        Text(
+                            text = "Accuracy: ${currentLocation?.accuracy}",
+                            modifier = Modifier.padding(16.dp)
+                        )
+                        Text(
+                            text = "Altitude: ${currentLocation?.altitude}",
+                            modifier = Modifier.padding(16.dp)
+                        )
+                        Text(
+                            text = "Altitude accuracy: ${currentLocation?.verticalAccuracyMeters}",
+                            modifier = Modifier.padding(16.dp)
+                        )
+                        Text(
+                            text = "Latitude: ${currentLocation?.latitude}",
+                            modifier = Modifier.padding(16.dp)
+                        )
+                        Text(
+                            text = "Longitude: ${currentLocation?.longitude}",
+                            modifier = Modifier.padding(16.dp)
+                        )
+
+                        val isoDate = currentLocation?.time?.let {
+                            Instant.ofEpochMilli(it)
+                                .atZone(ZoneId.systemDefault())
+                                .format(DateTimeFormatter.ISO_DATE_TIME)
+                        } ?: "Unknown Time"
+                        Text(
+                            text = "Time: $isoDate"
+                        )
+
+                        Button(
+                            onClick = {
+                                if (isUpdatingLocation) {
+                                    locationService.stopUpdates()
+                                } else {
+                                    locationService.startUpdates()
+                                }
+                            },
+                            enabled = (fineLocationGranted && backgroundLocationGranted)
+                        ) {
+                            Text(
+                                if (isUpdatingLocation) {
+                                    "Stop service"
+                                } else {
+                                    "Start service"
+                                }
+                            )
+                        }
+
+                        Permissions(context, fineLocationGranted, backgroundLocationGranted)
+
                         DeviceSelector(
                             preferences = preferences,
                             devices = devices,
@@ -236,7 +347,7 @@ fun DeviceSelector(
 }
 
 @Composable
-fun Permissions(context: Context) {
+fun Permissions(context: Context, fineLocationGranted: Boolean, backgroundLocationGranted: Boolean) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -248,50 +359,9 @@ fun Permissions(context: Context) {
         )
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Location permissions
-        var fineLocationGranted by remember {
-            mutableStateOf(
-                ContextCompat.checkSelfPermission(
-                    context,
-                    Manifest.permission.ACCESS_FINE_LOCATION
-                ) == PackageManager.PERMISSION_GRANTED
-            )
-        }
-
-        var backgroundLocationGranted by remember {
-            mutableStateOf(
-                ContextCompat.checkSelfPermission(
-                    context,
-                    Manifest.permission.ACCESS_BACKGROUND_LOCATION
-                ) == PackageManager.PERMISSION_GRANTED
-            )
-        }
-
-        val lifecycleOwner = LocalLifecycleOwner.current
-        DisposableEffect(lifecycleOwner) {
-            val observer = LifecycleEventObserver { _, event ->
-                if (event == Lifecycle.Event.ON_RESUME) {
-                    fineLocationGranted = ContextCompat.checkSelfPermission(
-                        context,
-                        Manifest.permission.ACCESS_FINE_LOCATION
-                    ) == PackageManager.PERMISSION_GRANTED
-                    backgroundLocationGranted = ContextCompat.checkSelfPermission(
-                        context,
-                        Manifest.permission.ACCESS_BACKGROUND_LOCATION
-                    ) == PackageManager.PERMISSION_GRANTED
-                }
-            }
-            lifecycleOwner.lifecycle.addObserver(observer)
-            onDispose {
-                lifecycleOwner.lifecycle.removeObserver(observer)
-            }
-        }
-
-        val fineLocationLauncher = rememberLauncherForActivityResult(
+        val locationPermissionLauncher = rememberLauncherForActivityResult(
             contract = ActivityResultContracts.RequestPermission()
-        ) { isGranted ->
-            fineLocationGranted = isGranted
-        }
+        ) {}
 
         PermissionCard(
             name = "Background Location",
@@ -299,12 +369,9 @@ fun Permissions(context: Context) {
             isGranted = (fineLocationGranted && backgroundLocationGranted),
             onGrantClick = {
                 if (!fineLocationGranted) {
-                    fineLocationLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+                    locationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
                 } else if (!backgroundLocationGranted) {
-                    val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                        data = Uri.fromParts("package", context.packageName, null)
-                    }
-                    context.startActivity(intent)
+                    locationPermissionLauncher.launch(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
                 }
             }
         )
@@ -347,3 +414,38 @@ fun PermissionCard(name: String, description: String, isGranted: Boolean, onGran
         }
     }
 }
+
+/*
+private fun getLocation(context: Context, updateLocation: (Location?) -> Unit) {
+    val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+
+    if (
+        ActivityCompat.checkSelfPermission(
+            context,
+            Manifest.permission.ACCESS_FINE_LOCATION
+        ) != PackageManager.PERMISSION_GRANTED &&
+        ActivityCompat.checkSelfPermission(
+            context,
+            Manifest.permission.ACCESS_BACKGROUND_LOCATION
+        ) != PackageManager.PERMISSION_GRANTED
+    ) {
+        return
+    }
+
+    var provider = LocationManager.FUSED_PROVIDER
+
+    val locationListener = object : LocationListener {
+        override fun onLocationChanged(location: Location) {
+            updateLocation(location)
+            locationManager.removeUpdates(this)
+        }
+    }
+
+    locationManager.requestLocationUpdates(
+        provider,
+        15000L,
+        0f,
+        locationListener
+    )
+}
+*/
