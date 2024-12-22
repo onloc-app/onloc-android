@@ -1,11 +1,17 @@
 package ca.kebs.onloc.android
 
+import android.Manifest
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Bundle
+import android.provider.Settings
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -22,6 +28,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -32,6 +39,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import ca.kebs.onloc.android.models.Device
 import ca.kebs.onloc.android.services.AuthService
 import ca.kebs.onloc.android.services.DevicesService
@@ -108,7 +119,7 @@ class LocationActivity : ComponentActivity() {
                             .padding(innerPadding),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Permissions()
+                        Permissions(context)
                         DeviceSelector(
                             preferences = preferences,
                             devices = devices,
@@ -183,42 +194,49 @@ fun DeviceSelector(
             sheetState = sheetState,
             onDismissRequest = onDismissBottomSheet
         ) {
-            LazyColumn {
-                items(devices) { device ->
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(56.dp)
-                            .selectable(
+            if (devices.isNotEmpty()) {
+                LazyColumn {
+                    items(devices) { device ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(56.dp)
+                                .selectable(
+                                    selected = (device.id == selectedDeviceId),
+                                    onClick = {
+                                        onDeviceSelected(device.id)
+                                        preferences.createDeviceId(device.id)
+                                        onDismissBottomSheet()
+                                    },
+                                    role = Role.RadioButton
+                                )
+                                .padding(horizontal = 16.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            RadioButton(
                                 selected = (device.id == selectedDeviceId),
-                                onClick = {
-                                    onDeviceSelected(device.id)
-                                    preferences.createDeviceId(device.id)
-                                    onDismissBottomSheet()
-                                },
-                                role = Role.RadioButton
+                                onClick = null
                             )
-                            .padding(horizontal = 16.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        RadioButton(
-                            selected = (device.id == selectedDeviceId),
-                            onClick = null
-                        )
-                        Text(
-                            text = device.name,
-                            style = MaterialTheme.typography.bodyLarge,
-                            modifier = Modifier.padding(start = 16.dp)
-                        )
+                            Text(
+                                text = device.name,
+                                style = MaterialTheme.typography.bodyLarge,
+                                modifier = Modifier.padding(start = 16.dp)
+                            )
+                        }
                     }
                 }
+            } else {
+                Text(
+                    text = "No device found.",
+                    modifier = Modifier.padding(16.dp)
+                )
             }
         }
     }
 }
 
 @Composable
-fun Permissions() {
+fun Permissions(context: Context) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -229,15 +247,72 @@ fun Permissions() {
             style = MaterialTheme.typography.titleLarge
         )
         Spacer(modifier = Modifier.height(16.dp))
+
+        // Location permissions
+        var fineLocationGranted by remember {
+            mutableStateOf(
+                ContextCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.ACCESS_FINE_LOCATION
+                ) == PackageManager.PERMISSION_GRANTED
+            )
+        }
+
+        var backgroundLocationGranted by remember {
+            mutableStateOf(
+                ContextCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.ACCESS_BACKGROUND_LOCATION
+                ) == PackageManager.PERMISSION_GRANTED
+            )
+        }
+
+        val lifecycleOwner = LocalLifecycleOwner.current
+        DisposableEffect(lifecycleOwner) {
+            val observer = LifecycleEventObserver { _, event ->
+                if (event == Lifecycle.Event.ON_RESUME) {
+                    fineLocationGranted = ContextCompat.checkSelfPermission(
+                        context,
+                        Manifest.permission.ACCESS_FINE_LOCATION
+                    ) == PackageManager.PERMISSION_GRANTED
+                    backgroundLocationGranted = ContextCompat.checkSelfPermission(
+                        context,
+                        Manifest.permission.ACCESS_BACKGROUND_LOCATION
+                    ) == PackageManager.PERMISSION_GRANTED
+                }
+            }
+            lifecycleOwner.lifecycle.addObserver(observer)
+            onDispose {
+                lifecycleOwner.lifecycle.removeObserver(observer)
+            }
+        }
+
+        val fineLocationLauncher = rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.RequestPermission()
+        ) { isGranted ->
+            fineLocationGranted = isGranted
+        }
+
         PermissionCard(
-            "Background Location",
-            "Allows the app to share your device's location with the server even when the app is not in use."
+            name = "Background Location",
+            description = "Allows the app to share your device's location with the server even when the app is not in use.",
+            isGranted = (fineLocationGranted && backgroundLocationGranted),
+            onGrantClick = {
+                if (!fineLocationGranted) {
+                    fineLocationLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+                } else if (!backgroundLocationGranted) {
+                    val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                        data = Uri.fromParts("package", context.packageName, null)
+                    }
+                    context.startActivity(intent)
+                }
+            }
         )
     }
 }
 
 @Composable
-fun PermissionCard(name: String, description: String) {
+fun PermissionCard(name: String, description: String, isGranted: Boolean, onGrantClick: () -> Unit) {
     Box(modifier = Modifier.fillMaxWidth()) {
         ElevatedCard(
             elevation = CardDefaults.cardElevation(
@@ -262,10 +337,11 @@ fun PermissionCard(name: String, description: String) {
             ) {
                 Spacer(modifier = Modifier.weight(1f))
                 OutlinedButton(
-                    onClick = { },
+                    onClick = { onGrantClick() },
+                    enabled = !isGranted,
                     modifier = Modifier.padding(defaultPadding)
                 ) {
-                    Text("Grant")
+                    Text(if (isGranted) "Granted" else "Grant")
                 }
             }
         }
