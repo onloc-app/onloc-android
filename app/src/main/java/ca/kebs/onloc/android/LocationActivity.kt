@@ -229,7 +229,7 @@ class LocationActivity : ComponentActivity() {
                             )
                         }
 
-                        Permissions(context, fineLocationGranted, backgroundLocationGranted)
+                        Permissions(fineLocationGranted, backgroundLocationGranted)
 
                         DeviceSelector(
                             preferences = preferences,
@@ -347,7 +347,7 @@ fun DeviceSelector(
 }
 
 @Composable
-fun Permissions(context: Context, fineLocationGranted: Boolean, backgroundLocationGranted: Boolean) {
+fun Permissions(fineLocationGranted: Boolean, backgroundLocationGranted: Boolean) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
