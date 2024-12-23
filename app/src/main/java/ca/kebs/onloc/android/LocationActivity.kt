@@ -21,7 +21,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material3.*
@@ -83,7 +85,16 @@ class LocationActivity : ComponentActivity() {
                 }
             }
 
-            // Location permissions
+            // Permissions
+            var notificationsGranted by remember {
+                mutableStateOf(
+                    ContextCompat.checkSelfPermission(
+                        context,
+                        Manifest.permission.POST_NOTIFICATIONS
+                    ) == PackageManager.PERMISSION_GRANTED
+                )
+            }
+
             var fineLocationGranted by remember {
                 mutableStateOf(
                     ContextCompat.checkSelfPermission(
@@ -106,6 +117,10 @@ class LocationActivity : ComponentActivity() {
             DisposableEffect(lifecycleOwner) {
                 val observer = LifecycleEventObserver { _, event ->
                     if (event == Lifecycle.Event.ON_RESUME) {
+                        notificationsGranted = ContextCompat.checkSelfPermission(
+                            context,
+                            Manifest.permission.POST_NOTIFICATIONS
+                        ) == PackageManager.PERMISSION_GRANTED
                         fineLocationGranted = ContextCompat.checkSelfPermission(
                             context,
                             Manifest.permission.ACCESS_FINE_LOCATION
@@ -169,10 +184,13 @@ class LocationActivity : ComponentActivity() {
                         )
                     }
                 ) { innerPadding ->
+                    val scrollState = rememberScrollState()
+
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(innerPadding),
+                            .padding(innerPadding)
+                            .verticalScroll(scrollState)
                     ) {
                         var canStartLocationService = true
                         var serviceStatus = if (isLocationServiceRunning) {
@@ -244,7 +262,7 @@ class LocationActivity : ComponentActivity() {
                             }
                         }
 
-                        Permissions(fineLocationGranted, backgroundLocationGranted)
+                        Permissions(notificationsGranted, fineLocationGranted, backgroundLocationGranted)
 
                         DeviceSelector(
                             preferences = preferences,
@@ -364,7 +382,7 @@ fun DeviceSelector(
 }
 
 @Composable
-fun Permissions(fineLocationGranted: Boolean, backgroundLocationGranted: Boolean) {
+fun Permissions(notificationsGranted: Boolean, fineLocationGranted: Boolean, backgroundLocationGranted: Boolean) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -376,9 +394,18 @@ fun Permissions(fineLocationGranted: Boolean, backgroundLocationGranted: Boolean
         )
         Spacer(modifier = Modifier.height(16.dp))
 
-        val locationPermissionLauncher = rememberLauncherForActivityResult(
+        val permissionLauncher = rememberLauncherForActivityResult(
             contract = ActivityResultContracts.RequestPermission()
         ) {}
+
+        PermissionCard(
+            name = "Notifications",
+            description = "Allows the app to send notifications if the service stops.",
+            isGranted = notificationsGranted,
+            onGrantClick = {
+                permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            }
+        )
 
         PermissionCard(
             name = "Background Location",
@@ -386,9 +413,9 @@ fun Permissions(fineLocationGranted: Boolean, backgroundLocationGranted: Boolean
             isGranted = (fineLocationGranted && backgroundLocationGranted),
             onGrantClick = {
                 if (!fineLocationGranted) {
-                    locationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+                    permissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
                 } else if (!backgroundLocationGranted) {
-                    locationPermissionLauncher.launch(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+                    permissionLauncher.launch(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
                 }
             }
         )
@@ -397,7 +424,11 @@ fun Permissions(fineLocationGranted: Boolean, backgroundLocationGranted: Boolean
 
 @Composable
 fun PermissionCard(name: String, description: String, isGranted: Boolean, onGrantClick: () -> Unit) {
-    Box(modifier = Modifier.fillMaxWidth()) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 16.dp)
+    ) {
         ElevatedCard(
             elevation = CardDefaults.cardElevation(
                 defaultElevation = 6.dp

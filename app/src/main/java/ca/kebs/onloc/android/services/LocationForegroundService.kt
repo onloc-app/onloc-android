@@ -2,6 +2,7 @@ package ca.kebs.onloc.android.services
 
 import android.Manifest
 import android.app.Notification
+import android.app.NotificationManager
 import android.app.Service
 import android.content.Context
 import android.content.Intent
@@ -78,6 +79,18 @@ class LocationForegroundService: Service() {
     override fun onDestroy() {
         super.onDestroy()
         stopForegroundService()
+
+        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val channelId = "service_stop_channel"
+
+        val notification = NotificationCompat.Builder(this, channelId)
+            .setSmallIcon(android.R.drawable.ic_dialog_alert)
+            .setContentTitle("Service Stopped")
+            .setContentText("The location tracking service has been stopped.")
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .build()
+
+        notificationManager.notify(2, notification)
     }
 }
 
