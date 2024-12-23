@@ -65,4 +65,5 @@ dependencies {
     implementation(libs.androidx.security.crypto)
     implementation(libs.gson)
     implementation(libs.androidx.work.runtime.ktx)
+    implementation(libs.androidx.work.runtime)
 }
