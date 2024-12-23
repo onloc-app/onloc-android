@@ -400,7 +400,7 @@ fun Permissions(notificationsGranted: Boolean, fineLocationGranted: Boolean, bac
 
         PermissionCard(
             name = "Notifications",
-            description = "Allows the app to send notifications if the service stops.",
+            description = "Allows the app to send notifications about the service's status.",
             isGranted = notificationsGranted,
             onGrantClick = {
                 permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
