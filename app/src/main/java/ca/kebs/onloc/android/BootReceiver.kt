@@ -7,7 +7,8 @@ import ca.kebs.onloc.android.services.LocationForegroundService
 
 class BootReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
-        if (intent.action == Intent.ACTION_BOOT_COMPLETED) {
+        val preferences = Preferences(context)
+        if (intent.action == Intent.ACTION_BOOT_COMPLETED && preferences.getLocationServiceStatus()) {
             val serviceIntent = Intent(context, LocationForegroundService::class.java)
             context.startForegroundService(serviceIntent)
         }
