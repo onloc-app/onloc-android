@@ -147,7 +147,7 @@ class LocationActivity : ComponentActivity() {
                 if (ip != null && token != null && location != null && selectedDeviceId != -1) {
                     val parsedLocation = Location.fromAndroidLocation(0, selectedDeviceId, location)
                     currentLocation = parsedLocation
-                    locationsApiService.postLocation(ip, token, parsedLocation)
+                    // locationsApiService.postLocation(ip, token, parsedLocation)
                 }
             }
 

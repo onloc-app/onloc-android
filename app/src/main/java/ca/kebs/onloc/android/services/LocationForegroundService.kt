@@ -14,14 +14,60 @@ import android.location.LocationManager
 import android.os.IBinder
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
+import ca.kebs.onloc.android.api.LocationsApiService
+import androidx.security.crypto.EncryptedSharedPreferences
+import androidx.security.crypto.MasterKey
 
 class LocationForegroundService: Service() {
     private val locationManager: LocationManager by lazy {
         getSystemService(Context.LOCATION_SERVICE) as LocationManager
     }
 
+    private fun getToken(): String? {
+        val masterKey: MasterKey by lazy {
+            MasterKey.Builder(applicationContext)
+                .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+                .build()
+        }
+
+        val encryptedSharedPreferences by lazy {
+            EncryptedSharedPreferences.create(
+                applicationContext,
+                "user_credentials",
+                masterKey,
+                EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+            )
+        }
+
+        return encryptedSharedPreferences.getString("token", null)
+    }
+
+    private fun getSelectedDeviceId(): Int {
+        val sharedPreferences = getSharedPreferences("app_preferences", Context.MODE_PRIVATE)
+        return sharedPreferences.getInt("device_id", -1)
+    }
+
+    private fun getIP(): String? {
+        val sharedPreferences = getSharedPreferences("app_preferences", Context.MODE_PRIVATE)
+        return sharedPreferences.getString("ip", null)
+    }
+
+    private val locationsApiService = LocationsApiService()
+
     private val locationListener = LocationListener { location ->
         println("Latitude: ${location.latitude}, Longitude: ${location.longitude}")
+        val ip = getIP()
+        val token = getToken()
+        val selectedDeviceId = getSelectedDeviceId()
+        val parsedLocation = ca.kebs.onloc.android.models.Location.fromAndroidLocation(
+            0,
+            selectedDeviceId,
+            location
+        )
+        if (ip != null && token != null && selectedDeviceId != -1) {
+            locationsApiService.postLocation(ip, token, parsedLocation)
+        }
         LocationCallbackManager.callback?.invoke(location)
     }
 
