@@ -1,4 +1,4 @@
-package ca.kebs.onloc.android.services
+package ca.kebs.onloc.android.api
 
 import ca.kebs.onloc.android.models.User
 import okhttp3.Call
@@ -11,7 +11,7 @@ import okhttp3.Response
 import org.json.JSONObject
 import java.io.IOException
 
-class AuthService {
+class AuthApiService {
     private val client = OkHttpClient()
 
     fun login(ip: String, username: String, password: String, callback: (String?, User?, String?) -> Unit) {

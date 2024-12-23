@@ -4,7 +4,6 @@ import android.Manifest
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.location.Location
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -43,13 +42,13 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import ca.kebs.onloc.android.models.Device
-import ca.kebs.onloc.android.services.AuthService
-import ca.kebs.onloc.android.services.DevicesService
-import ca.kebs.onloc.android.services.LocationService
+import ca.kebs.onloc.android.api.AuthApiService
+import ca.kebs.onloc.android.api.DevicesApiService
+import ca.kebs.onloc.android.api.LocationsApiService
+import ca.kebs.onloc.android.models.Location
+import ca.kebs.onloc.android.services.LocationCallbackManager
+import ca.kebs.onloc.android.services.LocationForegroundService
 import ca.kebs.onloc.android.ui.theme.OnlocAndroidTheme
-import java.time.Instant
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 
 class LocationActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
@@ -57,7 +56,8 @@ class LocationActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            val devicesService = DevicesService()
+            val devicesApiService = DevicesApiService()
+            val locationsApiService = LocationsApiService()
             val context = LocalContext.current
             val preferences = Preferences(context)
 
@@ -73,7 +73,7 @@ class LocationActivity : ComponentActivity() {
             val ip = preferences.getIP()
 
             if (token != null && ip != null) {
-                devicesService.getDevices(ip, token) { foundDevices, errorMessage ->
+                devicesApiService.getDevices(ip, token) { foundDevices, errorMessage ->
                     if (foundDevices != null) {
                         devices = foundDevices
                     }
@@ -122,12 +122,18 @@ class LocationActivity : ComponentActivity() {
                 }
             }
 
+            // Location service
+            var isLocationServiceRunning by remember {
+                mutableStateOf(preferences.getLocationServiceStatus())
+            }
+
             var currentLocation by remember { mutableStateOf<Location?>(null) }
-            var isUpdatingLocation by remember { mutableStateOf(false) }
-            val locationService = LocationService(context) { location, isUpdating ->
-                currentLocation = location
-                isUpdatingLocation = isUpdating
-                println("Transmitting location...")
+            LocationCallbackManager.callback = { location ->
+                if (ip != null && token != null && location != null && selectedDeviceId != -1) {
+                    val parsedLocation = Location.fromAndroidLocation(0, selectedDeviceId, location)
+                    currentLocation = parsedLocation
+                    locationsApiService.postLocation(ip, token, parsedLocation)
+                }
             }
 
             OnlocAndroidTheme {
@@ -141,8 +147,8 @@ class LocationActivity : ComponentActivity() {
                             ),
                             actions = {
                                 TextButton(
-                                    onClick = { showBottomSheet = true }
-
+                                    onClick = { showBottomSheet = true },
+                                    enabled = !preferences.getLocationServiceStatus()
                                 ) {
                                     if (selectedDeviceId == -1) {
                                         Text("Select a device")
@@ -167,66 +173,75 @@ class LocationActivity : ComponentActivity() {
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(innerPadding),
-                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        var serviceStatus = "Stopped"
+                        var canStartLocationService = true
+                        var serviceStatus = if (isLocationServiceRunning) {
+                            "Started"
+                        } else {
+                            "Stopped"
+                        }
                         if (selectedDeviceId == -1) {
                             serviceStatus = "No device selected"
+                            canStartLocationService = false
                         }
                         if (!fineLocationGranted || !backgroundLocationGranted) {
                             serviceStatus = "Required permissions missing"
+                            canStartLocationService = false
                         }
-                        Text(
-                            text = "Service's status: $serviceStatus",
-                            modifier = Modifier.padding(16.dp)
-                        )
-                        Text(
-                            text = "Accuracy: ${currentLocation?.accuracy}",
-                            modifier = Modifier.padding(16.dp)
-                        )
-                        Text(
-                            text = "Altitude: ${currentLocation?.altitude}",
-                            modifier = Modifier.padding(16.dp)
-                        )
-                        Text(
-                            text = "Altitude accuracy: ${currentLocation?.verticalAccuracyMeters}",
-                            modifier = Modifier.padding(16.dp)
-                        )
-                        Text(
-                            text = "Latitude: ${currentLocation?.latitude}",
-                            modifier = Modifier.padding(16.dp)
-                        )
-                        Text(
-                            text = "Longitude: ${currentLocation?.longitude}",
-                            modifier = Modifier.padding(16.dp)
-                        )
 
-                        val isoDate = currentLocation?.time?.let {
-                            Instant.ofEpochMilli(it)
-                                .atZone(ZoneId.systemDefault())
-                                .format(DateTimeFormatter.ISO_DATE_TIME)
-                        } ?: "Unknown Time"
-                        Text(
-                            text = "Time: $isoDate"
-                        )
-
-                        Button(
-                            onClick = {
-                                if (isUpdatingLocation) {
-                                    locationService.stopUpdates()
-                                } else {
-                                    locationService.startUpdates()
-                                }
-                            },
-                            enabled = (fineLocationGranted && backgroundLocationGranted)
+                        val defaultPadding = 16.dp
+                        Row(
+                            modifier = Modifier
+                                .padding(defaultPadding)
+                                .height(32.dp),
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                if (isUpdatingLocation) {
-                                    "Stop service"
-                                } else {
-                                    "Start service"
-                                }
+                                text = "Service's status: $serviceStatus",
+                                style = MaterialTheme.typography.titleLarge,
                             )
+                        }
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = defaultPadding)
+                        ) {
+                            ElevatedCard(
+                                elevation = CardDefaults.cardElevation(
+                                    defaultElevation = 6.dp
+                                ),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                            ) {
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(defaultPadding)
+                                ) {
+                                    Text(text = "Accuracy: ${currentLocation?.accuracy}")
+                                    Text(text = "Altitude: ${currentLocation?.altitude}")
+                                    Text(text = "Altitude accuracy: ${currentLocation?.altitudeAccuracy}")
+                                    Text(text = "Latitude: ${currentLocation?.latitude}")
+                                    Text(text = "Longitude: ${currentLocation?.longitude}")
+
+                                    Button(
+                                        onClick = {
+                                            if (isLocationServiceRunning) {
+                                                stopLocationService(context, preferences)
+                                                isLocationServiceRunning = false
+                                                currentLocation = null
+                                            } else {
+                                                startLocationService(context, preferences)
+                                                isLocationServiceRunning = true
+                                            }
+                                        },
+                                        enabled = canStartLocationService,
+                                        modifier = Modifier.padding(top = defaultPadding)
+                                    ) {
+                                        Text(text = if (isLocationServiceRunning) "Stop" else "Start")
+                                    }
+                                }
+                            }
                         }
 
                         Permissions(fineLocationGranted, backgroundLocationGranted)
@@ -251,7 +266,7 @@ class LocationActivity : ComponentActivity() {
 fun Avatar(context: Context, preferences: Preferences) {
     var accountMenuExpanded by remember { mutableStateOf(false) }
 
-    val authService = AuthService()
+    val authApiService = AuthApiService()
 
     val ip = preferences.getIP()
     val user = preferences.getUserCredentials().second
@@ -268,8 +283,10 @@ fun Avatar(context: Context, preferences: Preferences) {
             DropdownMenuItem(
                 text = { Text("Logout") },
                 onClick = {
+                    stopLocationService(context, preferences)
+
                     if (ip != null && user != null) {
-                        authService.logout(ip, user.id)
+                        authApiService.logout(ip, user.id)
                     }
 
                     preferences.deleteUserCredentials()
@@ -415,37 +432,14 @@ fun PermissionCard(name: String, description: String, isGranted: Boolean, onGran
     }
 }
 
-/*
-private fun getLocation(context: Context, updateLocation: (Location?) -> Unit) {
-    val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
-
-    if (
-        ActivityCompat.checkSelfPermission(
-            context,
-            Manifest.permission.ACCESS_FINE_LOCATION
-        ) != PackageManager.PERMISSION_GRANTED &&
-        ActivityCompat.checkSelfPermission(
-            context,
-            Manifest.permission.ACCESS_BACKGROUND_LOCATION
-        ) != PackageManager.PERMISSION_GRANTED
-    ) {
-        return
-    }
-
-    var provider = LocationManager.FUSED_PROVIDER
-
-    val locationListener = object : LocationListener {
-        override fun onLocationChanged(location: Location) {
-            updateLocation(location)
-            locationManager.removeUpdates(this)
-        }
-    }
-
-    locationManager.requestLocationUpdates(
-        provider,
-        15000L,
-        0f,
-        locationListener
-    )
+fun startLocationService(context: Context, preferences: Preferences) {
+    preferences.createLocationServiceStatus(true)
+    val serviceIntent = Intent(context, LocationForegroundService::class.java)
+    context.startService(serviceIntent)
 }
-*/
+
+fun stopLocationService(context: Context, preferences: Preferences) {
+    preferences.createLocationServiceStatus(false)
+    val serviceIntent = Intent(context, LocationForegroundService::class.java)
+    context.stopService(serviceIntent)
+}

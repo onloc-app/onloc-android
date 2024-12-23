@@ -37,7 +37,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
-import ca.kebs.onloc.android.services.AuthService
+import ca.kebs.onloc.android.api.AuthApiService
 import ca.kebs.onloc.android.ui.theme.OnlocAndroidTheme
 
 class MainActivity : ComponentActivity() {
@@ -169,8 +169,8 @@ fun LoginForm(context: Context, preferences: Preferences) {
                     error = ""
 
                     if (isValid) {
-                        val authService = AuthService()
-                        authService.login(ip, username, password) { token, user, errorMessage ->
+                        val authApiService = AuthApiService()
+                        authApiService.login(ip, username, password) { token, user, errorMessage ->
                             if (token != null && user != null) {
                                 preferences.createIP(ip)
                                 preferences.createUserCredentials(token, user)

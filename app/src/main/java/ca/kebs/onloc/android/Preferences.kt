@@ -11,6 +11,8 @@ const val DEVICE_ID_KEY = "device_id"
 const val TOKEN_KEY = "token"
 const val USER_KEY = "user"
 
+const val LOCATION_SERVICE_KEY = "location"
+
 class Preferences(private val context: Context) {
     private val masterKey: MasterKey by lazy {
         MasterKey.Builder(context)
@@ -28,33 +30,52 @@ class Preferences(private val context: Context) {
         )
     }
 
-    private val sharedPreferences = context.getSharedPreferences("app_preferences", Context.MODE_PRIVATE)
+    private val appPreferences = context.getSharedPreferences("app_preferences", Context.MODE_PRIVATE)
+    private val servicesPreferences = context.getSharedPreferences("service_preferences", Context.MODE_PRIVATE)
 
     fun getIP(): String? {
-        return sharedPreferences.getString(IP_KEY, "")
+        return appPreferences.getString(IP_KEY, "")
     }
 
     fun createIP(ip: String) {
-        sharedPreferences.edit().apply {
+        appPreferences.edit().apply {
             putString(IP_KEY, ip)
             apply()
         }
     }
 
     fun getDeviceId(): Int {
-        return sharedPreferences.getInt(DEVICE_ID_KEY, -1)
+        return appPreferences.getInt(DEVICE_ID_KEY, -1)
     }
 
     fun createDeviceId(id: Int) {
-        sharedPreferences.edit().apply {
+        appPreferences.edit().apply {
             putInt(DEVICE_ID_KEY, id)
             apply()
         }
     }
 
     fun deleteDeviceId() {
-        sharedPreferences.edit().apply {
+        appPreferences.edit().apply {
             remove(DEVICE_ID_KEY)
+            apply()
+        }
+    }
+
+    fun getLocationServiceStatus(): Boolean {
+        return servicesPreferences.getBoolean(LOCATION_SERVICE_KEY, false)
+    }
+
+    fun createLocationServiceStatus(status: Boolean) {
+        servicesPreferences.edit().apply {
+            putBoolean(LOCATION_SERVICE_KEY, status)
+            apply()
+        }
+    }
+
+    fun deleteLocationServiceStatus() {
+        servicesPreferences.edit().apply {
+            remove(LOCATION_SERVICE_KEY)
             apply()
         }
     }

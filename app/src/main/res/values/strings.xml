@@ -1,4 +1,4 @@
 <resources>
-    <string name="app_name">Onloc Android</string>
+    <string name="app_name">Onloc</string>
     <string name="title_activity_location">LocationActivity</string>
 </resources>
