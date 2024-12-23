@@ -38,6 +38,10 @@ class LocationForegroundService : Service() {
         return deviceEncryptedPreferences.getInt("device_id", -1)
     }
 
+    private fun getInterval(): Int {
+        return deviceEncryptedPreferences.getInt("interval", -1)
+    }
+
     private val locationsApiService = LocationsApiService()
 
     private val locationListener = LocationListener { location ->
@@ -72,9 +76,11 @@ class LocationForegroundService : Service() {
 
         val provider = LocationManager.FUSED_PROVIDER
 
+        val interval = getInterval() * 60000L
+
         locationManager.requestLocationUpdates(
             provider,
-            15000L,
+            interval,
             0f,
             locationListener
         )

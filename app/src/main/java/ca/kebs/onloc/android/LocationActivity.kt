@@ -39,6 +39,8 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -47,6 +49,7 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -174,7 +177,7 @@ class LocationActivity : ComponentActivity() {
                         TopAppBar(
                             title = { Text("Onloc") },
                             colors = TopAppBarDefaults.topAppBarColors(
-                                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                containerColor = MaterialTheme.colorScheme.secondaryContainer,
                                 titleContentColor = MaterialTheme.colorScheme.primary
                             ),
                             actions = {
@@ -258,6 +261,33 @@ class LocationActivity : ComponentActivity() {
                                     Text(text = "Altitude accuracy: ${currentLocation?.altitudeAccuracy}")
                                     Text(text = "Latitude: ${currentLocation?.latitude}")
                                     Text(text = "Longitude: ${currentLocation?.longitude}")
+
+                                    Text(
+                                        text = "Interval between uploads",
+                                        modifier = Modifier.padding(top = 16.dp)
+                                    )
+                                    var sliderPosition by remember { mutableFloatStateOf(30f) }
+                                    if (preferences.getLocationUpdatesInterval() != -1) {
+                                        sliderPosition = preferences.getLocationUpdatesInterval().toFloat()
+                                    } else {
+                                        preferences.createLocationUpdatesInterval(sliderPosition.toInt())
+                                    }
+                                    Slider(
+                                        value = sliderPosition,
+                                        onValueChange = {
+                                            sliderPosition = it
+                                            preferences.createLocationUpdatesInterval(it.toInt())
+                                        },
+                                        colors = SliderDefaults.colors(
+                                            thumbColor = MaterialTheme.colorScheme.secondary,
+                                            activeTrackColor = MaterialTheme.colorScheme.secondary,
+                                            inactiveTickColor = MaterialTheme.colorScheme.secondaryContainer,
+                                        ),
+                                        steps = 3,
+                                        valueRange = 1f..60f,
+                                        enabled = !isLocationServiceRunning
+                                    )
+                                    Text(text = "${sliderPosition.toInt().toString()} minutes")
 
                                     Button(
                                         onClick = {

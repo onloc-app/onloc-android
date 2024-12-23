@@ -12,6 +12,7 @@ const val TOKEN_KEY = "token"
 const val USER_KEY = "user"
 
 const val LOCATION_SERVICE_KEY = "location"
+const val LOCATION_UPDATES_INTERVAL_KEY = "interval"
 
 class Preferences(private val context: Context) {
     private val deviceProtectedPreferences by lazy {
@@ -148,6 +149,29 @@ class Preferences(private val context: Context) {
         }
         deviceProtectedPreferences.edit().apply {
             remove(TOKEN_KEY)
+            apply()
+        }
+    }
+
+    fun getLocationUpdatesInterval(): Int {
+        return servicesPreferences.getInt(LOCATION_UPDATES_INTERVAL_KEY, -1)
+    }
+
+    fun createLocationUpdatesInterval(interval: Int) {
+        servicesPreferences.edit().apply {
+            putInt(LOCATION_UPDATES_INTERVAL_KEY, interval)
+            apply()
+        }
+        saveToDeviceEncryptedStorage(LOCATION_UPDATES_INTERVAL_KEY, interval)
+    }
+
+    fun deleteLocationUpdatesInterval() {
+        servicesPreferences.edit().apply {
+            remove(LOCATION_UPDATES_INTERVAL_KEY)
+            apply()
+        }
+        deviceProtectedPreferences.edit().apply {
+            remove(LOCATION_UPDATES_INTERVAL_KEY)
             apply()
         }
     }
