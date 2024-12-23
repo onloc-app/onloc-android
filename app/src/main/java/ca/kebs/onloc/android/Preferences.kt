@@ -14,6 +14,22 @@ const val USER_KEY = "user"
 const val LOCATION_SERVICE_KEY = "location"
 
 class Preferences(private val context: Context) {
+    private val deviceProtectedPreferences by lazy {
+        context.createDeviceProtectedStorageContext()
+            .getSharedPreferences("device_protected_preferences", Context.MODE_PRIVATE)
+    }
+
+    private fun saveToDeviceEncryptedStorage(key: String, value: Any) {
+        val editor = deviceProtectedPreferences.edit()
+        when (value) {
+            is String -> editor.putString(key, value)
+            is Int -> editor.putInt(key, value)
+            is Boolean -> editor.putBoolean(key, value)
+            else -> throw IllegalArgumentException("Unsupported data type for device-protected storage")
+        }
+        editor.apply()
+    }
+
     private val masterKey: MasterKey by lazy {
         MasterKey.Builder(context)
             .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
@@ -30,8 +46,10 @@ class Preferences(private val context: Context) {
         )
     }
 
-    private val appPreferences = context.getSharedPreferences("app_preferences", Context.MODE_PRIVATE)
-    private val servicesPreferences = context.getSharedPreferences("service_preferences", Context.MODE_PRIVATE)
+    private val appPreferences =
+        context.getSharedPreferences("app_preferences", Context.MODE_PRIVATE)
+    private val servicesPreferences =
+        context.getSharedPreferences("service_preferences", Context.MODE_PRIVATE)
 
     fun getIP(): String? {
         return appPreferences.getString(IP_KEY, "")
@@ -40,6 +58,18 @@ class Preferences(private val context: Context) {
     fun createIP(ip: String) {
         appPreferences.edit().apply {
             putString(IP_KEY, ip)
+            apply()
+        }
+        saveToDeviceEncryptedStorage(IP_KEY, ip)
+    }
+
+    fun deleteIP() {
+        appPreferences.edit().apply {
+            remove(IP_KEY)
+            apply()
+        }
+        deviceProtectedPreferences.edit().apply {
+            remove(IP_KEY)
             apply()
         }
     }
@@ -53,10 +83,15 @@ class Preferences(private val context: Context) {
             putInt(DEVICE_ID_KEY, id)
             apply()
         }
+        saveToDeviceEncryptedStorage(DEVICE_ID_KEY, id)
     }
 
     fun deleteDeviceId() {
         appPreferences.edit().apply {
+            remove(DEVICE_ID_KEY)
+            apply()
+        }
+        deviceProtectedPreferences.edit().apply {
             remove(DEVICE_ID_KEY)
             apply()
         }
@@ -71,10 +106,15 @@ class Preferences(private val context: Context) {
             putBoolean(LOCATION_SERVICE_KEY, status)
             apply()
         }
+        saveToDeviceEncryptedStorage(LOCATION_SERVICE_KEY, status)
     }
 
     fun deleteLocationServiceStatus() {
         servicesPreferences.edit().apply {
+            remove(LOCATION_SERVICE_KEY)
+            apply()
+        }
+        deviceProtectedPreferences.edit().apply {
             remove(LOCATION_SERVICE_KEY)
             apply()
         }
@@ -98,11 +138,16 @@ class Preferences(private val context: Context) {
             putString(USER_KEY, Gson().toJson(user))
             apply()
         }
+        saveToDeviceEncryptedStorage(TOKEN_KEY, token)
     }
 
     fun deleteUserCredentials() {
         encryptedSharedPreferences.edit().apply {
             clear()
+            apply()
+        }
+        deviceProtectedPreferences.edit().apply {
+            remove(TOKEN_KEY)
             apply()
         }
     }

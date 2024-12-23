@@ -15,42 +15,27 @@ import android.os.IBinder
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import ca.kebs.onloc.android.api.LocationsApiService
-import androidx.security.crypto.EncryptedSharedPreferences
-import androidx.security.crypto.MasterKey
 
-class LocationForegroundService: Service() {
+class LocationForegroundService : Service() {
     private val locationManager: LocationManager by lazy {
         getSystemService(Context.LOCATION_SERVICE) as LocationManager
     }
 
-    private fun getToken(): String? {
-        val masterKey: MasterKey by lazy {
-            MasterKey.Builder(applicationContext)
-                .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
-                .build()
-        }
-
-        val encryptedSharedPreferences by lazy {
-            EncryptedSharedPreferences.create(
-                applicationContext,
-                "user_credentials",
-                masterKey,
-                EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-            )
-        }
-
-        return encryptedSharedPreferences.getString("token", null)
-    }
-
-    private fun getSelectedDeviceId(): Int {
-        val sharedPreferences = getSharedPreferences("app_preferences", Context.MODE_PRIVATE)
-        return sharedPreferences.getInt("device_id", -1)
+    private val deviceEncryptedPreferences by lazy {
+        createDeviceProtectedStorageContext()
+            .getSharedPreferences("device_protected_preferences", Context.MODE_PRIVATE)
     }
 
     private fun getIP(): String? {
-        val sharedPreferences = getSharedPreferences("app_preferences", Context.MODE_PRIVATE)
-        return sharedPreferences.getString("ip", null)
+        return deviceEncryptedPreferences.getString("ip", null)
+    }
+
+    private fun getToken(): String? {
+        return deviceEncryptedPreferences.getString("token", null)
+    }
+
+    private fun getSelectedDeviceId(): Int {
+        return deviceEncryptedPreferences.getInt("device_id", -1)
     }
 
     private val locationsApiService = LocationsApiService()
@@ -98,7 +83,8 @@ class LocationForegroundService: Service() {
     private fun startForegroundService() {
         val channelId = "location_channel"
         val channelName = "Location channel"
-        val channel = NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_DEFAULT)
+        val channel =
+            NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_DEFAULT)
 
         val notificationManager =
             getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -135,7 +121,8 @@ class LocationForegroundService: Service() {
 
         val channelId = "service_stop_channel"
         val channelName = "Service stop channel"
-        val channel = NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_HIGH)
+        val channel =
+            NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_HIGH)
 
         val notificationManager =
             getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager

@@ -26,7 +26,24 @@ import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AccountCircle
-import androidx.compose.material3.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
@@ -43,10 +60,10 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import ca.kebs.onloc.android.models.Device
 import ca.kebs.onloc.android.api.AuthApiService
 import ca.kebs.onloc.android.api.DevicesApiService
 import ca.kebs.onloc.android.api.LocationsApiService
+import ca.kebs.onloc.android.models.Device
 import ca.kebs.onloc.android.models.Location
 import ca.kebs.onloc.android.services.LocationCallbackManager
 import ca.kebs.onloc.android.services.LocationForegroundService
@@ -262,7 +279,11 @@ class LocationActivity : ComponentActivity() {
                             }
                         }
 
-                        Permissions(notificationsGranted, fineLocationGranted, backgroundLocationGranted)
+                        Permissions(
+                            notificationsGranted,
+                            fineLocationGranted,
+                            backgroundLocationGranted
+                        )
 
                         DeviceSelector(
                             preferences = preferences,
@@ -382,7 +403,11 @@ fun DeviceSelector(
 }
 
 @Composable
-fun Permissions(notificationsGranted: Boolean, fineLocationGranted: Boolean, backgroundLocationGranted: Boolean) {
+fun Permissions(
+    notificationsGranted: Boolean,
+    fineLocationGranted: Boolean,
+    backgroundLocationGranted: Boolean
+) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -423,7 +448,12 @@ fun Permissions(notificationsGranted: Boolean, fineLocationGranted: Boolean, bac
 }
 
 @Composable
-fun PermissionCard(name: String, description: String, isGranted: Boolean, onGrantClick: () -> Unit) {
+fun PermissionCard(
+    name: String,
+    description: String,
+    isGranted: Boolean,
+    onGrantClick: () -> Unit
+) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
