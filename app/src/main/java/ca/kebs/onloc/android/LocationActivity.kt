@@ -163,7 +163,7 @@ class LocationActivity : ComponentActivity() {
                             actions = {
                                 TextButton(
                                     onClick = { showBottomSheet = true },
-                                    enabled = !preferences.getLocationServiceStatus()
+                                    enabled = !isLocationServiceRunning
                                 ) {
                                     if (selectedDeviceId == -1) {
                                         Text("Select a device")

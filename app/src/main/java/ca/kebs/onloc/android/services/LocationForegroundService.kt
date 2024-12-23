@@ -2,6 +2,7 @@ package ca.kebs.onloc.android.services
 
 import android.Manifest
 import android.app.Notification
+import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
 import android.content.Context
@@ -50,6 +51,12 @@ class LocationForegroundService: Service() {
 
     private fun startForegroundService() {
         val channelId = "location_channel"
+        val channelName = "Location channel"
+        val channel = NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_DEFAULT)
+
+        val notificationManager =
+            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.createNotificationChannel(channel)
 
         val notification: Notification = NotificationCompat.Builder(this, channelId)
             .setContentTitle("Location Tracking")
@@ -80,8 +87,13 @@ class LocationForegroundService: Service() {
         super.onDestroy()
         stopForegroundService()
 
-        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         val channelId = "service_stop_channel"
+        val channelName = "Service stop channel"
+        val channel = NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_HIGH)
+
+        val notificationManager =
+            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.createNotificationChannel(channel)
 
         val notification = NotificationCompat.Builder(this, channelId)
             .setSmallIcon(android.R.drawable.ic_dialog_alert)
