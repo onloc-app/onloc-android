@@ -58,7 +58,7 @@ class AuthApiService {
                         } else {
                             try {
                                 val errorJson = JSONObject(responseBody)
-                                val errorMessage = errorJson.getString("error")
+                                val errorMessage = errorJson.getString("message")
                                 callback(null, null, errorMessage)
                             } catch (e: Exception) {
                                 e.printStackTrace()
