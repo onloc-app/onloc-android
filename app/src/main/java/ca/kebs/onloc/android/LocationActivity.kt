@@ -402,7 +402,8 @@ fun Avatar(context: Context, preferences: Preferences) {
                                         text = "Account",
                                         modifier = Modifier.align(Alignment.Center),
                                         textAlign = TextAlign.Center,
-                                        style = MaterialTheme.typography.titleLarge
+                                        style = MaterialTheme.typography.titleLarge,
+                                        color = MaterialTheme.colorScheme.primary
                                     )
                                 }
 
@@ -420,8 +421,7 @@ fun Avatar(context: Context, preferences: Preferences) {
                                         Icon(
                                             Icons.Outlined.AccountCircle,
                                             contentDescription = "Avatar",
-                                            modifier = Modifier.size(48.dp),
-                                            tint = MaterialTheme.colorScheme.primary
+                                            modifier = Modifier.size(48.dp)
                                         )
 
                                         Text(
