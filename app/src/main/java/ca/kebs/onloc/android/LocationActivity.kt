@@ -11,6 +11,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -20,17 +21,19 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -42,6 +45,7 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -59,7 +63,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -296,23 +302,31 @@ class LocationActivity : ComponentActivity() {
                                         valueRange = 1f..60f,
                                         enabled = !isLocationServiceRunning
                                     )
-                                    Text(text = "${sliderPosition.toInt()} minutes")
+                                    Text(text = "${sliderPosition.toInt()} ${if (sliderPosition > 1) "minutes" else "minute"}")
 
-                                    Button(
-                                        onClick = {
-                                            if (isLocationServiceRunning) {
-                                                stopLocationService(context, preferences)
-                                                isLocationServiceRunning = false
-                                                currentLocation = null
-                                            } else {
-                                                startLocationService(context, preferences)
-                                                isLocationServiceRunning = true
-                                            }
-                                        },
-                                        enabled = canStartLocationService,
-                                        modifier = Modifier.padding(top = defaultPadding)
+                                    Row(
+                                        modifier = Modifier.padding(top = defaultPadding),
+                                        verticalAlignment = Alignment.CenterVertically
                                     ) {
-                                        Text(text = if (isLocationServiceRunning) "Stop" else "Start")
+                                        Text(
+                                            text = "Location service",
+                                            style = MaterialTheme.typography.titleMedium,
+                                            modifier = Modifier.padding(end = defaultPadding)
+                                        )
+                                        Switch(
+                                            checked = isLocationServiceRunning,
+                                            onCheckedChange = {
+                                                if (isLocationServiceRunning) {
+                                                    stopLocationService(context, preferences)
+                                                    isLocationServiceRunning = false
+                                                    currentLocation = null
+                                                } else {
+                                                    startLocationService(context, preferences)
+                                                    isLocationServiceRunning = true
+                                                }
+                                            },
+                                            enabled = canStartLocationService
+                                        )
                                     }
                                 }
                             }
@@ -342,40 +356,102 @@ class LocationActivity : ComponentActivity() {
 
 @Composable
 fun Avatar(context: Context, preferences: Preferences) {
-    var accountMenuExpanded by remember { mutableStateOf(false) }
+    var accountDialogOpened by remember { mutableStateOf(false) }
 
     val authApiService = AuthApiService()
 
     val ip = preferences.getIP()
     val user = preferences.getUserCredentials().second
 
-    IconButton(onClick = { accountMenuExpanded = true }) {
+    IconButton(onClick = { accountDialogOpened = true }) {
         Icon(
             Icons.Outlined.AccountCircle,
             contentDescription = "Account"
         )
-        DropdownMenu(
-            expanded = accountMenuExpanded,
-            onDismissRequest = { accountMenuExpanded = false }
-        ) {
-            DropdownMenuItem(
-                text = { Text("Logout") },
-                onClick = {
-                    stopLocationService(context, preferences)
+        when {
+            accountDialogOpened -> {
+                Dialog(
+                    onDismissRequest = { accountDialogOpened = false }, // Ensures the dialog can be dismissed
+                ) {
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        shape = RoundedCornerShape(16.dp),
+                    ) {
+                        if (user != null) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp)
+                            ) {
+                                IconButton(
+                                    onClick = { accountDialogOpened = false },
+                                    modifier = Modifier.align(Alignment.TopStart)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Filled.Close,
+                                        contentDescription = "Close",
+                                        tint = MaterialTheme.colorScheme.onSurface
+                                    )
+                                }
 
-                    if (ip != null && user != null) {
-                        authApiService.logout(ip)
+                                Column(
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.spacedBy(32.dp),
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(top = 8.dp)
+                                ) {
+                                    Text(
+                                        text = "Account",
+                                        modifier = Modifier.fillMaxWidth(),
+                                        textAlign = TextAlign.Center,
+                                        style = MaterialTheme.typography.titleLarge
+                                    )
+
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                    ) {
+                                        Icon(
+                                            Icons.Outlined.AccountCircle,
+                                            contentDescription = "Avatar",
+                                            modifier = Modifier.size(48.dp),
+                                            tint = MaterialTheme.colorScheme.primary
+                                        )
+
+                                        Text(
+                                            text = user.username,
+                                            style = MaterialTheme.typography.titleLarge
+                                        )
+                                    }
+
+                                    Button(
+                                        onClick = {
+                                            stopLocationService(context, preferences)
+
+                                            if (ip != null) {
+                                                authApiService.logout(ip)
+                                            }
+
+                                            preferences.deleteUserCredentials()
+                                            preferences.deleteDeviceId()
+
+                                            val intent = Intent(context, MainActivity::class.java)
+                                            intent.flags =
+                                                Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                                            context.startActivity(intent)
+                                        }
+                                    ) {
+                                        Text("Logout")
+                                    }
+                                }
+                            }
+                        }
                     }
-
-                    preferences.deleteUserCredentials()
-                    preferences.deleteDeviceId()
-
-                    val intent = Intent(context, MainActivity::class.java)
-                    intent.flags =
-                        Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                    context.startActivity(intent)
                 }
-            )
+            }
         }
     }
 }
