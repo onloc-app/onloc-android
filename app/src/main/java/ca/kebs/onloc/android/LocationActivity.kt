@@ -182,7 +182,6 @@ class LocationActivity : ComponentActivity() {
                 if (ip != null && token != null && location != null && selectedDeviceId != -1) {
                     val parsedLocation = Location.fromAndroidLocation(0, selectedDeviceId, location)
                     currentLocation = parsedLocation
-                    // locationsApiService.postLocation(ip, token, parsedLocation)
                 }
             }
 
@@ -385,14 +384,25 @@ fun Avatar(context: Context, preferences: Preferences) {
                                     .fillMaxWidth()
                                     .padding(16.dp)
                             ) {
-                                IconButton(
-                                    onClick = { accountDialogOpened = false },
-                                    modifier = Modifier.align(Alignment.TopStart)
+                                Box(
+                                    modifier = Modifier.fillMaxWidth()
                                 ) {
-                                    Icon(
-                                        imageVector = Icons.Filled.Close,
-                                        contentDescription = "Close",
-                                        tint = MaterialTheme.colorScheme.onSurface
+                                    IconButton(
+                                        onClick = { accountDialogOpened = false },
+                                        modifier = Modifier.align(Alignment.CenterStart)
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Filled.Close,
+                                            contentDescription = "Close",
+                                            tint = MaterialTheme.colorScheme.onSurface
+                                        )
+                                    }
+
+                                    Text(
+                                        text = "Account",
+                                        modifier = Modifier.align(Alignment.Center),
+                                        textAlign = TextAlign.Center,
+                                        style = MaterialTheme.typography.titleLarge
                                     )
                                 }
 
@@ -401,15 +411,8 @@ fun Avatar(context: Context, preferences: Preferences) {
                                     verticalArrangement = Arrangement.spacedBy(32.dp),
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .padding(top = 8.dp)
+                                        .padding(top = 64.dp)
                                 ) {
-                                    Text(
-                                        text = "Account",
-                                        modifier = Modifier.fillMaxWidth(),
-                                        textAlign = TextAlign.Center,
-                                        style = MaterialTheme.typography.titleLarge
-                                    )
-
                                     Row(
                                         verticalAlignment = Alignment.CenterVertically,
                                         horizontalArrangement = Arrangement.spacedBy(8.dp)
