@@ -364,7 +364,7 @@ fun Avatar(context: Context, preferences: Preferences) {
                     stopLocationService(context, preferences)
 
                     if (ip != null && user != null) {
-                        authApiService.logout(ip, user.id)
+                        authApiService.logout(ip)
                     }
 
                     preferences.deleteUserCredentials()

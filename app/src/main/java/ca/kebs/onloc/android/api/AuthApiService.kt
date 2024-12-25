@@ -74,16 +74,15 @@ class AuthApiService {
         })
     }
 
-    fun logout(ip: String, id: Int) {
+    fun logout(ip: String) {
         val url = "$ip/api/logout"
 
-        val jsonBody = JSONObject().apply {
-            put("id", id)
-        }
+        val emptyBody = "".toRequestBody()
 
-        val requestBody = jsonBody.toString().toRequestBody("application/json; charset=utf-8".toMediaType())
-
-        val request = Request.Builder().url(url).post(requestBody).build()
+        val request = Request.Builder()
+            .url(url)
+            .post(emptyBody)
+            .build()
 
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
