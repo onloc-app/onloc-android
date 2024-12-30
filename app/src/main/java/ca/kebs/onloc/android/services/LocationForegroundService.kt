@@ -42,8 +42,6 @@ class LocationForegroundService : Service() {
         return deviceEncryptedPreferences.getInt("interval", -1)
     }
 
-    private val locationsApiService = LocationsApiService()
-
     private val locationListener = LocationListener { location ->
         println("Latitude: ${location.latitude}, Longitude: ${location.longitude}")
         val ip = getIP()
@@ -55,7 +53,8 @@ class LocationForegroundService : Service() {
             location
         )
         if (ip != null && token != null && selectedDeviceId != -1) {
-            locationsApiService.postLocation(ip, token, parsedLocation)
+            val locationsApiService = LocationsApiService(ip, token)
+            locationsApiService.postLocation(parsedLocation)
         }
         LocationCallbackManager.callback?.invoke(location)
     }

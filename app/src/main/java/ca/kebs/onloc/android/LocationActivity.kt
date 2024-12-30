@@ -72,7 +72,6 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import ca.kebs.onloc.android.api.AuthApiService
 import ca.kebs.onloc.android.api.DevicesApiService
-import ca.kebs.onloc.android.api.LocationsApiService
 import ca.kebs.onloc.android.models.Device
 import ca.kebs.onloc.android.models.Location
 import ca.kebs.onloc.android.services.LocationCallbackManager
@@ -85,8 +84,6 @@ class LocationActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            val devicesApiService = DevicesApiService()
-            val locationsApiService = LocationsApiService()
             val context = LocalContext.current
             val preferences = Preferences(context)
 
@@ -98,19 +95,27 @@ class LocationActivity : ComponentActivity() {
 
             val credentials = preferences.getUserCredentials()
             val token = credentials.first
-            val user = credentials.second
             val ip = preferences.getIP()
 
-            if (token != null && ip != null) {
-                devicesApiService.getDevices(ip, token) { foundDevices, errorMessage ->
-                    if (foundDevices != null) {
-                        devices = foundDevices
-                    }
-                    if (errorMessage != null) {
-                        devicesErrorMessage = errorMessage
+            fun fetchDevices() {
+                if (token != null && ip != null) {
+                    val devicesApiService = DevicesApiService(ip, token)
+                    devicesApiService.getDevices() { foundDevices, errorMessage ->
+                        if (foundDevices != null) {
+                            devices = foundDevices
+                        }
+                        if (errorMessage != null) {
+                            devicesErrorMessage = errorMessage
+                            val intent = Intent(context, MainActivity::class.java)
+                            intent.flags =
+                                Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                            context.startActivity(intent)
+                        }
                     }
                 }
             }
+
+            fetchDevices()
 
             // Permissions
             var notificationsGranted by remember {
@@ -213,7 +218,7 @@ class LocationActivity : ComponentActivity() {
                                         }
                                     }
                                 }
-                                Avatar(context, preferences)
+                                Avatar()
                             }
                         )
                     }
@@ -338,8 +343,8 @@ class LocationActivity : ComponentActivity() {
                         )
 
                         DeviceSelector(
-                            preferences = preferences,
                             devices = devices,
+                            errorMessage = devicesErrorMessage,
                             selectedDeviceId = selectedDeviceId,
                             showBottomSheet = showBottomSheet,
                             onDismissBottomSheet = { showBottomSheet = false }
@@ -354,10 +359,11 @@ class LocationActivity : ComponentActivity() {
 }
 
 @Composable
-fun Avatar(context: Context, preferences: Preferences) {
+fun Avatar() {
     var accountDialogOpened by remember { mutableStateOf(false) }
 
-    val authApiService = AuthApiService()
+    val context = LocalContext.current
+    val preferences = Preferences(context)
 
     val ip = preferences.getIP()
     val user = preferences.getUserCredentials().second
@@ -434,8 +440,10 @@ fun Avatar(context: Context, preferences: Preferences) {
                                         onClick = {
                                             stopLocationService(context, preferences)
 
-                                            if (ip != null) {
-                                                authApiService.logout(ip)
+                                            val token = preferences.getUserCredentials().first
+                                            if (ip != null && token != null) {
+                                                val authApiService = AuthApiService(ip)
+                                                authApiService.logout(token)
                                             }
 
                                             preferences.deleteUserCredentials()
@@ -462,13 +470,15 @@ fun Avatar(context: Context, preferences: Preferences) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DeviceSelector(
-    preferences: Preferences,
     devices: List<Device>,
+    errorMessage: String,
     selectedDeviceId: Int,
     showBottomSheet: Boolean,
     onDismissBottomSheet: () -> Unit,
     onDeviceSelected: (id: Int) -> Unit
 ) {
+    val preferences = Preferences(LocalContext.current)
+
     val sheetState = rememberModalBottomSheetState(
         skipPartiallyExpanded = false,
     )
@@ -511,10 +521,18 @@ fun DeviceSelector(
                     }
                 }
             } else {
-                Text(
-                    text = "No device found.",
-                    modifier = Modifier.padding(16.dp)
-                )
+                if (errorMessage != "") {
+                    Text(
+                        text = errorMessage,
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.padding(16.dp)
+                    )
+                } else {
+                    Text(
+                        text = "No device found.",
+                        modifier = Modifier.padding(16.dp)
+                    )
+                }
             }
         }
     }

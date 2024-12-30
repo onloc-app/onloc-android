@@ -1,6 +1,5 @@
 package ca.kebs.onloc.android
 
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Patterns
@@ -53,12 +52,18 @@ class MainActivity : ComponentActivity() {
             val credentials = preferences.getUserCredentials()
             val token = credentials.first
             val user = credentials.second
+            val ip = preferences.getIP()
 
-            if (token != null && user != null) {
-                val intent = Intent(context, LocationActivity::class.java)
-                intent.flags =
-                    Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                context.startActivity(intent)
+            if (token != null && user != null && ip != null) {
+                val authApiService = AuthApiService(ip)
+                authApiService.userInfo(token) { fetchedUser, _ ->
+                    if (fetchedUser != null) {
+                        val intent = Intent(context, LocationActivity::class.java)
+                        intent.flags =
+                            Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                        context.startActivity(intent)
+                    }
+                }
             }
 
             OnlocAndroidTheme {
@@ -82,7 +87,7 @@ class MainActivity : ComponentActivity() {
                             style = MaterialTheme.typography.titleMedium,
                             modifier = Modifier.padding(bottom = 8.dp)
                         )
-                        LoginForm(context, preferences)
+                        LoginForm()
                     }
                 }
             }
@@ -91,7 +96,10 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun LoginForm(context: Context, preferences: Preferences) {
+fun LoginForm() {
+    val context = LocalContext.current
+    val preferences = Preferences(context)
+
     var storedIp = preferences.getIP()
     if (storedIp == null)
         storedIp = ""
@@ -174,8 +182,8 @@ fun LoginForm(context: Context, preferences: Preferences) {
                     error = ""
 
                     if (isValid) {
-                        val authApiService = AuthApiService()
-                        authApiService.login(ip, username, password) { token, user, errorMessage ->
+                        val authApiService = AuthApiService(ip)
+                        authApiService.login(username, password) { token, user, errorMessage ->
                             if (token != null && user != null) {
                                 preferences.createIP(ip)
                                 preferences.createUserCredentials(token, user)

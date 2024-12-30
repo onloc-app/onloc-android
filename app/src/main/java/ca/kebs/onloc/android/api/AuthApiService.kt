@@ -11,10 +11,10 @@ import okhttp3.Response
 import org.json.JSONObject
 import java.io.IOException
 
-class AuthApiService {
+class AuthApiService(private val ip: String) {
     private val client = OkHttpClient()
 
-    fun login(ip: String, username: String, password: String, callback: (String?, User?, String?) -> Unit) {
+    fun login(username: String, password: String, callback: (String?, User?, String?) -> Unit) {
         val url = "$ip/api/login"
 
         val jsonBody = JSONObject().apply {
@@ -74,13 +74,14 @@ class AuthApiService {
         })
     }
 
-    fun logout(ip: String) {
+    fun logout(token: String) {
         val url = "$ip/api/logout"
 
         val emptyBody = "".toRequestBody()
 
         val request = Request.Builder()
             .url(url)
+            .addHeader("Authorization", "Bearer $token")
             .post(emptyBody)
             .build()
 
@@ -95,6 +96,60 @@ class AuthApiService {
                         println("Logged out")
                     } else {
                         println("Logout failed")
+                    }
+                }
+            }
+        })
+    }
+
+    fun userInfo(token: String, callback: (User?, String?) -> Unit) {
+        val url = "$ip/api/user"
+
+        val request = Request.Builder()
+            .url(url)
+            .addHeader("Authorization", "Bearer $token")
+            .get()
+            .build()
+
+        client.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                e.printStackTrace()
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                response.use {
+                    val responseBody = response.body?.string()
+
+                    if (responseBody != null) {
+                        if (response.isSuccessful) {
+                            try {
+                                val json = JSONObject(responseBody)
+
+                                val user = User(
+                                    id = json.getInt("id"),
+                                    username = json.getString("username"),
+                                    createdAt = json.getString("created_at"),
+                                    updatedAt = json.getString("updated_at")
+                                )
+
+                                callback(user, null)
+                            } catch (e: Exception) {
+                                e.printStackTrace()
+                                callback(null, "Error parsing response: ${e.message}")
+                            }
+                        } else {
+                            try {
+                                val errorJson = JSONObject(responseBody)
+                                val errorMessage = errorJson.getString("message")
+                                callback(null, errorMessage)
+                            } catch (e: Exception) {
+                                e.printStackTrace()
+                                callback(null, "Error parsing response: ${e.message}")
+                            }
+                        }
+                    } else {
+                        callback(null, "Empty response body")
+                        return
                     }
                 }
             }

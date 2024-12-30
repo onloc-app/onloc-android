@@ -11,10 +11,10 @@ import okhttp3.Response
 import org.json.JSONObject
 import java.io.IOException
 
-class LocationsApiService {
+class LocationsApiService(private val ip: String, private val token: String) {
     private val client = OkHttpClient()
 
-    fun postLocation(ip: String, token: String, location: Location) {
+    fun postLocation(location: Location) {
         val url = "$ip/api/locations"
 
         val jsonBody = JSONObject().apply {

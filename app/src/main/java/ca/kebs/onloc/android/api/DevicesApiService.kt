@@ -9,10 +9,10 @@ import okhttp3.Request
 import okhttp3.Response
 import java.io.IOException
 
-class DevicesApiService {
+class DevicesApiService(private val ip: String, private val token: String) {
     private val client = OkHttpClient()
 
-    fun getDevices(ip: String, token: String, callback: (List<Device>?, String?) -> Unit) {
+    fun getDevices(callback: (List<Device>?, String?) -> Unit) {
         val url = "$ip/api/devices"
 
         val request = Request.Builder()
