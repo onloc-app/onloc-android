@@ -1,1 +1,1 @@
-Self-hosted find my device API.
+Self-hosted find my device Android app.
