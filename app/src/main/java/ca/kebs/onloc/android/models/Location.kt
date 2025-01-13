@@ -16,6 +16,7 @@ data class Location(
 
     val latitude: Double,
     val longitude: Double,
+    var battery: Int?,
 
     @SerializedName("created_at")
     val createdAt: String?,
@@ -33,6 +34,7 @@ data class Location(
                 location.verticalAccuracyMeters,
                 location.latitude,
                 location.longitude,
+                null,
                 null,
                 null,
             )

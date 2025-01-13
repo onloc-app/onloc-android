@@ -11,6 +11,7 @@ import android.content.pm.PackageManager
 import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
+import android.os.BatteryManager
 import android.os.IBinder
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
@@ -44,14 +45,21 @@ class LocationForegroundService : Service() {
 
     private val locationListener = LocationListener { location ->
         println("Latitude: ${location.latitude}, Longitude: ${location.longitude}")
+
         val ip = getIP()
         val token = getToken()
         val selectedDeviceId = getSelectedDeviceId()
+
+        val batteryManager = applicationContext.getSystemService(Context.BATTERY_SERVICE) as BatteryManager
+        val batteryLevel: Int = batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY)
+
         val parsedLocation = ca.kebs.onloc.android.models.Location.fromAndroidLocation(
             0,
             selectedDeviceId,
-            location
+            location,
         )
+        parsedLocation.battery = batteryLevel
+
         if (ip != null && token != null && selectedDeviceId != -1) {
             val locationsApiService = LocationsApiService(ip, token)
             locationsApiService.postLocation(parsedLocation)
