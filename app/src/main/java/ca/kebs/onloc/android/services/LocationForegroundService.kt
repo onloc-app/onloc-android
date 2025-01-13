@@ -59,6 +59,7 @@ class LocationForegroundService : Service() {
             location,
         )
         parsedLocation.battery = batteryLevel
+        println("Battery: ${parsedLocation.battery}")
 
         if (ip != null && token != null && selectedDeviceId != -1) {
             val locationsApiService = LocationsApiService(ip, token)

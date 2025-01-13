@@ -24,6 +24,7 @@ class LocationsApiService(private val ip: String, private val token: String) {
             put("altitude_accuracy", location.altitudeAccuracy)
             put("latitude", location.latitude)
             put("longitude", location.longitude)
+            put("battery", location.battery)
         }
 
         val requestBody = jsonBody.toString().toRequestBody("application/json; charset=utf-8".toMediaType())
