@@ -395,7 +395,7 @@ fun Avatar() {
                                 ) {
                                     IconButton(
                                         onClick = { accountDialogOpened = false },
-                                        modifier = Modifier.align(Alignment.CenterStart)
+                                        modifier = Modifier.align(Alignment.CenterEnd)
                                     ) {
                                         Icon(
                                             imageVector = Icons.Filled.Close,
