@@ -176,18 +176,22 @@ fun LoginForm() {
 
                     if (isValid) {
                         val authApiService = AuthApiService(ip)
-                        authApiService.login(username, password) { token, user, errorMessage ->
-                            if (token != null && user != null) {
-                                preferences.createIP(ip)
-                                preferences.createUserCredentials(token, user)
+                        try {
+                            authApiService.login(username, password) { token, user, errorMessage ->
+                                if (token != null && user != null) {
+                                    preferences.createIP(ip)
+                                    preferences.createUserCredentials(token, user)
 
-                                val intent = Intent(context, LocationActivity::class.java)
-                                intent.flags =
-                                    Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                                context.startActivity(intent)
-                            } else {
-                                error = errorMessage ?: "Failure."
+                                    val intent = Intent(context, LocationActivity::class.java)
+                                    intent.flags =
+                                        Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                                    context.startActivity(intent)
+                                } else {
+                                    error = errorMessage ?: "Failure."
+                                }
                             }
+                        } catch (e: Exception) {
+                            error = e.message ?: "Failure."
                         }
                     }
                 },
