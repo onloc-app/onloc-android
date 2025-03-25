@@ -13,7 +13,7 @@
 > - **Do not use the app as the only way to locate your devices.**
 
 ## Description
-Onloc is a service that allows you to track and locate your devices. This repository contains the Laravel back-end used for storing and retrieving Onloc's data.
+Onloc is a service that allows you to track and locate your devices. This repository contains the Android application that sends your phone's location and battery level to the Onloc instance of your choice.
 
 > [!NOTE]
 > You can find the other repositories here:
