@@ -17,3 +17,7 @@ data class Device(
     @SerializedName("updated_at")
     val updatedAt: String?
 )
+
+data class DeviceResponse(
+    val devices: List<Device>
+)

@@ -43,13 +43,13 @@ class MainActivity : ComponentActivity() {
             val preferences = Preferences(context)
 
             val credentials = preferences.getUserCredentials()
-            val token = credentials.first
-            val user = credentials.second
+            val accessToken = credentials.accessToken
+            val user = credentials.user
             val ip = preferences.getIP()
 
-            if (token != null && user != null && ip != null) {
-                val authApiService = AuthApiService(ip)
-                authApiService.userInfo(token) { fetchedUser, _ ->
+            if (accessToken != null && user != null && ip != null) {
+                val authApiService = AuthApiService(context, ip)
+                authApiService.userInfo(accessToken) { fetchedUser, _ ->
                     if (fetchedUser != null) {
                         val intent = Intent(context, LocationActivity::class.java)
                         intent.flags =
@@ -175,12 +175,12 @@ fun LoginForm() {
                     error = ""
 
                     if (isValid) {
-                        val authApiService = AuthApiService(ip)
+                        val authApiService = AuthApiService(context, ip)
                         try {
-                            authApiService.login(username, password) { token, user, errorMessage ->
-                                if (token != null && user != null) {
+                            authApiService.login(username, password) { tokens, user, errorMessage ->
+                                if (tokens != null && user != null) {
                                     preferences.createIP(ip)
-                                    preferences.createUserCredentials(token, user)
+                                    preferences.createUserCredentials(tokens, user)
 
                                     val intent = Intent(context, LocationActivity::class.java)
                                     intent.flags =

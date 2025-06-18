@@ -5,10 +5,12 @@ import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import ca.kebs.onloc.android.models.User
 import com.google.gson.Gson
+import androidx.core.content.edit
 
 const val IP_KEY = "ip"
 const val DEVICE_ID_KEY = "device_id"
-const val TOKEN_KEY = "token"
+const val ACCESS_TOKEN_KEY = "accessToken"
+const val REFRESH_TOKEN_KEY = "refreshToken"
 const val USER_KEY = "user"
 
 const val LOCATION_SERVICE_KEY = "location"
@@ -21,14 +23,14 @@ class Preferences(private val context: Context) {
     }
 
     private fun saveToDeviceEncryptedStorage(key: String, value: Any) {
-        val editor = deviceProtectedPreferences.edit()
-        when (value) {
-            is String -> editor.putString(key, value)
-            is Int -> editor.putInt(key, value)
-            is Boolean -> editor.putBoolean(key, value)
-            else -> throw IllegalArgumentException("Unsupported data type for device-protected storage")
+        deviceProtectedPreferences.edit {
+            when (value) {
+                is String -> putString(key, value)
+                is Int -> putInt(key, value)
+                is Boolean -> putBoolean(key, value)
+                else -> throw IllegalArgumentException("Unsupported data type for device-protected storage")
+            }
         }
-        editor.apply()
     }
 
     private val masterKey: MasterKey by lazy {
@@ -121,25 +123,30 @@ class Preferences(private val context: Context) {
         }
     }
 
-    fun getUserCredentials(): Pair<String?, User?> {
-        val token = encryptedSharedPreferences.getString(TOKEN_KEY, null)
+    data class UserCredentials(val accessToken: String?, val refreshToken: String?, val user: User?)
+
+    fun getUserCredentials(): UserCredentials {
+        val accessToken = encryptedSharedPreferences.getString(ACCESS_TOKEN_KEY, null)
+        val refreshToken = encryptedSharedPreferences.getString(REFRESH_TOKEN_KEY, null)
         val userJson = encryptedSharedPreferences.getString(USER_KEY, null)
 
-        return if (token != null && userJson != null) {
+        return if (accessToken != null && refreshToken != null && userJson != null) {
             val user = Gson().fromJson(userJson, User::class.java)
-            token to user
+            UserCredentials(accessToken, refreshToken, user)
         } else {
-            null to null
+            UserCredentials(null, null, null)
         }
     }
 
-    fun createUserCredentials(token: String, user: User) {
+    fun createUserCredentials(tokens: Pair<String, String>, user: User) {
         encryptedSharedPreferences.edit().apply {
-            putString(TOKEN_KEY, token)
+            putString(ACCESS_TOKEN_KEY, tokens.first)
+            putString(REFRESH_TOKEN_KEY, tokens.second)
             putString(USER_KEY, Gson().toJson(user))
             apply()
         }
-        saveToDeviceEncryptedStorage(TOKEN_KEY, token)
+        saveToDeviceEncryptedStorage(ACCESS_TOKEN_KEY, tokens.first)
+        saveToDeviceEncryptedStorage(REFRESH_TOKEN_KEY, tokens.second)
     }
 
     fun deleteUserCredentials() {
@@ -148,9 +155,21 @@ class Preferences(private val context: Context) {
             apply()
         }
         deviceProtectedPreferences.edit().apply {
-            remove(TOKEN_KEY)
+            remove(ACCESS_TOKEN_KEY)
             apply()
         }
+        deviceProtectedPreferences.edit().apply {
+            remove(REFRESH_TOKEN_KEY)
+            apply()
+        }
+    }
+
+    fun updateAccessToken(accessToken: String) {
+        encryptedSharedPreferences.edit().apply {
+            putString(ACCESS_TOKEN_KEY, accessToken)
+            apply()
+        }
+        saveToDeviceEncryptedStorage(ACCESS_TOKEN_KEY, accessToken)
     }
 
     fun getLocationUpdatesInterval(): Int {

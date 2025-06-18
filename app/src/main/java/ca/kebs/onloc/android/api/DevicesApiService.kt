@@ -1,16 +1,17 @@
 package ca.kebs.onloc.android.api
 
+import android.content.Context
 import ca.kebs.onloc.android.models.Device
+import ca.kebs.onloc.android.models.DeviceResponse
 import com.google.gson.Gson
 import okhttp3.Call
 import okhttp3.Callback
-import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
 import java.io.IOException
 
-class DevicesApiService(private val ip: String, private val token: String) {
-    private val client = OkHttpClient()
+class DevicesApiService(context: Context, private val ip: String, private val token: String) {
+    private val client = NetworkClient(context).okHttpClient
 
     fun getDevices(callback: (List<Device>?, String?) -> Unit) {
         val url = "$ip/api/devices"
@@ -46,6 +47,7 @@ class DevicesApiService(private val ip: String, private val token: String) {
     }
 
     private fun parseDevices(json: String): List<Device> {
-        return Gson().fromJson(json, Array<Device>::class.java).toList()
+        val response =  Gson().fromJson(json, DeviceResponse::class.java)
+        return response.devices
     }
 }

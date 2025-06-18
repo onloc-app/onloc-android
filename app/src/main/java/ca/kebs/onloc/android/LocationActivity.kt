@@ -94,12 +94,12 @@ class LocationActivity : ComponentActivity() {
             var selectedDeviceId by remember { mutableIntStateOf(preferences.getDeviceId()) }
 
             val credentials = preferences.getUserCredentials()
-            val token = credentials.first
+            val accessToken = credentials.accessToken
             val ip = preferences.getIP()
 
             fun fetchDevices() {
-                if (token != null && ip != null) {
-                    val devicesApiService = DevicesApiService(ip, token)
+                if (accessToken != null && ip != null) {
+                    val devicesApiService = DevicesApiService(context, ip, accessToken)
                     devicesApiService.getDevices() { foundDevices, errorMessage ->
                         if (foundDevices != null) {
                             devices = foundDevices
@@ -184,7 +184,7 @@ class LocationActivity : ComponentActivity() {
 
             var currentLocation by remember { mutableStateOf<Location?>(null) }
             LocationCallbackManager.callback = { location ->
-                if (ip != null && token != null && location != null && selectedDeviceId != -1) {
+                if (ip != null && accessToken != null && location != null && selectedDeviceId != -1) {
                     val parsedLocation = Location.fromAndroidLocation(0, selectedDeviceId, location)
                     currentLocation = parsedLocation
                 }
@@ -366,7 +366,7 @@ fun Avatar() {
     val preferences = Preferences(context)
 
     val ip = preferences.getIP()
-    val user = preferences.getUserCredentials().second
+    val user = preferences.getUserCredentials().user
 
     IconButton(onClick = { accountDialogOpened = true }) {
         Icon(
@@ -376,7 +376,7 @@ fun Avatar() {
         when {
             accountDialogOpened -> {
                 Dialog(
-                    onDismissRequest = { accountDialogOpened = false }, // Ensures the dialog can be dismissed
+                    onDismissRequest = { accountDialogOpened = false },
                 ) {
                     Card(
                         modifier = Modifier
@@ -440,10 +440,11 @@ fun Avatar() {
                                         onClick = {
                                             stopLocationService(context, preferences)
 
-                                            val token = preferences.getUserCredentials().first
-                                            if (ip != null && token != null) {
-                                                val authApiService = AuthApiService(ip)
-                                                authApiService.logout(token)
+                                            val accessToken = preferences.getUserCredentials().accessToken
+                                            val refreshToken = preferences.getUserCredentials().refreshToken
+                                            if (ip != null && accessToken != null && refreshToken != null) {
+                                                val authApiService = AuthApiService(context, ip)
+                                                authApiService.logout(accessToken, refreshToken)
                                             }
 
                                             preferences.deleteUserCredentials()

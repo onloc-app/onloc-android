@@ -1,21 +1,21 @@
 package ca.kebs.onloc.android.api
 
+import android.content.Context
 import ca.kebs.onloc.android.models.User
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
 import org.json.JSONObject
 import java.io.IOException
 
-class AuthApiService(private val ip: String) {
-    private val client = OkHttpClient()
+class AuthApiService(context: Context, private val ip: String) {
+    private val client = NetworkClient(context).okHttpClient
 
-    fun login(username: String, password: String, callback: (String?, User?, String?) -> Unit) {
-        val url = "$ip/api/login"
+    fun login(username: String, password: String, callback: (Pair<String, String>?, User?, String?) -> Unit) {
+        val url = "$ip/api/auth/login"
 
         val jsonBody = JSONObject().apply {
             put("username", username)
@@ -40,7 +40,8 @@ class AuthApiService(private val ip: String) {
                         if (response.isSuccessful) {
                             try {
                                 val json = JSONObject(responseBody)
-                                val token = json.getString("token")
+                                val accessToken = json.getString("accessToken")
+                                val refreshToken = json.getString("refreshToken")
                                 val userInfo = json.getJSONObject("user")
 
                                 val user = User(
@@ -50,7 +51,7 @@ class AuthApiService(private val ip: String) {
                                     updatedAt = userInfo.getString("updated_at")
                                 )
 
-                                callback(token, user, null)
+                                callback(accessToken to refreshToken, user, null)
                             } catch (e: Exception) {
                                 e.printStackTrace()
                                 callback(null, null, "Error parsing response: ${e.message}")
@@ -74,15 +75,19 @@ class AuthApiService(private val ip: String) {
         })
     }
 
-    fun logout(token: String) {
-        val url = "$ip/api/logout"
+    fun logout(accessToken: String, refreshToken: String) {
+        val url = "$ip/api/tokens"
 
-        val emptyBody = "".toRequestBody()
+        val jsonBody = JSONObject().apply {
+            put("refreshToken", refreshToken)
+        }
+
+        val requestBody = jsonBody.toString().toRequestBody("application/json; charset=utf-8".toMediaType())
 
         val request = Request.Builder()
             .url(url)
-            .addHeader("Authorization", "Bearer $token")
-            .post(emptyBody)
+            .addHeader("Authorization", "Bearer $accessToken")
+            .delete(requestBody)
             .build()
 
         client.newCall(request).enqueue(object : Callback {
@@ -102,12 +107,12 @@ class AuthApiService(private val ip: String) {
         })
     }
 
-    fun userInfo(token: String, callback: (User?, String?) -> Unit) {
+    fun userInfo(accessToken: String, callback: (User?, String?) -> Unit) {
         val url = "$ip/api/user"
 
         val request = Request.Builder()
             .url(url)
-            .addHeader("Authorization", "Bearer $token")
+            .addHeader("Authorization", "Bearer $accessToken")
             .get()
             .build()
 
@@ -123,7 +128,7 @@ class AuthApiService(private val ip: String) {
                     if (responseBody != null) {
                         if (response.isSuccessful) {
                             try {
-                                val json = JSONObject(responseBody)
+                                val json = JSONObject(responseBody).getJSONObject("user")
 
                                 val user = User(
                                     id = json.getInt("id"),
@@ -155,4 +160,27 @@ class AuthApiService(private val ip: String) {
             }
         })
     }
+
+    fun refresh(refreshToken: String): String {
+        val url = "$ip/api/auth/refresh"
+
+        val jsonBody = JSONObject().apply {
+            put("refreshToken", refreshToken)
+        }
+        val body = jsonBody
+            .toString()
+            .toRequestBody("application/json; charset=utf-8".toMediaType())
+
+        val request = Request.Builder()
+            .url(url)
+            .post(body)
+            .build()
+
+        client.newCall(request).execute().use { response ->
+            if (!response.isSuccessful) throw IOException("Refresh failed ${response.code}")
+            val json = JSONObject(response.body!!.string())
+            return json.getString("accessToken")
+        }
+    }
+
 }

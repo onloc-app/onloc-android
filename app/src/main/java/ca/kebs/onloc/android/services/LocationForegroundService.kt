@@ -5,7 +5,6 @@ import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
@@ -19,20 +18,20 @@ import ca.kebs.onloc.android.api.LocationsApiService
 
 class LocationForegroundService : Service() {
     private val locationManager: LocationManager by lazy {
-        getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        getSystemService(LOCATION_SERVICE) as LocationManager
     }
 
     private val deviceEncryptedPreferences by lazy {
         createDeviceProtectedStorageContext()
-            .getSharedPreferences("device_protected_preferences", Context.MODE_PRIVATE)
+            .getSharedPreferences("device_protected_preferences", MODE_PRIVATE)
     }
 
     private fun getIP(): String? {
         return deviceEncryptedPreferences.getString("ip", null)
     }
 
-    private fun getToken(): String? {
-        return deviceEncryptedPreferences.getString("token", null)
+    private fun getAccessToken(): String? {
+        return deviceEncryptedPreferences.getString("accessToken", null)
     }
 
     private fun getSelectedDeviceId(): Int {
@@ -47,10 +46,10 @@ class LocationForegroundService : Service() {
         println("Latitude: ${location.latitude}, Longitude: ${location.longitude}")
 
         val ip = getIP()
-        val token = getToken()
+        val accessToken = getAccessToken()
         val selectedDeviceId = getSelectedDeviceId()
 
-        val batteryManager = applicationContext.getSystemService(Context.BATTERY_SERVICE) as BatteryManager
+        val batteryManager = applicationContext.getSystemService(BATTERY_SERVICE) as BatteryManager
         val batteryLevel: Int = batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY)
 
         val parsedLocation = ca.kebs.onloc.android.models.Location.fromAndroidLocation(
@@ -61,8 +60,8 @@ class LocationForegroundService : Service() {
         parsedLocation.battery = batteryLevel
         println("Battery: ${parsedLocation.battery}")
 
-        if (ip != null && token != null && selectedDeviceId != -1) {
-            val locationsApiService = LocationsApiService(ip, token)
+        if (ip != null && accessToken != null && selectedDeviceId != -1) {
+            val locationsApiService = LocationsApiService(applicationContext, ip, accessToken)
             locationsApiService.postLocation(parsedLocation)
         }
         LocationCallbackManager.callback?.invoke(location)
@@ -101,7 +100,7 @@ class LocationForegroundService : Service() {
             NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_DEFAULT)
 
         val notificationManager =
-            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.createNotificationChannel(channel)
 
         val notification: Notification = NotificationCompat.Builder(this, channelId)
@@ -139,7 +138,7 @@ class LocationForegroundService : Service() {
             NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_HIGH)
 
         val notificationManager =
-            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.createNotificationChannel(channel)
 
         val notification = NotificationCompat.Builder(this, channelId)

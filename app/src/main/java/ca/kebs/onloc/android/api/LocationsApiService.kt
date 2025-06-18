@@ -1,18 +1,18 @@
 package ca.kebs.onloc.android.api
 
+import android.content.Context
 import ca.kebs.onloc.android.models.Location
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
 import org.json.JSONObject
 import java.io.IOException
 
-class LocationsApiService(private val ip: String, private val token: String) {
-    private val client = OkHttpClient()
+class LocationsApiService(context: Context, private val ip: String, private val accessToken: String) {
+    private val client = NetworkClient(context).okHttpClient
 
     fun postLocation(location: Location) {
         val url = "$ip/api/locations"
@@ -31,7 +31,7 @@ class LocationsApiService(private val ip: String, private val token: String) {
 
         val request = Request.Builder()
             .url(url)
-            .addHeader("Authorization", "Bearer $token")
+            .addHeader("Authorization", "Bearer $accessToken")
             .post(requestBody)
             .build()
 
@@ -41,7 +41,7 @@ class LocationsApiService(private val ip: String, private val token: String) {
             }
 
             override fun onResponse(call: Call, response: Response) {
-                response.use {  }
+                response.use { }
             }
         })
     }
