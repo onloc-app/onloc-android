@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-    <img src="https://raw.githubusercontent.com/Calvicii/onloc-ui/refs/heads/main/public/favicon.svg" height="120"/>
+    <img src="https://raw.githubusercontent.com/Onloc-Code/onloc-ui/refs/heads/main/public/favicon.svg" height="120"/>
 </p>
 
 ## Disclaimer
@@ -17,9 +17,9 @@ Onloc is a service that allows you to track and locate your devices. This reposi
 
 > [!NOTE]
 > You can find the other repositories here:
-> - Front-end: https://github.com/Calvicii/onloc-ui
-> - Back-end: https://github.com/Calvicii/onloc-api
-> - Deployment: https://github.com/Calvicii/onloc-deployment
+> - Front-end: https://github.com/Onloc-Code/onloc-ui
+> - Back-end: https://github.com/Onloc-Code/onloc-api
+> - Deployment: https://github.com/Onloc-Code/onloc-deployment
 
 ## Installation
-Instructions can be found here: https://github.com/Calvicii/onloc-deployment
+Instructions can be found here: https://github.com/Onloc-Code/onloc-deployment
