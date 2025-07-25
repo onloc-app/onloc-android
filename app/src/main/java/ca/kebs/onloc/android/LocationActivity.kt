@@ -1,21 +1,15 @@
 package ca.kebs.onloc.android
 
-import android.Manifest
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
-import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -40,7 +34,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
@@ -66,17 +59,18 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import androidx.core.content.ContextCompat
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import ca.kebs.onloc.android.api.AuthApiService
 import ca.kebs.onloc.android.api.DevicesApiService
+import ca.kebs.onloc.android.components.Permissions
 import ca.kebs.onloc.android.models.Device
 import ca.kebs.onloc.android.models.Location
+import ca.kebs.onloc.android.permissions.LocationPermission
 import ca.kebs.onloc.android.services.LocationCallbackManager
 import ca.kebs.onloc.android.services.LocationForegroundService
+import ca.kebs.onloc.android.singletons.RingerState
 import ca.kebs.onloc.android.ui.theme.OnlocAndroidTheme
+import org.json.JSONObject
+import kotlin.jvm.java
 
 class LocationActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
@@ -117,63 +111,42 @@ class LocationActivity : ComponentActivity() {
 
             fetchDevices()
 
-            // Permissions
-            var notificationsGranted by remember {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    mutableStateOf(
-                        ContextCompat.checkSelfPermission(
-                            context,
-                            Manifest.permission.POST_NOTIFICATIONS
-                        ) == PackageManager.PERMISSION_GRANTED
-                    )
-                } else {
-                    mutableStateOf(true)
-                }
-            }
+            // Create Websocket
+            DisposableEffect(Unit) {
+                val ip = preferences.getIP()
+                val accessToken = preferences.getUserCredentials().accessToken
 
-            var fineLocationGranted by remember {
-                mutableStateOf(
-                    ContextCompat.checkSelfPermission(
-                        context,
-                        Manifest.permission.ACCESS_FINE_LOCATION
-                    ) == PackageManager.PERMISSION_GRANTED
-                )
-            }
+                if (ip != null && accessToken != null) {
+                    SocketManager.initialize(ip, accessToken)
+                    SocketManager.connect()
 
-            var backgroundLocationGranted by remember {
-                mutableStateOf(
-                    ContextCompat.checkSelfPermission(
-                        context,
-                        Manifest.permission.ACCESS_BACKGROUND_LOCATION
-                    ) == PackageManager.PERMISSION_GRANTED
-                )
-            }
-
-            val lifecycleOwner = LocalLifecycleOwner.current
-            DisposableEffect(lifecycleOwner) {
-                val observer = LifecycleEventObserver { _, event ->
-                    if (event == Lifecycle.Event.ON_RESUME) {
-                        notificationsGranted = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                            ContextCompat.checkSelfPermission(
-                                context,
-                                Manifest.permission.POST_NOTIFICATIONS
-                            ) == PackageManager.PERMISSION_GRANTED
-                        } else {
-                            true
-                        }
-                        fineLocationGranted = ContextCompat.checkSelfPermission(
-                            context,
-                            Manifest.permission.ACCESS_FINE_LOCATION
-                        ) == PackageManager.PERMISSION_GRANTED
-                        backgroundLocationGranted = ContextCompat.checkSelfPermission(
-                            context,
-                            Manifest.permission.ACCESS_BACKGROUND_LOCATION
-                        ) == PackageManager.PERMISSION_GRANTED
+                    val registerPayload = JSONObject().apply {
+                        put("deviceId", selectedDeviceId)
                     }
-                }
-                lifecycleOwner.lifecycle.addObserver(observer)
-                onDispose {
-                    lifecycleOwner.lifecycle.removeObserver(observer)
+                    SocketManager.emit("register-device", registerPayload)
+
+                    val ringListener: (Array<Any>) -> Unit = { data ->
+                        if (!RingerState.isRinging) {
+                            RingerState.isRinging = true
+                            val ringerIntent = Intent(context, RingerActivity::class.java)
+                                .apply {
+                                    flags =
+                                        Intent.FLAG_ACTIVITY_NEW_TASK or
+                                                Intent.FLAG_ACTIVITY_SINGLE_TOP or
+                                                Intent.FLAG_ACTIVITY_CLEAR_TOP
+                                }
+                            startActivity(ringerIntent)
+                        }
+                    }
+
+                    SocketManager.on("ring-command", ringListener)
+
+                    onDispose {
+                        SocketManager.off("ring-command", ringListener)
+                        SocketManager.disconnect()
+                    }
+                } else {
+                    onDispose { }
                 }
             }
 
@@ -241,7 +214,7 @@ class LocationActivity : ComponentActivity() {
                             serviceStatus = "No device selected"
                             canStartLocationService = false
                         }
-                        if (!fineLocationGranted || !backgroundLocationGranted) {
+                        if (!LocationPermission().isGranted(context)) {
                             serviceStatus = "Required permissions missing"
                             canStartLocationService = false
                         }
@@ -336,11 +309,7 @@ class LocationActivity : ComponentActivity() {
                             }
                         }
 
-                        Permissions(
-                            notificationsGranted,
-                            fineLocationGranted,
-                            backgroundLocationGranted
-                        )
+                        Permissions()
 
                         DeviceSelector(
                             devices = devices,
@@ -500,8 +469,20 @@ fun DeviceSelector(
                                 .selectable(
                                     selected = (device.id == selectedDeviceId),
                                     onClick = {
+                                        val lastDeviceId = selectedDeviceId
                                         onDeviceSelected(device.id)
                                         preferences.createDeviceId(device.id)
+
+                                        val unregisterPayload = JSONObject().apply {
+                                            put("deviceId", lastDeviceId)
+                                        }
+                                        SocketManager.emit("unregister-device", unregisterPayload)
+
+                                        val registerPayload = JSONObject().apply {
+                                            put("deviceId", device.id)
+                                        }
+                                        SocketManager.emit("register-device", registerPayload)
+
                                         onDismissBottomSheet()
                                     },
                                     role = Role.RadioButton
@@ -533,99 +514,6 @@ fun DeviceSelector(
                         text = "No device found.",
                         modifier = Modifier.padding(16.dp)
                     )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun Permissions(
-    notificationsGranted: Boolean,
-    fineLocationGranted: Boolean,
-    backgroundLocationGranted: Boolean
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp)
-    ) {
-        Text(
-            text = "Required Permissions",
-            style = MaterialTheme.typography.titleLarge
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-
-        val permissionLauncher = rememberLauncherForActivityResult(
-            contract = ActivityResultContracts.RequestPermission()
-        ) {}
-
-        PermissionCard(
-            name = "Notifications",
-            description = "Allows the app to send notifications about the service's status.",
-            isGranted = notificationsGranted,
-            onGrantClick = {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-                }
-            }
-        )
-
-        PermissionCard(
-            name = "Background Location",
-            description = "Allows the app to share your device's location with the server even when the app is not in use.",
-            isGranted = (fineLocationGranted && backgroundLocationGranted),
-            onGrantClick = {
-                if (!fineLocationGranted) {
-                    permissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
-                } else if (!backgroundLocationGranted) {
-                    permissionLauncher.launch(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
-                }
-            }
-        )
-    }
-}
-
-@Composable
-fun PermissionCard(
-    name: String,
-    description: String,
-    isGranted: Boolean,
-    onGrantClick: () -> Unit
-) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(bottom = 16.dp)
-    ) {
-        ElevatedCard(
-            elevation = CardDefaults.cardElevation(
-                defaultElevation = 6.dp
-            ),
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            val defaultPadding = 16.dp
-            Text(
-                text = name,
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(defaultPadding)
-            )
-            Text(
-                text = description,
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(horizontal = defaultPadding)
-            )
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Spacer(modifier = Modifier.weight(1f))
-                OutlinedButton(
-                    onClick = { onGrantClick() },
-                    enabled = !isGranted,
-                    modifier = Modifier.padding(defaultPadding)
-                ) {
-                    Text(if (isGranted) "Granted" else "Grant")
                 }
             }
         }

@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">Onloc</string>
-    <string name="title_activity_location">LocationActivity</string>
+    <string name="title_activity_location">Location Activity</string>
+    <string name="title_activity_ringer">Ringer Activity</string>
 </resources>
