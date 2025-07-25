@@ -69,6 +69,7 @@
         <service
                 android:directBootAware="true"
                 android:name=".services.RingerWebSocketService"
+                android:foregroundServiceType="mediaPlayback"
                 android:exported="false">
         </service>
         <receiver

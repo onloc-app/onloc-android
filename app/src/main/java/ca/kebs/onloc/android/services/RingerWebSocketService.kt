@@ -1,8 +1,12 @@
 package ca.kebs.onloc.android.services
 
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.app.Service
 import android.content.Intent
 import android.os.IBinder
+import androidx.core.app.NotificationCompat
 import ca.kebs.onloc.android.Preferences
 import ca.kebs.onloc.android.SocketManager
 import ca.kebs.onloc.android.singletons.RingerState
@@ -11,6 +15,9 @@ import org.json.JSONObject
 class RingerWebSocketService : Service() {
     override fun onCreate() {
         super.onCreate()
+
+        val notification = createNotification()
+        startForeground(2001, notification)
 
         val preferences = Preferences(applicationContext)
         val ip = preferences.getIP()
@@ -43,6 +50,22 @@ class RingerWebSocketService : Service() {
                 }
             }
         }
+    }
+
+    private fun createNotification(): Notification {
+        val channelId = "ringer_websocket_channel"
+        val channelName = "Ringer WebSocket channel"
+        val channel = NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_HIGH)
+
+        val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.createNotificationChannel(channel)
+
+        return NotificationCompat.Builder(this, channelId)
+            .setContentTitle("Listening for commands")
+            .setContentText("The device will ring when commended to")
+            .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .build()
     }
 
     override fun onDestroy() {

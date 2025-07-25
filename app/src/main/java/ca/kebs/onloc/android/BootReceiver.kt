@@ -31,7 +31,7 @@ class BootReceiver : BroadcastReceiver() {
             }
             
             val ringerWebSocketServiceIntent = Intent(context, RingerWebSocketService::class.java)
-            context.startService(ringerWebSocketServiceIntent)
+            context.startForegroundService(ringerWebSocketServiceIntent)
         }
     }
 }

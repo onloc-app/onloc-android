@@ -20,7 +20,7 @@ class RingerService : Service() {
             RingerState.isRinging = true
 
             val notification = createRingerNotification()
-            startForeground(2001, notification)
+            startForeground(3001, notification)
 
             val intent = Intent(this, RingerActivity::class.java).apply {
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
