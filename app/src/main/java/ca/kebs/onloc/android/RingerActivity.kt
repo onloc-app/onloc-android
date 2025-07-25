@@ -1,5 +1,7 @@
 package ca.kebs.onloc.android
 
+import android.content.Context
+import android.content.Intent
 import android.media.AudioManager
 import android.media.Ringtone
 import android.media.RingtoneManager
@@ -11,6 +13,8 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -18,6 +22,9 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import ca.kebs.onloc.android.services.RingerService
 import ca.kebs.onloc.android.singletons.RingerState
 import ca.kebs.onloc.android.ui.theme.OnlocAndroidTheme
 import kotlinx.coroutines.delay
@@ -51,10 +58,16 @@ class RingerActivity : ComponentActivity() {
                             .padding(innerPadding),
                         contentAlignment = Alignment.Center,
                     ) {
-                        Button(onClick = {
-                            finish()
-                        }) {
-                            Text("Stop")
+                        Button(
+                            shape = CircleShape,
+                            modifier = Modifier
+                                .padding(16.dp)
+                                .size(256.dp),
+                            onClick = {
+                                stopRingerService(context)
+                                finish()
+                            }) {
+                            Text(text = "Stop", fontSize = 24.sp)
                         }
                     }
                 }
@@ -95,5 +108,10 @@ class RingerActivity : ComponentActivity() {
 
         oldRingerMode?.let { audioManager.ringerMode = it }
         oldAlarmVolume?.let { audioManager.ringerMode = it }
+    }
+
+    fun stopRingerService(context: Context) {
+        val ringerServiceIntent = Intent(context, RingerService::class.java)
+        context.stopService(ringerServiceIntent)
     }
 }

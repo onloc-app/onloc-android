@@ -45,7 +45,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
@@ -67,7 +66,6 @@ import ca.kebs.onloc.android.models.Location
 import ca.kebs.onloc.android.permissions.LocationPermission
 import ca.kebs.onloc.android.services.LocationCallbackManager
 import ca.kebs.onloc.android.services.LocationForegroundService
-import ca.kebs.onloc.android.singletons.RingerState
 import ca.kebs.onloc.android.ui.theme.OnlocAndroidTheme
 import org.json.JSONObject
 import kotlin.jvm.java
@@ -110,45 +108,6 @@ class LocationActivity : ComponentActivity() {
             }
 
             fetchDevices()
-
-            // Create Websocket
-            DisposableEffect(Unit) {
-                val ip = preferences.getIP()
-                val accessToken = preferences.getUserCredentials().accessToken
-
-                if (ip != null && accessToken != null) {
-                    SocketManager.initialize(ip, accessToken)
-                    SocketManager.connect()
-
-                    val registerPayload = JSONObject().apply {
-                        put("deviceId", selectedDeviceId)
-                    }
-                    SocketManager.emit("register-device", registerPayload)
-
-                    val ringListener: (Array<Any>) -> Unit = { data ->
-                        if (!RingerState.isRinging) {
-                            RingerState.isRinging = true
-                            val ringerIntent = Intent(context, RingerActivity::class.java)
-                                .apply {
-                                    flags =
-                                        Intent.FLAG_ACTIVITY_NEW_TASK or
-                                                Intent.FLAG_ACTIVITY_SINGLE_TOP or
-                                                Intent.FLAG_ACTIVITY_CLEAR_TOP
-                                }
-                            startActivity(ringerIntent)
-                        }
-                    }
-
-                    SocketManager.on("ring-command", ringListener)
-
-                    onDispose {
-                        SocketManager.off("ring-command", ringListener)
-                        SocketManager.disconnect()
-                    }
-                } else {
-                    onDispose { }
-                }
-            }
 
             // Location service
             var isLocationServiceRunning by remember {
@@ -522,12 +481,12 @@ fun DeviceSelector(
 
 fun startLocationService(context: Context, preferences: Preferences) {
     preferences.createLocationServiceStatus(true)
-    val serviceIntent = Intent(context, LocationForegroundService::class.java)
-    context.startService(serviceIntent)
+    val locationServiceIntent = Intent(context, LocationForegroundService::class.java)
+    context.startService(locationServiceIntent)
 }
 
 fun stopLocationService(context: Context, preferences: Preferences) {
     preferences.createLocationServiceStatus(false)
-    val serviceIntent = Intent(context, LocationForegroundService::class.java)
-    context.stopService(serviceIntent)
+    val locationServiceIntent = Intent(context, LocationForegroundService::class.java)
+    context.stopService(locationServiceIntent)
 }

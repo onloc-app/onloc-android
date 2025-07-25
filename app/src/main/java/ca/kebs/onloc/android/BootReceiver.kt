@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import ca.kebs.onloc.android.services.LocationForegroundService
+import ca.kebs.onloc.android.services.RingerWebSocketService
 
 class BootReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
@@ -21,11 +22,16 @@ class BootReceiver : BroadcastReceiver() {
         Log.d("BootReceiver", "Intent action: ${intent.action}")
         Log.d("BootReceiver", "Location service status: ${getLocationServiceStatus()}")
 
-        if ((intent.action == Intent.ACTION_LOCKED_BOOT_COMPLETED || intent.action == Intent.ACTION_BOOT_COMPLETED) && getLocationServiceStatus()) {
+        if (intent.action == Intent.ACTION_LOCKED_BOOT_COMPLETED || intent.action == Intent.ACTION_BOOT_COMPLETED) {
             Log.d("BootReceiver", "Boot completed, starting service.")
 
-            val serviceIntent = Intent(context, LocationForegroundService::class.java)
-            context.startForegroundService(serviceIntent)
+            if (getLocationServiceStatus()) {
+                val locationServiceIntent = Intent(context, LocationForegroundService::class.java)
+                context.startForegroundService(locationServiceIntent)
+            }
+            
+            val ringerWebSocketServiceIntent = Intent(context, RingerWebSocketService::class.java)
+            context.startService(ringerWebSocketServiceIntent)
         }
     }
 }

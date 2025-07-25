@@ -94,6 +94,10 @@ class LocationForegroundService : Service() {
     }
 
     private fun startForegroundService() {
+        startForeground(1001, createStartForegroundNotification())
+    }
+
+    private fun createStartForegroundNotification(): Notification {
         val channelId = "location_channel"
         val channelName = "Location channel"
         val channel =
@@ -103,13 +107,11 @@ class LocationForegroundService : Service() {
             getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.createNotificationChannel(channel)
 
-        val notification: Notification = NotificationCompat.Builder(this, channelId)
+        return NotificationCompat.Builder(this, channelId)
             .setContentTitle("Location Tracking")
             .setContentText("Tracking your location in the background")
             .setSmallIcon(android.R.drawable.ic_menu_mylocation)
             .build()
-
-        startForeground(1, notification)
     }
 
     private fun stopForegroundService() {
@@ -124,14 +126,18 @@ class LocationForegroundService : Service() {
         requestLocationUpdates()
     }
 
-    override fun onBind(intent: Intent?): IBinder? {
-        return null
-    }
+    override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onDestroy() {
         super.onDestroy()
         stopForegroundService()
 
+        val notificationManager =
+            getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.notify(1002, createStopForegroundNotification())
+    }
+
+    private fun createStopForegroundNotification(): Notification {
         val channelId = "service_stop_channel"
         val channelName = "Service stop channel"
         val channel =
@@ -141,14 +147,12 @@ class LocationForegroundService : Service() {
             getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.createNotificationChannel(channel)
 
-        val notification = NotificationCompat.Builder(this, channelId)
+        return NotificationCompat.Builder(this, channelId)
             .setSmallIcon(android.R.drawable.ic_dialog_alert)
             .setContentTitle("Service Stopped")
             .setContentText("The location tracking service has been stopped.")
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .build()
-
-        notificationManager.notify(2, notification)
     }
 }
 
