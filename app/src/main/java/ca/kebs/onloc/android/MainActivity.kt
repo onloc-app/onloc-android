@@ -24,6 +24,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -97,13 +98,13 @@ fun LoginForm() {
     if (storedIp == null)
         storedIp = ""
 
-    var ip by remember { mutableStateOf(storedIp) }
-    var isIpError by remember { mutableStateOf("") }
-    var username by remember { mutableStateOf("") }
-    var isUsernameError by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var isPasswordError by remember { mutableStateOf("") }
-    var error by remember { mutableStateOf("") }
+    var ip by rememberSaveable { mutableStateOf(storedIp) }
+    var isIpError by rememberSaveable { mutableStateOf("") }
+    var username by rememberSaveable { mutableStateOf("") }
+    var isUsernameError by rememberSaveable { mutableStateOf("") }
+    var password by rememberSaveable { mutableStateOf("") }
+    var isPasswordError by rememberSaveable { mutableStateOf("") }
+    var error by rememberSaveable { mutableStateOf("") }
 
     Box(
         modifier = Modifier.imePadding(),
