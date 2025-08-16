@@ -12,6 +12,10 @@ object SocketManager {
         try {
             val options = IO.Options().apply {
                 auth = mapOf("token" to token)
+                reconnection = true
+                reconnectionAttempts = Int.MAX_VALUE
+                reconnectionDelay = 2000
+                reconnectionDelayMax = 60000
             }
             socket = IO.socket(url, options)
         } catch (e: URISyntaxException) {
@@ -34,9 +38,5 @@ object SocketManager {
 
     fun on(event: String, listener: (Array<Any>) -> Unit) {
         socket?.on(event, listener)
-    }
-
-    fun off(event: String, listener: (Array<Any>) -> Unit) {
-        socket?.off(event, listener)
     }
 }

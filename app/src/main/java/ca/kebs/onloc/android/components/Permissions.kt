@@ -1,6 +1,8 @@
 package ca.kebs.onloc.android.components
 
 import android.app.Activity
+import android.content.Intent
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -8,6 +10,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
@@ -30,6 +33,8 @@ import ca.kebs.onloc.android.permissions.DoNotDisturbPermission
 import ca.kebs.onloc.android.permissions.LocationPermission
 import ca.kebs.onloc.android.permissions.OverlayPermission
 import ca.kebs.onloc.android.permissions.PostNotificationPermission
+import ca.kebs.onloc.android.services.RingerWebSocketService
+import ca.kebs.onloc.android.services.ServiceStatus
 
 @Composable
 fun Permissions() {
@@ -65,6 +70,71 @@ fun Permissions() {
             .padding(16.dp)
     ) {
         Text(
+            text = "Features",
+            style = MaterialTheme.typography.titleLarge,
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Text(text = "Send location updates")
+            Text(
+                text = if (locationGranted) "On" else "Off",
+                color = if (locationGranted) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
+            )
+        }
+        if (!locationGranted) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Text(text = "More permissions need to be granted", color = MaterialTheme.colorScheme.error)
+            }
+        }
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Text(text = "Receive ring commands")
+            Text(
+                text = if (doNotDisturbGranted && overlayGranted && ServiceStatus.isWebSocketServiceRunning)
+                    "On" else "Off",
+                color = if (doNotDisturbGranted && overlayGranted && ServiceStatus.isWebSocketServiceRunning)
+                    MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
+            )
+        }
+        if (!doNotDisturbGranted || !overlayGranted) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Text(text = "More permissions need to be granted", color = MaterialTheme.colorScheme.error)
+            }
+        }
+        if (!ServiceStatus.isWebSocketServiceRunning) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Text(text = "WebSocket service isn't running", color = MaterialTheme.colorScheme.error)
+                Button(onClick = {
+                    val ringerWebSocketServiceIntent = Intent(
+                        context,
+                        RingerWebSocketService::class.java
+                    )
+                    context.startForegroundService(ringerWebSocketServiceIntent)
+                }) {
+                    Text(text = "Start service", color = MaterialTheme.colorScheme.primary)
+                }
+            }
+        }
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text(
             text = "Required Permissions",
             style = MaterialTheme.typography.titleLarge
         )
@@ -82,7 +152,8 @@ fun Permissions() {
 
         PermissionCard(
             name = "Background Location",
-            description = "Allows the app to share your device's location with the server even when the app is not in use.",
+            description =
+                "Allows the app to share your device's location with the server even when the app is not in use.",
             isGranted = locationGranted,
             onGrantClick = {
                 LocationPermission().request(activity)
@@ -102,7 +173,8 @@ fun Permissions() {
 
         PermissionCard(
             name = "Display Over Other Apps",
-            description = "Allows the app to display over other apps, enabling features such as making the device ring.",
+            description =
+                "Allows the app to display over other apps, enabling features such as making the device ring.",
             isGranted = overlayGranted,
             onGrantClick = {
                 OverlayPermission().request(activity)
