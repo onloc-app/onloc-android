@@ -47,6 +47,8 @@ fun Permissions() {
     var doNotDisturbGranted by remember { mutableStateOf(DoNotDisturbPermission().isGranted(context)) }
     var overlayGranted by remember { mutableStateOf(OverlayPermission().isGranted(context)) }
 
+    var socketServiceStarted by remember { mutableStateOf(ServiceStatus.isWebSocketServiceRunning) }
+
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
@@ -115,10 +117,11 @@ fun Permissions() {
                 Text(text = "More permissions need to be granted", color = MaterialTheme.colorScheme.error)
             }
         }
-        if (!ServiceStatus.isWebSocketServiceRunning) {
+        if (!socketServiceStarted) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(text = "WebSocket service isn't running", color = MaterialTheme.colorScheme.error)
                 Button(onClick = {
@@ -127,8 +130,9 @@ fun Permissions() {
                         RingerWebSocketService::class.java
                     )
                     context.startForegroundService(ringerWebSocketServiceIntent)
+                    socketServiceStarted = true
                 }) {
-                    Text(text = "Start service", color = MaterialTheme.colorScheme.primary)
+                    Text(text = "Start service")
                 }
             }
         }
