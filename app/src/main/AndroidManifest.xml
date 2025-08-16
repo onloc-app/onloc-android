@@ -38,6 +38,7 @@
                   android:launchMode="singleTop"
                   android:showWhenLocked="true"
                   android:turnScreenOn="true"
+                  android:excludeFromRecents="true"
                   android:label="@string/title_activity_ringer"
                   android:theme="@style/Theme.OnlocAndroid"/>
         <activity
