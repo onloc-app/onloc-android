@@ -31,7 +31,6 @@ import kotlinx.coroutines.delay
 
 class RingerActivity : ComponentActivity() {
     private var ringtone: Ringtone? = null
-
     private var oldRingerMode: Int? = null
     private var oldAlarmVolume: Int? = null
 
@@ -96,18 +95,18 @@ class RingerActivity : ComponentActivity() {
         val audioManager = getSystemService(AUDIO_SERVICE) as AudioManager
 
         oldRingerMode = audioManager.ringerMode
-        oldAlarmVolume = audioManager.getStreamVolume(AudioManager.STREAM_ALARM)
+        oldAlarmVolume = audioManager.getStreamVolume(AudioManager.STREAM_RING)
 
         audioManager.ringerMode = AudioManager.RINGER_MODE_NORMAL
-        val maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_ALARM)
-        audioManager.setStreamVolume(AudioManager.STREAM_ALARM, maxVolume, 0)
+        val maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_RING)
+        audioManager.setStreamVolume(AudioManager.STREAM_RING, maxVolume, 0)
     }
 
     private fun resetVolume() {
         val audioManager = getSystemService(AUDIO_SERVICE) as AudioManager
 
         oldRingerMode?.let { audioManager.ringerMode = it }
-        oldAlarmVolume?.let { audioManager.ringerMode = it }
+        oldAlarmVolume?.let { audioManager.setStreamVolume(AudioManager.STREAM_RING, it, 0) }
     }
 
     fun stopRingerService(context: Context) {
