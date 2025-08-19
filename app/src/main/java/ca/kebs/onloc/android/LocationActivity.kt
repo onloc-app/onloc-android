@@ -6,6 +6,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,6 +26,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.outlined.AccountCircle
+import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -45,11 +47,13 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -61,14 +65,29 @@ import androidx.compose.ui.window.Dialog
 import ca.kebs.onloc.android.api.AuthApiService
 import ca.kebs.onloc.android.api.DevicesApiService
 import ca.kebs.onloc.android.components.Permissions
+import ca.kebs.onloc.android.helpers.stringToColor
 import ca.kebs.onloc.android.models.Device
 import ca.kebs.onloc.android.models.Location
 import ca.kebs.onloc.android.permissions.LocationPermission
 import ca.kebs.onloc.android.services.LocationCallbackManager
 import ca.kebs.onloc.android.services.LocationForegroundService
 import ca.kebs.onloc.android.ui.theme.OnlocAndroidTheme
+import dev.sargunv.maplibrecompose.compose.MaplibreMap
+import dev.sargunv.maplibrecompose.compose.rememberCameraState
+import dev.sargunv.maplibrecompose.compose.source.rememberGeoJsonSource
+import dev.sargunv.maplibrecompose.core.BaseStyle
+import dev.sargunv.maplibrecompose.core.CameraPosition
+import dev.sargunv.maplibrecompose.core.MapOptions
+import dev.sargunv.maplibrecompose.core.OrnamentOptions
+import dev.sargunv.maplibrecompose.core.source.GeoJsonData
+import io.github.dellisd.spatialk.geojson.Point
+import io.github.dellisd.spatialk.geojson.Position
+import kotlinx.coroutines.launch
 import org.json.JSONObject
 import kotlin.jvm.java
+import androidx.core.net.toUri
+import ca.kebs.onloc.android.components.LocationPuck
+import dev.sargunv.maplibrecompose.core.GestureOptions
 
 class LocationActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
@@ -107,11 +126,13 @@ class LocationActivity : ComponentActivity() {
                 }
             }
 
-            fetchDevices()
-
             // Location service
             var isLocationServiceRunning by remember {
                 mutableStateOf(preferences.getLocationServiceStatus())
+            }
+
+            LaunchedEffect(isLocationServiceRunning) {
+                fetchDevices()
             }
 
             var currentLocation by remember { mutableStateOf<Location?>(null) }
@@ -155,129 +176,243 @@ class LocationActivity : ComponentActivity() {
                         )
                     }
                 ) { innerPadding ->
-                    val scrollState = rememberScrollState()
+                    val defaultPadding = 16.dp
 
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(innerPadding)
-                            .verticalScroll(scrollState)
-                    ) {
-                        var canStartLocationService = true
-                        var serviceStatus = if (isLocationServiceRunning) {
-                            "Started"
-                        } else {
-                            "Stopped"
-                        }
-                        if (selectedDeviceId == -1) {
-                            serviceStatus = "No device selected"
-                            canStartLocationService = false
-                        }
-                        if (!LocationPermission().isGranted(context)) {
-                            serviceStatus = "Required permissions missing"
-                            canStartLocationService = false
-                        }
+                    var canStartLocationService = true
+                    var serviceStatus = if (isLocationServiceRunning) {
+                        "Started"
+                    } else {
+                        "Stopped"
+                    }
+                    if (selectedDeviceId == -1) {
+                        serviceStatus = "No device selected"
+                        canStartLocationService = false
+                    }
+                    if (!LocationPermission().isGranted(context)) {
+                        serviceStatus = "Required permissions missing"
+                        canStartLocationService = false
+                    }
 
-                        val defaultPadding = 16.dp
-                        Row(
-                            modifier = Modifier
-                                .padding(defaultPadding)
-                                .height(32.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = "Service's status: $serviceStatus",
-                                style = MaterialTheme.typography.titleLarge,
-                            )
-                        }
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = defaultPadding)
-                        ) {
-                            ElevatedCard(
-                                elevation = CardDefaults.cardElevation(
-                                    defaultElevation = 6.dp
-                                ),
-                                modifier = Modifier
-                                    .fillMaxWidth()
+                    BottomSheetScaffold(
+                        modifier = Modifier.padding(innerPadding),
+                        sheetPeekHeight = 96.dp,
+                        sheetDragHandle = {
+                            Row(
+                                modifier = Modifier.padding(top = defaultPadding),
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Column(
+                                Text(
+                                    text = "Location service",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    modifier = Modifier.padding(end = defaultPadding)
+                                )
+                                Switch(
+                                    checked = isLocationServiceRunning,
+                                    onCheckedChange = {
+                                        if (isLocationServiceRunning) {
+                                            stopLocationService(context, preferences)
+                                            isLocationServiceRunning = false
+                                            currentLocation = null
+                                        } else {
+                                            startLocationService(context, preferences)
+                                            isLocationServiceRunning = true
+                                        }
+                                    },
+                                    enabled = canStartLocationService
+                                )
+                            }
+                        },
+                        sheetContent = {
+                            val scrollState = rememberScrollState()
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .verticalScroll(scrollState)
+                            ) {
+                                Row(
+                                    modifier = Modifier
+                                        .padding(defaultPadding)
+                                        .height(32.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
+                                        text = "Service's status: $serviceStatus",
+                                        style = MaterialTheme.typography.titleLarge,
+                                    )
+                                }
+
+                                Text(
+                                    text = "Settings",
+                                    style = MaterialTheme.typography.titleLarge,
+                                    modifier = Modifier.padding(defaultPadding)
+                                )
+
+                                Box(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .padding(defaultPadding)
+                                        .padding(horizontal = defaultPadding)
                                 ) {
-                                    Text(text = "Accuracy: ${currentLocation?.accuracy}")
-                                    Text(text = "Altitude: ${currentLocation?.altitude}")
-                                    Text(text = "Altitude accuracy: ${currentLocation?.altitudeAccuracy}")
-                                    Text(text = "Latitude: ${currentLocation?.latitude}")
-                                    Text(text = "Longitude: ${currentLocation?.longitude}")
-
-                                    Text(
-                                        text = "Interval between uploads",
-                                        modifier = Modifier.padding(top = 16.dp)
-                                    )
-                                    var sliderPosition by remember { mutableFloatStateOf(30f) }
-                                    if (preferences.getLocationUpdatesInterval() != -1) {
-                                        sliderPosition = preferences.getLocationUpdatesInterval().toFloat()
-                                    } else {
-                                        preferences.createLocationUpdatesInterval(sliderPosition.toInt())
-                                    }
-                                    Slider(
-                                        value = sliderPosition,
-                                        onValueChange = {
-                                            sliderPosition = it
-                                            preferences.createLocationUpdatesInterval(it.toInt())
-                                        },
-                                        colors = SliderDefaults.colors(
-                                            thumbColor = MaterialTheme.colorScheme.secondary,
-                                            activeTrackColor = MaterialTheme.colorScheme.secondary,
-                                            inactiveTickColor = MaterialTheme.colorScheme.secondaryContainer,
+                                    ElevatedCard(
+                                        elevation = CardDefaults.cardElevation(
+                                            defaultElevation = 6.dp
                                         ),
-                                        steps = 3,
-                                        valueRange = 1f..60f,
-                                        enabled = !isLocationServiceRunning
-                                    )
-                                    Text(text = "${sliderPosition.toInt()} ${if (sliderPosition > 1) "minutes" else "minute"}")
-
-                                    Row(
-                                        modifier = Modifier.padding(top = defaultPadding),
-                                        verticalAlignment = Alignment.CenterVertically
+                                        modifier = Modifier
+                                            .fillMaxWidth()
                                     ) {
-                                        Text(
-                                            text = "Location service",
-                                            style = MaterialTheme.typography.titleMedium,
-                                            modifier = Modifier.padding(end = defaultPadding)
-                                        )
-                                        Switch(
-                                            checked = isLocationServiceRunning,
-                                            onCheckedChange = {
-                                                if (isLocationServiceRunning) {
-                                                    stopLocationService(context, preferences)
-                                                    isLocationServiceRunning = false
-                                                    currentLocation = null
-                                                } else {
-                                                    startLocationService(context, preferences)
-                                                    isLocationServiceRunning = true
-                                                }
-                                            },
-                                            enabled = canStartLocationService
-                                        )
+                                        Column(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(defaultPadding)
+                                        ) {
+                                            Text(
+                                                text = "Interval between uploads",
+                                                modifier = Modifier.padding(top = 16.dp)
+                                            )
+                                            var sliderPosition by remember { mutableFloatStateOf(30f) }
+                                            if (preferences.getLocationUpdatesInterval() != -1) {
+                                                sliderPosition = preferences.getLocationUpdatesInterval().toFloat()
+                                            } else {
+                                                preferences.createLocationUpdatesInterval(sliderPosition.toInt())
+                                            }
+                                            Slider(
+                                                value = sliderPosition,
+                                                onValueChange = {
+                                                    sliderPosition = it
+                                                    preferences.createLocationUpdatesInterval(it.toInt())
+                                                },
+                                                colors = SliderDefaults.colors(
+                                                    thumbColor = MaterialTheme.colorScheme.secondary,
+                                                    activeTrackColor = MaterialTheme.colorScheme.secondary,
+                                                    inactiveTickColor = MaterialTheme.colorScheme.secondaryContainer,
+                                                ),
+                                                steps = 3,
+                                                valueRange = 1f..60f,
+                                                enabled = !isLocationServiceRunning
+                                            )
+                                            Text(
+                                                text = "${sliderPosition.toInt()} ${
+                                                    if (sliderPosition > 1) "minutes"
+                                                    else "minute"
+                                                }"
+                                            )
+                                        }
                                     }
                                 }
+
+                                Permissions()
+
+                                DeviceSelector(
+                                    devices = devices,
+                                    errorMessage = devicesErrorMessage,
+                                    selectedDeviceId = selectedDeviceId,
+                                    showBottomSheet = showBottomSheet,
+                                    onDismissBottomSheet = { showBottomSheet = false }
+                                ) { id ->
+                                    selectedDeviceId = id
+                                }
                             }
-                        }
+                        }) {
 
-                        Permissions()
+                        val coroutineScope = rememberCoroutineScope()
+                        val cameraState = rememberCameraState()
+                        val variant = if (isSystemInDarkTheme()) "dark" else "light"
+                        MaplibreMap(
+                            baseStyle = BaseStyle.Uri("https://tiles.immich.cloud/v1/style/$variant.json"),
+                            modifier = Modifier.fillMaxSize(),
+                            options = MapOptions(
+                                ornamentOptions = OrnamentOptions.AllDisabled,
+                                gestureOptions = GestureOptions(isRotateEnabled = false, isTiltEnabled = false),
+                            ),
+                            cameraState = cameraState,
+                        ) {
+                            val allPositions = mutableListOf<Position>()
 
-                        DeviceSelector(
-                            devices = devices,
-                            errorMessage = devicesErrorMessage,
-                            selectedDeviceId = selectedDeviceId,
-                            showBottomSheet = showBottomSheet,
-                            onDismissBottomSheet = { showBottomSheet = false }
-                        ) { id ->
-                            selectedDeviceId = id
+                            // Display current location
+                            val longitude = currentLocation?.longitude
+                            val latitude = currentLocation?.latitude
+                            val accuracy = currentLocation?.accuracy?.toDouble()
+                            val name = devices.find { it.id == selectedDeviceId }?.name
+
+                            if (longitude != null && latitude != null && accuracy != null && name != null) {
+                                val markerSource = rememberGeoJsonSource(
+                                    data = GeoJsonData.Features(
+                                        Point(
+                                            Position(longitude, latitude),
+                                        )
+                                    )
+                                )
+
+                                LocationPuck(
+                                    id = 0,
+                                    source = markerSource,
+                                    accuracy = accuracy,
+                                    metersPerDp = cameraState.metersPerDpAtTarget,
+                                    color = MaterialTheme.colorScheme.secondary,
+                                    onClick = {
+                                        coroutineScope.launch {
+                                            cameraState.animateTo(
+                                                CameraPosition(
+                                                    target = Position(
+                                                        longitude,
+                                                        latitude,
+                                                    ),
+                                                    zoom = 15.0,
+                                                )
+                                            )
+                                        }
+                                    },
+                                )
+                            }
+
+                            // Display the location of every other device
+                            for (device in devices) {
+                                val location = device.latestLocation
+
+                                if (isLocationServiceRunning && selectedDeviceId == device.id) continue
+
+                                if (location != null) {
+                                    allPositions.add(Position(location.longitude, location.latitude))
+
+                                    val markerSource = rememberGeoJsonSource(
+                                        data = GeoJsonData.Features(
+                                            Point(
+                                                Position(
+                                                    location.longitude,
+                                                    location.latitude,
+                                                )
+                                            )
+                                        ),
+                                    )
+
+                                    LocationPuck(
+                                        id = location.id,
+                                        source = markerSource,
+                                        accuracy = location.accuracy.toDouble(),
+                                        metersPerDp = cameraState.metersPerDpAtTarget,
+                                        color = stringToColor(device.name),
+                                        name = device.name,
+                                        onClick = {
+                                            coroutineScope.launch {
+                                                cameraState.animateTo(
+                                                    CameraPosition(
+                                                        target = Position(
+                                                            location.longitude,
+                                                            location.latitude,
+                                                        ),
+                                                        zoom = 15.0,
+                                                    )
+                                                )
+                                            }
+                                        },
+                                        onLongClick = {
+                                            val uri =
+                                                "geo:${location.latitude},${location.longitude}?q=${location.latitude},${location.longitude}".toUri()
+                                            val intent = Intent(Intent.ACTION_VIEW, uri)
+                                            startActivity(intent)
+                                        },
+                                    )
+                                }
+                            }
                         }
                     }
                 }

@@ -11,6 +11,9 @@ data class Device(
     val name: String,
     val icon: String?,
 
+    @SerializedName("latest_location")
+    val latestLocation: Location?,
+
     @SerializedName("created_at")
     val createdAt: String?,
 
