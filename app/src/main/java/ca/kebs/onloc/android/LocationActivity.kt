@@ -10,6 +10,7 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -90,6 +91,7 @@ import kotlin.jvm.java
 import androidx.core.net.toUri
 import ca.kebs.onloc.android.components.LocationPuck
 import dev.sargunv.maplibrecompose.core.GestureOptions
+import io.github.dellisd.spatialk.geojson.BoundingBox
 
 class LocationActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
@@ -325,6 +327,8 @@ class LocationActivity : ComponentActivity() {
                             val name = devices.find { it.id == selectedDeviceId }?.name
 
                             if (longitude != null && latitude != null && accuracy != null && name != null) {
+                                allPositions.add(Position(longitude, latitude))
+
                                 val markerSource = rememberGeoJsonSource(
                                     data = GeoJsonData.Features(
                                         Point(
@@ -403,6 +407,22 @@ class LocationActivity : ComponentActivity() {
                                         },
                                     )
                                 }
+                            }
+
+                            LaunchedEffect(allPositions) {
+                                val maxLongitude = allPositions.maxOf { it.longitude }
+                                val minLongitude = allPositions.minOf { it.longitude }
+                                val maxLatitude = allPositions.maxOf { it.latitude }
+                                val minLatitude = allPositions.minOf { it.latitude }
+                                cameraState.animateTo(
+                                    boundingBox = BoundingBox(
+                                        west = minLongitude,
+                                        north = maxLatitude,
+                                        east = maxLongitude,
+                                        south = minLatitude,
+                                    ),
+                                    padding = PaddingValues(128.dp),
+                                )
                             }
                         }
                     }
