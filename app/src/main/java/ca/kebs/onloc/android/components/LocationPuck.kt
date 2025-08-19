@@ -1,5 +1,6 @@
 package ca.kebs.onloc.android.components
 
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -49,6 +50,7 @@ fun LocationPuck(
             ClickResult.Consume
         })
     name?.let {
+        val textColor = if (isSystemInDarkTheme()) Color.White else Color.Black
         SymbolLayer(
             id = "location-device-name-$id",
             source = source,
@@ -58,7 +60,7 @@ fun LocationPuck(
                 ),
             textFont = const(listOf("Noto Sans Regular")),
             textSize = const(1.2f.em),
-            textColor = const(Color.White),
+            textColor = const(textColor),
             textOffset = offset(0f.em, (1.5f).em),
         )
     }

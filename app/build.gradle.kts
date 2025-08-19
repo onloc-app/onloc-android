@@ -8,12 +8,12 @@ plugins {
 
 android {
     namespace = "ca.kebs.onloc.android"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "ca.kebs.onloc.android"
         minSdk = 31
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0"
 

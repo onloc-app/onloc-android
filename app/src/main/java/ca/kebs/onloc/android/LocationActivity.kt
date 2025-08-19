@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -57,6 +58,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextAlign
@@ -179,11 +181,7 @@ class LocationActivity : ComponentActivity() {
                     val defaultPadding = 16.dp
 
                     var canStartLocationService = true
-                    var serviceStatus = if (isLocationServiceRunning) {
-                        "Started"
-                    } else {
-                        "Stopped"
-                    }
+                    var serviceStatus = ""
                     if (selectedDeviceId == -1) {
                         serviceStatus = "No device selected"
                         canStartLocationService = false
@@ -195,62 +193,56 @@ class LocationActivity : ComponentActivity() {
 
                     BottomSheetScaffold(
                         modifier = Modifier.padding(innerPadding),
-                        sheetPeekHeight = 96.dp,
-                        sheetDragHandle = {
-                            Row(
-                                modifier = Modifier.padding(top = defaultPadding),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(
-                                    text = "Location service",
-                                    style = MaterialTheme.typography.titleMedium,
-                                    modifier = Modifier.padding(end = defaultPadding)
-                                )
-                                Switch(
-                                    checked = isLocationServiceRunning,
-                                    onCheckedChange = {
-                                        if (isLocationServiceRunning) {
-                                            stopLocationService(context, preferences)
-                                            isLocationServiceRunning = false
-                                            currentLocation = null
-                                        } else {
-                                            startLocationService(context, preferences)
-                                            isLocationServiceRunning = true
-                                        }
-                                    },
-                                    enabled = canStartLocationService
-                                )
-                            }
-                        },
                         sheetContent = {
                             val scrollState = rememberScrollState()
                             Column(
                                 modifier = Modifier
                                     .fillMaxSize()
                                     .verticalScroll(scrollState)
+                                    .padding(defaultPadding),
+                                verticalArrangement = Arrangement.spacedBy(defaultPadding),
                             ) {
-                                Row(
-                                    modifier = Modifier
-                                        .padding(defaultPadding)
-                                        .height(32.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Text(
-                                        text = "Service's status: $serviceStatus",
-                                        style = MaterialTheme.typography.titleLarge,
-                                    )
+                                Spacer(Modifier.height(32.dp))
+                                Column {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(defaultPadding),
+                                    ) {
+                                        Text(
+                                            text = "Location service",
+                                            style = MaterialTheme.typography.titleMedium,
+                                            color = if (!canStartLocationService)
+                                                MaterialTheme.colorScheme.onBackground else Color.Unspecified,
+                                        )
+                                        Switch(
+                                            checked = isLocationServiceRunning,
+                                            onCheckedChange = {
+                                                if (isLocationServiceRunning) {
+                                                    stopLocationService(context, preferences)
+                                                    isLocationServiceRunning = false
+                                                    currentLocation = null
+                                                } else {
+                                                    startLocationService(context, preferences)
+                                                    isLocationServiceRunning = true
+                                                }
+                                            },
+                                            enabled = canStartLocationService
+                                        )
+                                    }
+
+                                    if (!canStartLocationService) {
+                                        Text(text = serviceStatus, color = MaterialTheme.colorScheme.error)
+                                    }
                                 }
 
                                 Text(
                                     text = "Settings",
                                     style = MaterialTheme.typography.titleLarge,
-                                    modifier = Modifier.padding(defaultPadding)
                                 )
 
                                 Box(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .padding(horizontal = defaultPadding)
                                 ) {
                                     ElevatedCard(
                                         elevation = CardDefaults.cardElevation(
@@ -266,7 +258,6 @@ class LocationActivity : ComponentActivity() {
                                         ) {
                                             Text(
                                                 text = "Interval between uploads",
-                                                modifier = Modifier.padding(top = 16.dp)
                                             )
                                             var sliderPosition by remember { mutableFloatStateOf(30f) }
                                             if (preferences.getLocationUpdatesInterval() != -1) {

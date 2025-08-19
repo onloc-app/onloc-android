@@ -69,7 +69,6 @@ fun Permissions() {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp)
     ) {
         Text(
             text = "Features",
