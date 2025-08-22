@@ -1,7 +1,10 @@
 package ca.kebs.onloc.android
 
+import android.Manifest
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.location.LocationManager
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -63,6 +66,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import androidx.core.content.ContextCompat
 import ca.kebs.onloc.android.api.AuthApiService
 import ca.kebs.onloc.android.api.DevicesApiService
 import ca.kebs.onloc.android.components.Permissions
@@ -104,6 +108,7 @@ class LocationActivity : ComponentActivity() {
         setContent {
             val context = LocalContext.current
             val preferences = Preferences(context)
+            val locationManager = context.getSystemService(LOCATION_SERVICE) as LocationManager
 
             var showBottomSheet by remember { mutableStateOf(false) }
 
@@ -147,6 +152,24 @@ class LocationActivity : ComponentActivity() {
                 if (ip != null && accessToken != null && location != null && selectedDeviceId != -1) {
                     val parsedLocation = Location.fromAndroidLocation(0, selectedDeviceId, location)
                     currentLocation = parsedLocation
+                }
+            }
+
+            LaunchedEffect(Unit) {
+                if (ContextCompat.checkSelfPermission(
+                        context,
+                        Manifest.permission.ACCESS_FINE_LOCATION,
+                    ) == PackageManager.PERMISSION_GRANTED
+                ) {
+                    val provider = LocationManager.FUSED_PROVIDER
+                    val location = locationManager.getLastKnownLocation(provider)
+                    if (location != null) {
+                        currentLocation = Location.fromAndroidLocation(
+                            id = 0,
+                            deviceId = 0,
+                            location
+                        )
+                    }
                 }
             }
 
