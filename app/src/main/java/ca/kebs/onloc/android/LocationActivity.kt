@@ -1,8 +1,7 @@
 package ca.kebs.onloc.android
 
-import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.location.LocationManager
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -65,7 +64,6 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import androidx.core.content.ContextCompat
 import ca.kebs.onloc.android.api.AuthApiService
 import ca.kebs.onloc.android.api.DevicesApiService
 import ca.kebs.onloc.android.components.Permissions
@@ -91,6 +89,7 @@ import kotlin.jvm.java
 import androidx.core.net.toUri
 import ca.kebs.onloc.android.components.LocationPuck
 import ca.kebs.onloc.android.components.MapAttribution
+import ca.kebs.onloc.android.permissions.PostNotificationPermission
 import ca.kebs.onloc.android.services.ServiceManager
 import dev.sargunv.maplibrecompose.compose.rememberStyleState
 import dev.sargunv.maplibrecompose.core.GestureOptions
@@ -100,6 +99,7 @@ import dev.sargunv.maplibrecompose.material3.controls.ScaleBar
 import io.github.dellisd.spatialk.geojson.BoundingBox
 
 class LocationActivity : ComponentActivity() {
+    @SuppressLint("MissingPermission")
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -155,11 +155,7 @@ class LocationActivity : ComponentActivity() {
             }
 
             LaunchedEffect(Unit) {
-                if (ContextCompat.checkSelfPermission(
-                        context,
-                        Manifest.permission.ACCESS_FINE_LOCATION,
-                    ) == PackageManager.PERMISSION_GRANTED
-                ) {
+                if (PostNotificationPermission().isGranted(context)) {
                     val provider = LocationManager.FUSED_PROVIDER
                     val location = locationManager.getLastKnownLocation(provider)
                     if (location != null) {
@@ -181,7 +177,7 @@ class LocationActivity : ComponentActivity() {
                     serviceStatus = "No device selected"
                     canStartLocationService = false
                 }
-                if (!LocationPermission().isGranted(context)) {
+                if (!LocationPermission().isGranted(context) || !PostNotificationPermission().isGranted(context)) {
                     serviceStatus = "Required permissions missing"
                     canStartLocationService = false
                 }
