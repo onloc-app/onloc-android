@@ -410,19 +410,21 @@ class LocationActivity : ComponentActivity() {
                             }
 
                             LaunchedEffect(allPositions) {
-                                val maxLongitude = allPositions.maxOf { it.longitude }
-                                val minLongitude = allPositions.minOf { it.longitude }
-                                val maxLatitude = allPositions.maxOf { it.latitude }
-                                val minLatitude = allPositions.minOf { it.latitude }
-                                cameraState.animateTo(
-                                    boundingBox = BoundingBox(
-                                        west = minLongitude,
-                                        north = maxLatitude,
-                                        east = maxLongitude,
-                                        south = minLatitude,
-                                    ),
-                                    padding = PaddingValues(128.dp),
-                                )
+                                if (allPositions.isNotEmpty()) {
+                                    val maxLongitude = allPositions.maxOf { it.longitude }
+                                    val minLongitude = allPositions.minOf { it.longitude }
+                                    val maxLatitude = allPositions.maxOf { it.latitude }
+                                    val minLatitude = allPositions.minOf { it.latitude }
+                                    cameraState.animateTo(
+                                        boundingBox = BoundingBox(
+                                            west = minLongitude,
+                                            north = maxLatitude,
+                                            east = maxLongitude,
+                                            south = minLatitude,
+                                        ),
+                                        padding = PaddingValues(128.dp),
+                                    )
+                                }
                             }
                         }
                     }
