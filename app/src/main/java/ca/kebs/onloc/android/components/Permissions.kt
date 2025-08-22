@@ -1,7 +1,6 @@
 package ca.kebs.onloc.android.components
 
 import android.app.Activity
-import android.content.Intent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,14 +9,17 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -33,8 +35,7 @@ import ca.kebs.onloc.android.permissions.DoNotDisturbPermission
 import ca.kebs.onloc.android.permissions.LocationPermission
 import ca.kebs.onloc.android.permissions.OverlayPermission
 import ca.kebs.onloc.android.permissions.PostNotificationPermission
-import ca.kebs.onloc.android.services.RingerWebSocketService
-import ca.kebs.onloc.android.services.ServiceStatus
+import ca.kebs.onloc.android.services.ServiceManager
 
 @Composable
 fun Permissions() {
@@ -46,8 +47,6 @@ fun Permissions() {
     var locationGranted by remember { mutableStateOf(LocationPermission().isGranted(context)) }
     var doNotDisturbGranted by remember { mutableStateOf(DoNotDisturbPermission().isGranted(context)) }
     var overlayGranted by remember { mutableStateOf(OverlayPermission().isGranted(context)) }
-
-    var socketServiceStarted by remember { mutableStateOf(ServiceStatus.isWebSocketServiceRunning) }
 
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
@@ -71,129 +70,65 @@ fun Permissions() {
             .fillMaxWidth()
     ) {
         Text(
-            text = "Features",
-            style = MaterialTheme.typography.titleLarge,
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-        ) {
-            Text(text = "Send location updates")
-            Text(
-                text = if (locationGranted) "On" else "Off",
-                color = if (locationGranted) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
-            )
-        }
-        if (!locationGranted) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-            ) {
-                Text(text = "More permissions need to be granted", color = MaterialTheme.colorScheme.error)
-            }
-        }
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-        ) {
-            Text(text = "Receive ring commands")
-            Text(
-                text = if (doNotDisturbGranted && overlayGranted && ServiceStatus.isWebSocketServiceRunning)
-                    "On" else "Off",
-                color = if (doNotDisturbGranted && overlayGranted && ServiceStatus.isWebSocketServiceRunning)
-                    MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
-            )
-        }
-        if (!doNotDisturbGranted || !overlayGranted) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-            ) {
-                Text(text = "More permissions need to be granted", color = MaterialTheme.colorScheme.error)
-            }
-        }
-        if (!socketServiceStarted) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text(text = "WebSocket service isn't running", color = MaterialTheme.colorScheme.error)
-                Button(onClick = {
-                    val ringerWebSocketServiceIntent = Intent(
-                        context,
-                        RingerWebSocketService::class.java
-                    )
-                    context.startForegroundService(ringerWebSocketServiceIntent)
-                    socketServiceStarted = true
-                }) {
-                    Text(text = "Start service")
-                }
-            }
-        }
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Text(
-            text = "Required Permissions",
+            text = "Features & Permissions",
             style = MaterialTheme.typography.titleLarge
         )
         Spacer(modifier = Modifier.height(16.dp))
 
-        PermissionCard(
-            name = "Notifications",
-            description = "Allows the app to send notifications about the service's status.",
-            isGranted = notificationsGranted,
-            onGrantClick = {
-                PostNotificationPermission().request(activity)
-                notificationsGranted = PostNotificationPermission().isGranted(context)
-            }
-        )
-
-        PermissionCard(
+        FeatureCard(
             name = "Background Location",
             description =
                 "Allows the app to share your device's location with the server even when the app is not in use.",
-            isGranted = locationGranted,
-            onGrantClick = {
-                LocationPermission().request(activity)
-                locationGranted = LocationPermission().isGranted(context)
+            isGranted = notificationsGranted && locationGranted,
+            permissionCards = {
+                PermissionCard(name = "Notifications", isGranted = notificationsGranted, onGrantClick = {
+                    PostNotificationPermission().request(activity)
+                    notificationsGranted = PostNotificationPermission().isGranted(context)
+                })
+                PermissionCard(name = "Location", isGranted = locationGranted, onGrantClick = {
+                    LocationPermission().request(activity)
+                    locationGranted = LocationPermission().isGranted(context)
+                })
             }
         )
 
-        PermissionCard(
-            name = "Do Not Disturb Access",
-            description = "Allows the app to toggle 'Do Not Disturb'.",
-            isGranted = doNotDisturbGranted,
-            onGrantClick = {
+        FeatureCard(
+            name = "Ring Over the Air",
+            description =
+                "The app will listen for commands from the server and ring when commanded to.",
+            isGranted = notificationsGranted && doNotDisturbGranted && overlayGranted,
+            onGrant = { ServiceManager.startRingerWebSocketServiceIfAllowed(context) }
+        ) {
+            PermissionCard(name = "Notifications", isGranted = notificationsGranted, onGrantClick = {
+                PostNotificationPermission().request(activity)
+                notificationsGranted = PostNotificationPermission().isGranted(context)
+            })
+            PermissionCard(name = "Do Not Disturb Access", isGranted = doNotDisturbGranted, onGrantClick = {
                 DoNotDisturbPermission().request(context)
                 doNotDisturbGranted = DoNotDisturbPermission().isGranted(context)
-            }
-        )
-
-        PermissionCard(
-            name = "Display Over Other Apps",
-            description =
-                "Allows the app to display over other apps, enabling features such as making the device ring.",
-            isGranted = overlayGranted,
-            onGrantClick = {
+            })
+            PermissionCard(name = "Overlay Permission", isGranted = overlayGranted, onGrantClick = {
                 OverlayPermission().request(activity)
                 overlayGranted = OverlayPermission().isGranted(context)
-            }
-        )
+            })
+        }
     }
 }
 
 @Composable
-fun PermissionCard(
+fun FeatureCard(
     name: String,
     description: String,
     isGranted: Boolean,
-    onGrantClick: () -> Unit
+    onGrant: () -> Unit = {},
+    permissionCards: @Composable () -> Unit,
 ) {
+    LaunchedEffect(isGranted) {
+        if (isGranted) {
+            onGrant()
+        }
+    }
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -205,30 +140,49 @@ fun PermissionCard(
             ),
             modifier = Modifier.fillMaxWidth()
         ) {
-            val defaultPadding = 16.dp
-            Text(
-                text = name,
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(defaultPadding)
-            )
-            Text(
-                text = description,
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(horizontal = defaultPadding)
-            )
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Spacer(modifier = Modifier.weight(1f))
-                OutlinedButton(
-                    onClick = { onGrantClick() },
-                    enabled = !isGranted,
-                    modifier = Modifier.padding(defaultPadding)
+            Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    Text(if (isGranted) "Granted" else "Grant")
+                    Text(
+                        text = name,
+                        style = MaterialTheme.typography.titleMedium,
+                    )
+                    if (isGranted) {
+                        Icon(
+                            Icons.Default.Check,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                        )
+                    }
                 }
+                Text(
+                    text = description,
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+                permissionCards()
             }
+        }
+    }
+}
+
+@Composable
+fun PermissionCard(
+    name: String,
+    isGranted: Boolean,
+    onGrantClick: () -> Unit,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
+    ) {
+        Text(text = name, style = MaterialTheme.typography.titleSmall)
+        OutlinedButton(
+            onClick = onGrantClick,
+            enabled = !isGranted,
+        ) {
+            Text(if (isGranted) "Granted" else "Grant")
         }
     }
 }

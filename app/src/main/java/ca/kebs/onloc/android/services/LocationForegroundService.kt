@@ -94,6 +94,14 @@ class LocationForegroundService : Service() {
     }
 
     private fun startForegroundService() {
+        if (
+            ActivityCompat.checkSelfPermission(
+                applicationContext,
+                Manifest.permission.POST_NOTIFICATIONS
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            return
+        }
         startForeground(1001, createStartForegroundNotification())
     }
 

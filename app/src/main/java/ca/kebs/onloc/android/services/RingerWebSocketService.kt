@@ -1,11 +1,14 @@
 package ca.kebs.onloc.android.services
 
+import android.Manifest
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.IBinder
+import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import ca.kebs.onloc.android.SocketManager
 import ca.kebs.onloc.android.services.ServiceStatus.isWebSocketServiceRunning
@@ -36,6 +39,14 @@ class RingerWebSocketService : Service() {
 
     override fun onCreate() {
         super.onCreate()
+        if (
+            ActivityCompat.checkSelfPermission(
+                applicationContext,
+                Manifest.permission.POST_NOTIFICATIONS
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            return
+        }
         val notification = createNotification()
         startForeground(2001, notification)
     }

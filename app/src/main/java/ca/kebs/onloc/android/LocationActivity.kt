@@ -1,7 +1,6 @@
 package ca.kebs.onloc.android
 
 import android.Manifest
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.LocationManager
@@ -75,7 +74,6 @@ import ca.kebs.onloc.android.models.Device
 import ca.kebs.onloc.android.models.Location
 import ca.kebs.onloc.android.permissions.LocationPermission
 import ca.kebs.onloc.android.services.LocationCallbackManager
-import ca.kebs.onloc.android.services.LocationForegroundService
 import ca.kebs.onloc.android.ui.theme.OnlocAndroidTheme
 import dev.sargunv.maplibrecompose.compose.MaplibreMap
 import dev.sargunv.maplibrecompose.compose.rememberCameraState
@@ -93,6 +91,7 @@ import kotlin.jvm.java
 import androidx.core.net.toUri
 import ca.kebs.onloc.android.components.LocationPuck
 import ca.kebs.onloc.android.components.MapAttribution
+import ca.kebs.onloc.android.services.ServiceManager
 import dev.sargunv.maplibrecompose.compose.rememberStyleState
 import dev.sargunv.maplibrecompose.core.GestureOptions
 import dev.sargunv.maplibrecompose.material3.controls.DisappearingCompassButton
@@ -242,11 +241,11 @@ class LocationActivity : ComponentActivity() {
                                         checked = isLocationServiceRunning,
                                         onCheckedChange = {
                                             if (isLocationServiceRunning) {
-                                                stopLocationService(context, preferences)
+                                                ServiceManager.stopLocationService(context)
                                                 isLocationServiceRunning = false
                                                 currentLocation = null
                                             } else {
-                                                startLocationService(context, preferences)
+                                                ServiceManager.startLocationServiceIfAllowed(context)
                                                 isLocationServiceRunning = true
                                             }
                                         },
@@ -562,7 +561,8 @@ fun Avatar() {
 
                                     Button(
                                         onClick = {
-                                            stopLocationService(context, preferences)
+                                            ServiceManager.stopLocationService(context)
+                                            ServiceManager.stopRingerWebSocketService(context)
 
                                             val accessToken = preferences.getUserCredentials().accessToken
                                             val refreshToken = preferences.getUserCredentials().refreshToken
@@ -673,16 +673,4 @@ fun DeviceSelector(
             }
         }
     }
-}
-
-fun startLocationService(context: Context, preferences: Preferences) {
-    preferences.createLocationServiceStatus(true)
-    val locationServiceIntent = Intent(context, LocationForegroundService::class.java)
-    context.startService(locationServiceIntent)
-}
-
-fun stopLocationService(context: Context, preferences: Preferences) {
-    preferences.createLocationServiceStatus(false)
-    val locationServiceIntent = Intent(context, LocationForegroundService::class.java)
-    context.stopService(locationServiceIntent)
 }
