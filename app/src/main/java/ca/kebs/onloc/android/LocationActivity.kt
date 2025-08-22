@@ -177,7 +177,11 @@ class LocationActivity : ComponentActivity() {
                     serviceStatus = "No device selected"
                     canStartLocationService = false
                 }
-                if (!LocationPermission().isGranted(context) || !PostNotificationPermission().isGranted(context)) {
+
+                var notificationsGranted by remember { mutableStateOf(PostNotificationPermission().isGranted(context)) }
+                var locationGranted by remember { mutableStateOf(LocationPermission().isGranted(context)) }
+
+                if (!notificationsGranted || !locationGranted) {
                     serviceStatus = "Required permissions missing"
                     canStartLocationService = false
                 }
