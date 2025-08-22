@@ -62,6 +62,10 @@ fun LocationPuck(
             textSize = const(1.2f.em),
             textColor = const(textColor),
             textOffset = offset(0f.em, (1.5f).em),
+            onClick = {
+                onClick()
+                ClickResult.Consume
+            },
         )
     }
 }

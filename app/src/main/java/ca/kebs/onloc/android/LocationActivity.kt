@@ -88,7 +88,12 @@ import org.json.JSONObject
 import kotlin.jvm.java
 import androidx.core.net.toUri
 import ca.kebs.onloc.android.components.LocationPuck
+import ca.kebs.onloc.android.components.MapAttribution
+import dev.sargunv.maplibrecompose.compose.rememberStyleState
 import dev.sargunv.maplibrecompose.core.GestureOptions
+import dev.sargunv.maplibrecompose.material3.controls.DisappearingCompassButton
+import dev.sargunv.maplibrecompose.material3.controls.ExpandingAttributionButton
+import dev.sargunv.maplibrecompose.material3.controls.ScaleBar
 import io.github.dellisd.spatialk.geojson.BoundingBox
 
 class LocationActivity : ComponentActivity() {
@@ -302,15 +307,17 @@ class LocationActivity : ComponentActivity() {
 
                     val coroutineScope = rememberCoroutineScope()
                     val cameraState = rememberCameraState()
+                    val styleState = rememberStyleState()
                     val variant = if (isSystemInDarkTheme()) "dark" else "light"
                     MaplibreMap(
                         baseStyle = BaseStyle.Uri("https://tiles.immich.cloud/v1/style/$variant.json"),
                         modifier = Modifier.fillMaxSize(),
                         options = MapOptions(
                             ornamentOptions = OrnamentOptions.AllDisabled,
-                            gestureOptions = GestureOptions(isRotateEnabled = false, isTiltEnabled = false),
+                            gestureOptions = GestureOptions(isTiltEnabled = false),
                         ),
                         cameraState = cameraState,
+                        styleState = styleState,
                     ) {
                         val allPositions = mutableListOf<Position>()
 
@@ -420,6 +427,31 @@ class LocationActivity : ComponentActivity() {
                                 )
                             }
                         }
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(defaultPadding)
+                            .padding(bottom = 48.dp),
+                    ) {
+                        ScaleBar(
+                            metersPerDp = cameraState.metersPerDpAtTarget,
+                            modifier = Modifier.align(Alignment.TopStart),
+                        )
+                        DisappearingCompassButton(
+                            cameraState = cameraState,
+                            modifier = Modifier.align(Alignment.TopEnd)
+                        )
+                        ExpandingAttributionButton(
+                            cameraState = cameraState,
+                            styleState = styleState,
+                            modifier = Modifier
+                                .align(Alignment.BottomEnd)
+                                .height(48.dp),
+                            contentAlignment = Alignment.BottomEnd,
+                            expandedContent = { MapAttribution() },
+                        )
                     }
                 }
             }
