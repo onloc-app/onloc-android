@@ -74,6 +74,12 @@ class RingerWebSocketService : Service() {
         val token = getAccessToken()
         val deviceId = getSelectedDeviceId()
 
+        if (deviceId == -1) {
+            return START_STICKY
+        }
+
+        SocketManager.disconnect()
+
         if (ip != null && token != null) {
             SocketManager.initialize(ip, token)
             SocketManager.connect()
