@@ -48,7 +48,8 @@ fun LocationPuck(
         onLongClick = {
             onLongClick()
             ClickResult.Consume
-        })
+        },
+    )
     name?.let {
         val textColor = if (isSystemInDarkTheme()) Color.White else Color.Black
         SymbolLayer(
@@ -64,6 +65,10 @@ fun LocationPuck(
             textOffset = offset(0f.em, (1.5f).em),
             onClick = {
                 onClick()
+                ClickResult.Consume
+            },
+            onLongClick = {
+                onLongClick()
                 ClickResult.Consume
             },
         )
