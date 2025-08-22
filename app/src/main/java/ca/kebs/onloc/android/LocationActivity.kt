@@ -190,11 +190,6 @@ class LocationActivity : ComponentActivity() {
                                 titleContentColor = MaterialTheme.colorScheme.primary
                             ),
                             actions = {
-                                Button(onClick = {
-                                    selectedDeviceId = -1
-                                }) {
-                                    Text("test")
-                                }
                                 TextButton(
                                     onClick = { showBottomSheet = true },
                                     enabled = !isLocationServiceRunning
