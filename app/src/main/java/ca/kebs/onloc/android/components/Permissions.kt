@@ -38,7 +38,9 @@ import ca.kebs.onloc.android.permissions.PostNotificationPermission
 import ca.kebs.onloc.android.services.ServiceManager
 
 @Composable
-fun Permissions() {
+fun Permissions(
+    onPermissionsChanged: () -> Unit = {},
+) {
     val context = LocalContext.current
     val activity = context as Activity
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -55,6 +57,7 @@ fun Permissions() {
                 locationGranted = LocationPermission().isGranted(context)
                 doNotDisturbGranted = DoNotDisturbPermission().isGranted(context)
                 overlayGranted = OverlayPermission().isGranted(context)
+                onPermissionsChanged()
             }
         }
 
@@ -84,10 +87,12 @@ fun Permissions() {
                 PermissionCard(name = "Notifications", isGranted = notificationsGranted, onGrantClick = {
                     PostNotificationPermission().request(activity)
                     notificationsGranted = PostNotificationPermission().isGranted(context)
+                    onPermissionsChanged()
                 })
                 PermissionCard(name = "Location", isGranted = locationGranted, onGrantClick = {
                     LocationPermission().request(activity)
                     locationGranted = LocationPermission().isGranted(context)
+                    onPermissionsChanged()
                 })
             }
         )
@@ -102,14 +107,17 @@ fun Permissions() {
             PermissionCard(name = "Notifications", isGranted = notificationsGranted, onGrantClick = {
                 PostNotificationPermission().request(activity)
                 notificationsGranted = PostNotificationPermission().isGranted(context)
+                onPermissionsChanged()
             })
             PermissionCard(name = "Do Not Disturb Access", isGranted = doNotDisturbGranted, onGrantClick = {
                 DoNotDisturbPermission().request(context)
                 doNotDisturbGranted = DoNotDisturbPermission().isGranted(context)
+                onPermissionsChanged()
             })
             PermissionCard(name = "Overlay Permission", isGranted = overlayGranted, onGrantClick = {
                 OverlayPermission().request(activity)
                 overlayGranted = OverlayPermission().isGranted(context)
+                onPermissionsChanged()
             })
         }
     }

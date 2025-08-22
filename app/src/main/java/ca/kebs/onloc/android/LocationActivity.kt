@@ -154,8 +154,11 @@ class LocationActivity : ComponentActivity() {
                 }
             }
 
+            var notificationsGranted by remember { mutableStateOf(PostNotificationPermission().isGranted(context)) }
+            var locationGranted by remember { mutableStateOf(LocationPermission().isGranted(context)) }
+
             LaunchedEffect(Unit) {
-                if (PostNotificationPermission().isGranted(context)) {
+                if (notificationsGranted) {
                     val provider = LocationManager.FUSED_PROVIDER
                     val location = locationManager.getLastKnownLocation(provider)
                     if (location != null) {
@@ -171,20 +174,12 @@ class LocationActivity : ComponentActivity() {
             OnlocAndroidTheme {
                 val defaultPadding = 16.dp
 
-                var canStartLocationService = true
-                var serviceStatus = ""
-                if (selectedDeviceId == -1) {
-                    serviceStatus = "No device selected"
-                    canStartLocationService = false
+                val serviceStatus = when {
+                    selectedDeviceId == -1 -> "No device selected"
+                    !notificationsGranted || !locationGranted -> "Required permissions missing"
+                    else -> ""
                 }
-
-                var notificationsGranted by remember { mutableStateOf(PostNotificationPermission().isGranted(context)) }
-                var locationGranted by remember { mutableStateOf(LocationPermission().isGranted(context)) }
-
-                if (!notificationsGranted || !locationGranted) {
-                    serviceStatus = "Required permissions missing"
-                    canStartLocationService = false
-                }
+                val canStartLocationService = selectedDeviceId != -1 && notificationsGranted && locationGranted
 
                 BottomSheetScaffold(
                     topBar = {
@@ -313,7 +308,10 @@ class LocationActivity : ComponentActivity() {
                                 }
                             }
 
-                            Permissions()
+                            Permissions(onPermissionsChanged = {
+                                notificationsGranted = PostNotificationPermission().isGranted(context)
+                                locationGranted = PostNotificationPermission().isGranted(context)
+                            })
 
                             DeviceSelector(
                                 devices = devices,
