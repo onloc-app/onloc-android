@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -39,7 +38,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.RadioButton
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Switch
@@ -115,7 +113,7 @@ class LocationActivity : ComponentActivity() {
             fun fetchDevices() {
                 if (accessToken != null && ip != null) {
                     val devicesApiService = DevicesApiService(context, ip, accessToken)
-                    devicesApiService.getDevices() { foundDevices, errorMessage ->
+                    devicesApiService.getDevices { foundDevices, errorMessage ->
                         if (foundDevices != null) {
                             devices = foundDevices
                         }
@@ -148,7 +146,20 @@ class LocationActivity : ComponentActivity() {
             }
 
             OnlocAndroidTheme {
-                Scaffold(
+                val defaultPadding = 16.dp
+
+                var canStartLocationService = true
+                var serviceStatus = ""
+                if (selectedDeviceId == -1) {
+                    serviceStatus = "No device selected"
+                    canStartLocationService = false
+                }
+                if (!LocationPermission().isGranted(context)) {
+                    serviceStatus = "Required permissions missing"
+                    canStartLocationService = false
+                }
+
+                BottomSheetScaffold(
                     topBar = {
                         TopAppBar(
                             title = { Text("Onloc") },
@@ -178,253 +189,235 @@ class LocationActivity : ComponentActivity() {
                                 Avatar()
                             }
                         )
-                    }
-                ) { innerPadding ->
-                    val defaultPadding = 16.dp
-
-                    var canStartLocationService = true
-                    var serviceStatus = ""
-                    if (selectedDeviceId == -1) {
-                        serviceStatus = "No device selected"
-                        canStartLocationService = false
-                    }
-                    if (!LocationPermission().isGranted(context)) {
-                        serviceStatus = "Required permissions missing"
-                        canStartLocationService = false
-                    }
-
-                    BottomSheetScaffold(
-                        modifier = Modifier.padding(innerPadding),
-                        sheetContent = {
-                            val scrollState = rememberScrollState()
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .verticalScroll(scrollState)
-                                    .padding(defaultPadding),
-                                verticalArrangement = Arrangement.spacedBy(defaultPadding),
-                            ) {
-                                Spacer(Modifier.height(32.dp))
-                                Column {
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(defaultPadding),
-                                    ) {
-                                        Text(
-                                            text = "Location service",
-                                            style = MaterialTheme.typography.titleMedium,
-                                            color = if (!canStartLocationService)
-                                                MaterialTheme.colorScheme.onBackground else Color.Unspecified,
-                                        )
-                                        Switch(
-                                            checked = isLocationServiceRunning,
-                                            onCheckedChange = {
-                                                if (isLocationServiceRunning) {
-                                                    stopLocationService(context, preferences)
-                                                    isLocationServiceRunning = false
-                                                    currentLocation = null
-                                                } else {
-                                                    startLocationService(context, preferences)
-                                                    isLocationServiceRunning = true
-                                                }
-                                            },
-                                            enabled = canStartLocationService
-                                        )
-                                    }
-
-                                    if (!canStartLocationService) {
-                                        Text(text = serviceStatus, color = MaterialTheme.colorScheme.error)
-                                    }
+                    },
+                    sheetContent = {
+                        val scrollState = rememberScrollState()
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .verticalScroll(scrollState)
+                                .padding(defaultPadding),
+                            verticalArrangement = Arrangement.spacedBy(defaultPadding),
+                        ) {
+                            Column {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(defaultPadding),
+                                ) {
+                                    Text(
+                                        text = "Location service",
+                                        style = MaterialTheme.typography.titleMedium,
+                                        color = if (!canStartLocationService)
+                                            MaterialTheme.colorScheme.onBackground else Color.Unspecified,
+                                    )
+                                    Switch(
+                                        checked = isLocationServiceRunning,
+                                        onCheckedChange = {
+                                            if (isLocationServiceRunning) {
+                                                stopLocationService(context, preferences)
+                                                isLocationServiceRunning = false
+                                                currentLocation = null
+                                            } else {
+                                                startLocationService(context, preferences)
+                                                isLocationServiceRunning = true
+                                            }
+                                        },
+                                        enabled = canStartLocationService
+                                    )
                                 }
 
-                                Text(
-                                    text = "Settings",
-                                    style = MaterialTheme.typography.titleLarge,
-                                )
+                                if (!canStartLocationService) {
+                                    Text(text = serviceStatus, color = MaterialTheme.colorScheme.error)
+                                }
+                            }
 
-                                Box(
+                            Text(
+                                text = "Settings",
+                                style = MaterialTheme.typography.titleLarge,
+                            )
+
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                            ) {
+                                ElevatedCard(
+                                    elevation = CardDefaults.cardElevation(
+                                        defaultElevation = 6.dp
+                                    ),
                                     modifier = Modifier
                                         .fillMaxWidth()
                                 ) {
-                                    ElevatedCard(
-                                        elevation = CardDefaults.cardElevation(
-                                            defaultElevation = 6.dp
-                                        ),
+                                    Column(
                                         modifier = Modifier
                                             .fillMaxWidth()
+                                            .padding(defaultPadding)
                                     ) {
-                                        Column(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .padding(defaultPadding)
-                                        ) {
-                                            Text(
-                                                text = "Interval between uploads",
-                                            )
-                                            var sliderPosition by remember { mutableFloatStateOf(30f) }
-                                            if (preferences.getLocationUpdatesInterval() != -1) {
-                                                sliderPosition = preferences.getLocationUpdatesInterval().toFloat()
-                                            } else {
-                                                preferences.createLocationUpdatesInterval(sliderPosition.toInt())
-                                            }
-                                            Slider(
-                                                value = sliderPosition,
-                                                onValueChange = {
-                                                    sliderPosition = it
-                                                    preferences.createLocationUpdatesInterval(it.toInt())
-                                                },
-                                                colors = SliderDefaults.colors(
-                                                    thumbColor = MaterialTheme.colorScheme.secondary,
-                                                    activeTrackColor = MaterialTheme.colorScheme.secondary,
-                                                    inactiveTickColor = MaterialTheme.colorScheme.secondaryContainer,
-                                                ),
-                                                steps = 3,
-                                                valueRange = 1f..60f,
-                                                enabled = !isLocationServiceRunning
-                                            )
-                                            Text(
-                                                text = "${sliderPosition.toInt()} ${
-                                                    if (sliderPosition > 1) "minutes"
-                                                    else "minute"
-                                                }"
-                                            )
+                                        Text(
+                                            text = "Interval between uploads",
+                                        )
+                                        var sliderPosition by remember { mutableFloatStateOf(30f) }
+                                        if (preferences.getLocationUpdatesInterval() != -1) {
+                                            sliderPosition = preferences.getLocationUpdatesInterval().toFloat()
+                                        } else {
+                                            preferences.createLocationUpdatesInterval(sliderPosition.toInt())
                                         }
+                                        Slider(
+                                            value = sliderPosition,
+                                            onValueChange = {
+                                                sliderPosition = it
+                                                preferences.createLocationUpdatesInterval(it.toInt())
+                                            },
+                                            colors = SliderDefaults.colors(
+                                                thumbColor = MaterialTheme.colorScheme.secondary,
+                                                activeTrackColor = MaterialTheme.colorScheme.secondary,
+                                                inactiveTickColor = MaterialTheme.colorScheme.secondaryContainer,
+                                            ),
+                                            steps = 3,
+                                            valueRange = 1f..60f,
+                                            enabled = !isLocationServiceRunning
+                                        )
+                                        Text(
+                                            text = "${sliderPosition.toInt()} ${
+                                                if (sliderPosition > 1) "minutes"
+                                                else "minute"
+                                            }"
+                                        )
                                     }
                                 }
-
-                                Permissions()
-
-                                DeviceSelector(
-                                    devices = devices,
-                                    errorMessage = devicesErrorMessage,
-                                    selectedDeviceId = selectedDeviceId,
-                                    showBottomSheet = showBottomSheet,
-                                    onDismissBottomSheet = { showBottomSheet = false }
-                                ) { id ->
-                                    selectedDeviceId = id
-                                }
                             }
-                        }) {
 
-                        val coroutineScope = rememberCoroutineScope()
-                        val cameraState = rememberCameraState()
-                        val variant = if (isSystemInDarkTheme()) "dark" else "light"
-                        MaplibreMap(
-                            baseStyle = BaseStyle.Uri("https://tiles.immich.cloud/v1/style/$variant.json"),
-                            modifier = Modifier.fillMaxSize(),
-                            options = MapOptions(
-                                ornamentOptions = OrnamentOptions.AllDisabled,
-                                gestureOptions = GestureOptions(isRotateEnabled = false, isTiltEnabled = false),
-                            ),
-                            cameraState = cameraState,
-                        ) {
-                            val allPositions = mutableListOf<Position>()
+                            Permissions()
 
-                            // Display current location
-                            val longitude = currentLocation?.longitude
-                            val latitude = currentLocation?.latitude
-                            val accuracy = currentLocation?.accuracy?.toDouble()
-                            val name = devices.find { it.id == selectedDeviceId }?.name
+                            DeviceSelector(
+                                devices = devices,
+                                errorMessage = devicesErrorMessage,
+                                selectedDeviceId = selectedDeviceId,
+                                showBottomSheet = showBottomSheet,
+                                onDismissBottomSheet = { showBottomSheet = false }
+                            ) { id ->
+                                selectedDeviceId = id
+                            }
+                        }
+                    }) {
 
-                            if (longitude != null && latitude != null && accuracy != null && name != null) {
-                                allPositions.add(Position(longitude, latitude))
+                    val coroutineScope = rememberCoroutineScope()
+                    val cameraState = rememberCameraState()
+                    val variant = if (isSystemInDarkTheme()) "dark" else "light"
+                    MaplibreMap(
+                        baseStyle = BaseStyle.Uri("https://tiles.immich.cloud/v1/style/$variant.json"),
+                        modifier = Modifier.fillMaxSize(),
+                        options = MapOptions(
+                            ornamentOptions = OrnamentOptions.AllDisabled,
+                            gestureOptions = GestureOptions(isRotateEnabled = false, isTiltEnabled = false),
+                        ),
+                        cameraState = cameraState,
+                    ) {
+                        val allPositions = mutableListOf<Position>()
+
+                        // Display current location
+                        val longitude = currentLocation?.longitude
+                        val latitude = currentLocation?.latitude
+                        val accuracy = currentLocation?.accuracy?.toDouble()
+                        val name = devices.find { it.id == selectedDeviceId }?.name
+
+                        if (longitude != null && latitude != null && accuracy != null && name != null) {
+                            allPositions.add(Position(longitude, latitude))
+
+                            val markerSource = rememberGeoJsonSource(
+                                data = GeoJsonData.Features(
+                                    Point(
+                                        Position(longitude, latitude),
+                                    )
+                                )
+                            )
+
+                            LocationPuck(
+                                id = 0,
+                                source = markerSource,
+                                accuracy = accuracy,
+                                metersPerDp = cameraState.metersPerDpAtTarget,
+                                color = MaterialTheme.colorScheme.secondary,
+                                onClick = {
+                                    coroutineScope.launch {
+                                        cameraState.animateTo(
+                                            CameraPosition(
+                                                target = Position(
+                                                    longitude,
+                                                    latitude,
+                                                ),
+                                                zoom = 15.0,
+                                            )
+                                        )
+                                    }
+                                },
+                            )
+                        }
+
+                        // Display the location of every other device
+                        for (device in devices) {
+                            val location = device.latestLocation
+
+                            if (isLocationServiceRunning && selectedDeviceId == device.id) continue
+
+                            if (location != null) {
+                                allPositions.add(Position(location.longitude, location.latitude))
 
                                 val markerSource = rememberGeoJsonSource(
                                     data = GeoJsonData.Features(
                                         Point(
-                                            Position(longitude, latitude),
+                                            Position(
+                                                location.longitude,
+                                                location.latitude,
+                                            )
                                         )
-                                    )
+                                    ),
                                 )
 
                                 LocationPuck(
-                                    id = 0,
+                                    id = location.id,
                                     source = markerSource,
-                                    accuracy = accuracy,
+                                    accuracy = location.accuracy.toDouble(),
                                     metersPerDp = cameraState.metersPerDpAtTarget,
-                                    color = MaterialTheme.colorScheme.secondary,
+                                    color = stringToColor(device.name),
+                                    name = device.name,
                                     onClick = {
                                         coroutineScope.launch {
                                             cameraState.animateTo(
                                                 CameraPosition(
                                                     target = Position(
-                                                        longitude,
-                                                        latitude,
+                                                        location.longitude,
+                                                        location.latitude,
                                                     ),
                                                     zoom = 15.0,
                                                 )
                                             )
                                         }
                                     },
+                                    onLongClick = {
+                                        val uri =
+                                            "geo:${location.latitude},${location.longitude}?q=${location.latitude},${location.longitude}".toUri()
+                                        val intent = Intent(Intent.ACTION_VIEW, uri)
+                                        startActivity(intent)
+                                    },
                                 )
                             }
+                        }
 
-                            // Display the location of every other device
-                            for (device in devices) {
-                                val location = device.latestLocation
-
-                                if (isLocationServiceRunning && selectedDeviceId == device.id) continue
-
-                                if (location != null) {
-                                    allPositions.add(Position(location.longitude, location.latitude))
-
-                                    val markerSource = rememberGeoJsonSource(
-                                        data = GeoJsonData.Features(
-                                            Point(
-                                                Position(
-                                                    location.longitude,
-                                                    location.latitude,
-                                                )
-                                            )
-                                        ),
-                                    )
-
-                                    LocationPuck(
-                                        id = location.id,
-                                        source = markerSource,
-                                        accuracy = location.accuracy.toDouble(),
-                                        metersPerDp = cameraState.metersPerDpAtTarget,
-                                        color = stringToColor(device.name),
-                                        name = device.name,
-                                        onClick = {
-                                            coroutineScope.launch {
-                                                cameraState.animateTo(
-                                                    CameraPosition(
-                                                        target = Position(
-                                                            location.longitude,
-                                                            location.latitude,
-                                                        ),
-                                                        zoom = 15.0,
-                                                    )
-                                                )
-                                            }
-                                        },
-                                        onLongClick = {
-                                            val uri =
-                                                "geo:${location.latitude},${location.longitude}?q=${location.latitude},${location.longitude}".toUri()
-                                            val intent = Intent(Intent.ACTION_VIEW, uri)
-                                            startActivity(intent)
-                                        },
-                                    )
-                                }
-                            }
-
-                            LaunchedEffect(allPositions) {
-                                if (allPositions.isNotEmpty()) {
-                                    val maxLongitude = allPositions.maxOf { it.longitude }
-                                    val minLongitude = allPositions.minOf { it.longitude }
-                                    val maxLatitude = allPositions.maxOf { it.latitude }
-                                    val minLatitude = allPositions.minOf { it.latitude }
-                                    cameraState.animateTo(
-                                        boundingBox = BoundingBox(
-                                            west = minLongitude,
-                                            north = maxLatitude,
-                                            east = maxLongitude,
-                                            south = minLatitude,
-                                        ),
-                                        padding = PaddingValues(128.dp),
-                                    )
-                                }
+                        LaunchedEffect(allPositions) {
+                            if (allPositions.isNotEmpty()) {
+                                val maxLongitude = allPositions.maxOf { it.longitude }
+                                val minLongitude = allPositions.minOf { it.longitude }
+                                val maxLatitude = allPositions.maxOf { it.latitude }
+                                val minLatitude = allPositions.minOf { it.latitude }
+                                cameraState.animateTo(
+                                    boundingBox = BoundingBox(
+                                        west = minLongitude,
+                                        north = maxLatitude,
+                                        east = maxLongitude,
+                                        south = minLatitude,
+                                    ),
+                                    padding = PaddingValues(128.dp),
+                                )
                             }
                         }
                     }
