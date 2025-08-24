@@ -173,7 +173,7 @@ fun LoginForm() {
                     }
             )
 
-            if (showDialogButton) {
+            if (showDialogButton && servers.isNotEmpty()) {
                 Button(
                     modifier = Modifier.padding(bottom = 8.dp),
                     onClick = {
