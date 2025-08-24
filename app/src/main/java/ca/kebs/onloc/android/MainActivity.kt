@@ -1,19 +1,27 @@
 package ca.kebs.onloc.android
 
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.util.Patterns
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.annotation.RequiresExtension
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.AbsoluteRoundedCornerShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -21,21 +29,29 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import ca.kebs.onloc.android.api.AuthApiService
 import ca.kebs.onloc.android.ui.theme.OnlocAndroidTheme
 
 class MainActivity : ComponentActivity() {
+    @RequiresExtension(extension = Build.VERSION_CODES.TIRAMISU, version = 7)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -89,10 +105,12 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+@RequiresExtension(extension = Build.VERSION_CODES.TIRAMISU, version = 7)
 @Composable
 fun LoginForm() {
     val context = LocalContext.current
     val preferences = Preferences(context)
+    val lifecycleOwner = LocalLifecycleOwner.current
 
     var storedIp = preferences.getIP()
     if (storedIp == null)
@@ -105,6 +123,25 @@ fun LoginForm() {
     var password by rememberSaveable { mutableStateOf("") }
     var isPasswordError by rememberSaveable { mutableStateOf("") }
     var error by rememberSaveable { mutableStateOf("") }
+
+    var showDialogButton by rememberSaveable { mutableStateOf(false) }
+    var showFoundServers by rememberSaveable { mutableStateOf(false) }
+
+    val servers = remember { mutableStateListOf<Pair<String, Int>>() }
+    val serverDiscovery = remember {
+        ServerDiscovery(context) { service ->
+            if (lifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {
+                servers.add(service)
+            }
+        }
+    }
+
+    DisposableEffect(Unit) {
+        serverDiscovery.startDiscovery()
+        onDispose {
+            serverDiscovery.stopDiscovery()
+        }
+    }
 
     Box(
         modifier = Modifier.imePadding(),
@@ -129,8 +166,94 @@ fun LoginForm() {
                         )
                     }
                 },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .onFocusChanged { focusState ->
+                        showDialogButton = focusState.isFocused
+                    }
             )
+
+            if (showDialogButton) {
+                Button(
+                    modifier = Modifier.padding(bottom = 8.dp),
+                    onClick = {
+                        showFoundServers = true
+                    }
+                ) {
+                    Text(text = "Show found servers")
+                }
+            }
+
+            if (showFoundServers) {
+                Dialog(
+                    onDismissRequest = { showFoundServers = false },
+                ) {
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        shape = RoundedCornerShape(16.dp),
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier.fillMaxWidth(),
+                            ) {
+                                IconButton(
+                                    onClick = { showFoundServers = false },
+                                    modifier = Modifier.align(Alignment.CenterEnd)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Filled.Close,
+                                        contentDescription = "Close",
+                                        tint = MaterialTheme.colorScheme.onSurface
+                                    )
+                                }
+
+                                Text(
+                                    text = "Found Servers",
+                                    modifier = Modifier.align(Alignment.Center),
+                                    textAlign = TextAlign.Center,
+                                    style = MaterialTheme.typography.titleLarge,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                            }
+
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.spacedBy(8.dp),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(top = 64.dp)
+                            ) {
+                                for (server in servers) {
+                                    ElevatedCard(
+                                        elevation = CardDefaults.cardElevation(2.dp),
+                                        colors = CardDefaults.cardColors(MaterialTheme.colorScheme.surfaceVariant),
+                                        shape = AbsoluteRoundedCornerShape(16.dp),
+                                        onClick = {
+                                            ip = "http://${server.first}:${server.second}"
+                                            showFoundServers = false
+                                        }
+                                    ) {
+                                        Box(
+                                            modifier = Modifier.padding(16.dp),
+                                        ) {
+                                            Text(
+                                                "http://${server.first}:${server.second}",
+                                                style = MaterialTheme.typography.bodyLarge,
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
 
             OutlinedTextField(
                 value = username,
@@ -218,10 +341,10 @@ fun PasswordTextField(
         label = { Text("Password") },
         singleLine = true,
         visualTransformation =
-        if (passwordVisible)
-            VisualTransformation.None
-        else
-            PasswordVisualTransformation(),
+            if (passwordVisible)
+                VisualTransformation.None
+            else
+                PasswordVisualTransformation(),
         trailingIcon = {
             val image = if (passwordVisible)
                 Icons.Default.Visibility

@@ -266,8 +266,8 @@ class LocationActivity : ComponentActivity() {
                                     elevation = CardDefaults.cardElevation(
                                         defaultElevation = 6.dp
                                     ),
-                                    modifier = Modifier
-                                        .fillMaxWidth()
+                                    modifier = Modifier.fillMaxWidth(),
+                                    colors = CardDefaults.cardColors(MaterialTheme.colorScheme.surfaceContainer)
                                 ) {
                                     Column(
                                         modifier = Modifier
