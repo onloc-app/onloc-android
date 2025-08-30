@@ -30,6 +30,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.FitScreen
 import androidx.compose.material.icons.outlined.GpsFixed
 import androidx.compose.material.icons.outlined.GpsNotFixed
 import androidx.compose.material.icons.outlined.GpsOff
@@ -196,6 +197,26 @@ class LocationActivity : ComponentActivity() {
                 grabCurrentLocation()
             }
 
+            fun fitMapBounds(positions: List<Position>) {
+                if (positions.isNotEmpty()) {
+                    val maxLongitude = positions.maxOf { it.longitude }
+                    val minLongitude = positions.minOf { it.longitude }
+                    val maxLatitude = positions.maxOf { it.latitude }
+                    val minLatitude = positions.minOf { it.latitude }
+                    coroutineScope.launch {
+                        cameraState.animateTo(
+                            boundingBox = BoundingBox(
+                                west = minLongitude,
+                                north = maxLatitude,
+                                east = maxLongitude,
+                                south = minLatitude,
+                            ),
+                            padding = PaddingValues(128.dp),
+                        )
+                    }
+                }
+            }
+
             OnlocAndroidTheme {
                 val defaultPadding = 16.dp
 
@@ -350,6 +371,7 @@ class LocationActivity : ComponentActivity() {
                         }
                     }) {
 
+                    val allPositions = mutableListOf<Position>()
                     val variant = if (isSystemInDarkTheme()) "dark" else "light"
                     MaplibreMap(
                         baseStyle = BaseStyle.Uri("https://tiles.immich.cloud/v1/style/$variant.json"),
@@ -361,8 +383,6 @@ class LocationActivity : ComponentActivity() {
                         cameraState = cameraState,
                         styleState = styleState,
                     ) {
-                        val allPositions = mutableListOf<Position>()
-
                         // Display current location
                         val longitude = currentLocation?.longitude
                         val latitude = currentLocation?.latitude
@@ -453,21 +473,7 @@ class LocationActivity : ComponentActivity() {
                         }
 
                         LaunchedEffect(allPositions) {
-                            if (allPositions.isNotEmpty()) {
-                                val maxLongitude = allPositions.maxOf { it.longitude }
-                                val minLongitude = allPositions.minOf { it.longitude }
-                                val maxLatitude = allPositions.maxOf { it.latitude }
-                                val minLatitude = allPositions.minOf { it.latitude }
-                                cameraState.animateTo(
-                                    boundingBox = BoundingBox(
-                                        west = minLongitude,
-                                        north = maxLatitude,
-                                        east = maxLongitude,
-                                        south = minLatitude,
-                                    ),
-                                    padding = PaddingValues(128.dp),
-                                )
-                            }
+                            fitMapBounds(allPositions)
                         }
                     }
 
@@ -519,7 +525,7 @@ class LocationActivity : ComponentActivity() {
                             enabled = notificationsGranted
                         ) {
                             var icon = Icons.Outlined.GpsOff
-                            if (notificationsGranted && currentLocation != null) {
+                            if (notificationsGranted) {
                                 icon = if (onCurrentLocation) {
                                     Icons.Outlined.GpsFixed
                                 } else {
@@ -581,6 +587,20 @@ class LocationActivity : ComponentActivity() {
                                 Icon(
                                     imageVector = Icons.Outlined.Remove,
                                     contentDescription = "Zoom out",
+                                )
+                            }
+                            ElevatedButton(
+                                onClick = {
+                                    fitMapBounds(allPositions)
+                                },
+                                modifier = Modifier
+                                    .height(48.dp)
+                                    .width(48.dp),
+                                contentPadding = PaddingValues(0.dp),
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Outlined.FitScreen,
+                                    contentDescription = "Fit map to bounds",
                                 )
                             }
                         }
