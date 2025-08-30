@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -28,10 +29,16 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.outlined.AccountCircle
+import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.GpsFixed
+import androidx.compose.material.icons.outlined.GpsNotFixed
+import androidx.compose.material.icons.outlined.GpsOff
+import androidx.compose.material.icons.outlined.Remove
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -92,6 +99,7 @@ import ca.kebs.onloc.android.components.MapAttribution
 import ca.kebs.onloc.android.permissions.PostNotificationPermission
 import ca.kebs.onloc.android.services.ServiceManager
 import dev.sargunv.maplibrecompose.compose.rememberStyleState
+import dev.sargunv.maplibrecompose.core.CameraMoveReason
 import dev.sargunv.maplibrecompose.core.GestureOptions
 import dev.sargunv.maplibrecompose.material3.controls.DisappearingCompassButton
 import dev.sargunv.maplibrecompose.material3.controls.ExpandingAttributionButton
@@ -110,6 +118,7 @@ class LocationActivity : ComponentActivity() {
             val locationManager = context.getSystemService(LOCATION_SERVICE) as LocationManager
 
             var showBottomSheet by remember { mutableStateOf(false) }
+            var onCurrentLocation by remember { mutableStateOf(false) }
 
             var devices by remember { mutableStateOf<List<Device>>(emptyList()) }
             var devicesErrorMessage by remember { mutableStateOf("") }
@@ -146,6 +155,18 @@ class LocationActivity : ComponentActivity() {
                 fetchDevices()
             }
 
+            // Map components
+            val coroutineScope = rememberCoroutineScope()
+            val cameraState = rememberCameraState()
+            val styleState = rememberStyleState()
+
+            // On map move
+            LaunchedEffect(cameraState.position) {
+                if (cameraState.moveReason == CameraMoveReason.GESTURE) {
+                    onCurrentLocation = false
+                }
+            }
+
             var currentLocation by remember { mutableStateOf<Location?>(null) }
             LocationCallbackManager.callback = { location ->
                 if (ip != null && accessToken != null && location != null && selectedDeviceId != -1) {
@@ -157,7 +178,7 @@ class LocationActivity : ComponentActivity() {
             var notificationsGranted by remember { mutableStateOf(PostNotificationPermission().isGranted(context)) }
             var locationGranted by remember { mutableStateOf(LocationPermission().isGranted(context)) }
 
-            LaunchedEffect(Unit) {
+            fun grabCurrentLocation() {
                 if (notificationsGranted) {
                     val provider = LocationManager.FUSED_PROVIDER
                     val location = locationManager.getLastKnownLocation(provider)
@@ -165,10 +186,14 @@ class LocationActivity : ComponentActivity() {
                         currentLocation = Location.fromAndroidLocation(
                             id = 0,
                             deviceId = 0,
-                            location
+                            location = location,
                         )
                     }
                 }
+            }
+
+            LaunchedEffect(Unit) {
+                grabCurrentLocation()
             }
 
             OnlocAndroidTheme {
@@ -325,9 +350,6 @@ class LocationActivity : ComponentActivity() {
                         }
                     }) {
 
-                    val coroutineScope = rememberCoroutineScope()
-                    val cameraState = rememberCameraState()
-                    val styleState = rememberStyleState()
                     val variant = if (isSystemInDarkTheme()) "dark" else "light"
                     MaplibreMap(
                         baseStyle = BaseStyle.Uri("https://tiles.immich.cloud/v1/style/$variant.json"),
@@ -372,7 +394,7 @@ class LocationActivity : ComponentActivity() {
                                                     longitude,
                                                     latitude,
                                                 ),
-                                                zoom = 15.0,
+                                                zoom = 16.0,
                                             )
                                         )
                                     }
@@ -415,7 +437,7 @@ class LocationActivity : ComponentActivity() {
                                                         location.longitude,
                                                         location.latitude,
                                                     ),
-                                                    zoom = 15.0,
+                                                    zoom = 16.0,
                                                 )
                                             )
                                         }
@@ -472,6 +494,96 @@ class LocationActivity : ComponentActivity() {
                             contentAlignment = Alignment.BottomEnd,
                             expandedContent = { MapAttribution() },
                         )
+                        ElevatedButton(
+                            onClick = {
+                                grabCurrentLocation()
+                                if (currentLocation != null) {
+                                    val cameraPosition = CameraPosition(
+                                        target = Position(
+                                            currentLocation!!.longitude,
+                                            currentLocation!!.latitude
+                                        ),
+                                        zoom = 16.0,
+                                    )
+                                    coroutineScope.launch {
+                                        cameraState.animateTo(finalPosition = cameraPosition)
+                                    }
+                                    onCurrentLocation = true
+                                }
+                            },
+                            modifier = Modifier
+                                .align(Alignment.BottomStart)
+                                .height(48.dp)
+                                .width(48.dp),
+                            contentPadding = PaddingValues(0.dp),
+                            enabled = notificationsGranted
+                        ) {
+                            var icon = Icons.Outlined.GpsOff
+                            if (notificationsGranted && currentLocation != null) {
+                                icon = if (onCurrentLocation) {
+                                    Icons.Outlined.GpsFixed
+                                } else {
+                                    Icons.Outlined.GpsNotFixed
+                                }
+                            }
+                            Icon(
+                                imageVector = icon,
+                                contentDescription = "Go to current location",
+                            )
+                        }
+                        Column(
+                            modifier = Modifier.align(Alignment.CenterStart),
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            ElevatedButton(
+                                onClick = {
+                                    val current = cameraState.position
+                                    val newPosition = CameraPosition(
+                                        target = current.target,
+                                        zoom = current.zoom + 1.0,
+                                        tilt = current.tilt,
+                                        bearing = current.bearing,
+                                    )
+
+                                    coroutineScope.launch {
+                                        cameraState.animateTo(newPosition)
+                                    }
+                                },
+                                modifier = Modifier
+                                    .height(48.dp)
+                                    .width(48.dp),
+                                contentPadding = PaddingValues(0.dp),
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Outlined.Add,
+                                    contentDescription = "Zoom in",
+                                )
+                            }
+                            ElevatedButton(
+                                onClick = {
+                                    val current = cameraState.position
+                                    val newPosition = CameraPosition(
+                                        target = current.target,
+                                        zoom = current.zoom - 1.0,
+                                        tilt = current.tilt,
+                                        bearing = current.bearing,
+                                    )
+
+                                    coroutineScope.launch {
+                                        cameraState.animateTo(newPosition)
+                                    }
+                                },
+                                modifier = Modifier
+                                    .height(48.dp)
+                                    .width(48.dp),
+                                contentPadding = PaddingValues(0.dp),
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Outlined.Remove,
+                                    contentDescription = "Zoom out",
+                                )
+                            }
+                        }
                     }
                 }
             }
