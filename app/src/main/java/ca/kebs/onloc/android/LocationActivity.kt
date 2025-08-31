@@ -35,6 +35,7 @@ import androidx.compose.material.icons.outlined.GpsFixed
 import androidx.compose.material.icons.outlined.GpsNotFixed
 import androidx.compose.material.icons.outlined.GpsOff
 import androidx.compose.material.icons.outlined.Remove
+import androidx.compose.material.icons.outlined.Route
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -120,6 +121,7 @@ class LocationActivity : ComponentActivity() {
 
             var showBottomSheet by remember { mutableStateOf(false) }
             var onCurrentLocation by remember { mutableStateOf(false) }
+            var selectedDevice by remember { mutableStateOf<Device?>(null) }
 
             var devices by remember { mutableStateOf<List<Device>>(emptyList()) }
             var devicesErrorMessage by remember { mutableStateOf("") }
@@ -165,6 +167,7 @@ class LocationActivity : ComponentActivity() {
             LaunchedEffect(cameraState.position) {
                 if (cameraState.moveReason == CameraMoveReason.GESTURE) {
                     onCurrentLocation = false
+                    selectedDevice = null
                 }
             }
 
@@ -215,6 +218,13 @@ class LocationActivity : ComponentActivity() {
                         )
                     }
                 }
+            }
+
+            fun openNavigationApp(location: Location) {
+                val uri =
+                    "geo:${location.latitude},${location.longitude}?q=${location.latitude},${location.longitude}".toUri()
+                val intent = Intent(Intent.ACTION_VIEW, uri)
+                startActivity(intent)
             }
 
             OnlocAndroidTheme {
@@ -461,12 +471,10 @@ class LocationActivity : ComponentActivity() {
                                                 )
                                             )
                                         }
+                                        selectedDevice = device
                                     },
                                     onLongClick = {
-                                        val uri =
-                                            "geo:${location.latitude},${location.longitude}?q=${location.latitude},${location.longitude}".toUri()
-                                        val intent = Intent(Intent.ACTION_VIEW, uri)
-                                        startActivity(intent)
+                                        openNavigationApp(location)
                                     },
                                 )
                             }
@@ -500,6 +508,8 @@ class LocationActivity : ComponentActivity() {
                             contentAlignment = Alignment.BottomEnd,
                             expandedContent = { MapAttribution() },
                         )
+
+                        // Bottom start controls
                         ElevatedButton(
                             onClick = {
                                 grabCurrentLocation()
@@ -537,6 +547,8 @@ class LocationActivity : ComponentActivity() {
                                 contentDescription = "Go to current location",
                             )
                         }
+
+                        // Center start controls
                         Column(
                             modifier = Modifier.align(Alignment.CenterStart),
                             verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -601,6 +613,25 @@ class LocationActivity : ComponentActivity() {
                                 Icon(
                                     imageVector = Icons.Outlined.FitScreen,
                                     contentDescription = "Fit map to bounds",
+                                )
+                            }
+                        }
+
+                        // Center end controls
+                        selectedDevice?.latestLocation?.let {
+                            ElevatedButton(
+                                onClick = {
+                                    openNavigationApp(it)
+                                },
+                                modifier = Modifier
+                                    .align(Alignment.CenterEnd)
+                                    .height(48.dp)
+                                    .width(48.dp),
+                                contentPadding = PaddingValues(0.dp),
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Outlined.Route,
+                                    contentDescription = "Open navigation app",
                                 )
                             }
                         }
