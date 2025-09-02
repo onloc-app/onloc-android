@@ -1,4 +1,4 @@
-package ca.kebs.onloc.android.components
+package ca.kebs.onloc.android.components.map
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row

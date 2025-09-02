@@ -13,22 +13,14 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.selection.selectable
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.FitScreen
 import androidx.compose.material.icons.outlined.GpsFixed
@@ -37,17 +29,12 @@ import androidx.compose.material.icons.outlined.GpsOff
 import androidx.compose.material.icons.outlined.Remove
 import androidx.compose.material.icons.outlined.Route
 import androidx.compose.material3.BottomSheetScaffold
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Switch
@@ -55,8 +42,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.rememberModalBottomSheetState
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -69,11 +54,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
-import ca.kebs.onloc.android.api.AuthApiService
 import ca.kebs.onloc.android.api.DevicesApiService
 import ca.kebs.onloc.android.components.Permissions
 import ca.kebs.onloc.android.helpers.stringToColor
@@ -93,11 +74,12 @@ import dev.sargunv.maplibrecompose.core.source.GeoJsonData
 import io.github.dellisd.spatialk.geojson.Point
 import io.github.dellisd.spatialk.geojson.Position
 import kotlinx.coroutines.launch
-import org.json.JSONObject
 import kotlin.jvm.java
 import androidx.core.net.toUri
-import ca.kebs.onloc.android.components.LocationPuck
-import ca.kebs.onloc.android.components.MapAttribution
+import ca.kebs.onloc.android.components.Avatar
+import ca.kebs.onloc.android.components.devices.DeviceSelector
+import ca.kebs.onloc.android.components.map.LocationPuck
+import ca.kebs.onloc.android.components.map.MapAttribution
 import ca.kebs.onloc.android.permissions.PostNotificationPermission
 import ca.kebs.onloc.android.services.ServiceManager
 import dev.sargunv.maplibrecompose.compose.rememberStyleState
@@ -658,220 +640,5 @@ class LocationActivity : ComponentActivity() {
                 }
             }
         }
-    }
-}
-
-@Composable
-fun Avatar(modifier: Modifier = Modifier) {
-    var accountDialogOpened by remember { mutableStateOf(false) }
-
-    val context = LocalContext.current
-    val appPreferences = AppPreferences(context)
-    val userPreferences = UserPreferences(context)
-
-    val ip = appPreferences.getIP()
-    val user = userPreferences.getUserCredentials().user
-
-    IconButton(
-        onClick = { accountDialogOpened = true },
-        modifier = modifier
-    ) {
-        Icon(
-            Icons.Outlined.AccountCircle,
-            contentDescription = "Account"
-        )
-        when {
-            accountDialogOpened -> {
-                Dialog(
-                    onDismissRequest = { accountDialogOpened = false },
-                ) {
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        shape = RoundedCornerShape(16.dp),
-                    ) {
-                        if (user != null) {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(16.dp)
-                            ) {
-                                Box(
-                                    modifier = Modifier.fillMaxWidth()
-                                ) {
-                                    IconButton(
-                                        onClick = { accountDialogOpened = false },
-                                        modifier = Modifier.align(Alignment.CenterEnd)
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Filled.Close,
-                                            contentDescription = "Close",
-                                            tint = MaterialTheme.colorScheme.onSurface
-                                        )
-                                    }
-
-                                    Text(
-                                        text = "Account",
-                                        modifier = Modifier.align(Alignment.Center),
-                                        textAlign = TextAlign.Center,
-                                        style = MaterialTheme.typography.titleLarge,
-                                        color = MaterialTheme.colorScheme.primary
-                                    )
-                                }
-
-                                Column(
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                    verticalArrangement = Arrangement.spacedBy(32.dp),
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(top = 64.dp)
-                                ) {
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                                    ) {
-                                        Icon(
-                                            Icons.Outlined.AccountCircle,
-                                            contentDescription = "Avatar",
-                                            modifier = Modifier.size(48.dp)
-                                        )
-
-                                        Text(
-                                            text = user.username,
-                                            style = MaterialTheme.typography.titleLarge
-                                        )
-                                    }
-
-                                    Button(
-                                        onClick = {
-                                            ServiceManager.stopLocationService(context)
-                                            ServiceManager.stopRingerWebSocketService(context)
-
-                                            val accessToken = userPreferences.getUserCredentials().accessToken
-                                            val refreshToken = userPreferences.getUserCredentials().refreshToken
-                                            if (ip != null && accessToken != null && refreshToken != null) {
-                                                val authApiService = AuthApiService(context, ip)
-                                                authApiService.logout(accessToken, refreshToken)
-                                            }
-
-                                            userPreferences.deleteUserCredentials()
-                                            appPreferences.deleteDeviceId()
-
-                                            val intent = Intent(context, MainActivity::class.java)
-                                            intent.flags =
-                                                Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                                            context.startActivity(intent)
-                                        }
-                                    ) {
-                                        Text("Logout")
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun DeviceSelector(
-    devices: List<Device>,
-    errorMessage: String,
-    selectedDeviceId: Int,
-    showBottomSheet: Boolean,
-    onDismissBottomSheet: () -> Unit,
-    onDeviceSelect: (id: Int) -> Unit
-) {
-    val sheetState = rememberModalBottomSheetState(
-        skipPartiallyExpanded = false,
-    )
-
-    if (showBottomSheet) {
-        ModalBottomSheet(
-            modifier = Modifier.fillMaxHeight(),
-            sheetState = sheetState,
-            onDismissRequest = onDismissBottomSheet
-        ) {
-            if (devices.isNotEmpty()) {
-                LazyColumn {
-                    items(devices) { device ->
-                        DeviceRow(
-                            device = device,
-                            selected = device.id == selectedDeviceId,
-                            onSelect = {
-                                onDeviceSelect(device.id)
-                                onDismissBottomSheet()
-                            },
-                        )
-                    }
-                }
-            } else {
-                if (errorMessage != "") {
-                    Text(
-                        text = errorMessage,
-                        color = MaterialTheme.colorScheme.error,
-                        modifier = Modifier.padding(16.dp)
-                    )
-                } else {
-                    Text(
-                        text = "No device found",
-                        modifier = Modifier.padding(16.dp)
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun DeviceRow(
-    device: Device,
-    selected: Boolean,
-    onSelect: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    val appPreferences = AppPreferences(LocalContext.current)
-
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(56.dp)
-            .selectable(
-                selected = selected,
-                onClick = {
-                    val lastDeviceId = device.id
-
-                    appPreferences.createDeviceId(device.id)
-
-                    val unregisterPayload = JSONObject().apply {
-                        put("deviceId", lastDeviceId)
-                    }
-                    SocketManager.emit("unregister-device", unregisterPayload)
-
-                    val registerPayload = JSONObject().apply {
-                        put("deviceId", device.id)
-                    }
-                    SocketManager.emit("register-device", registerPayload)
-
-                    onSelect()
-                },
-                role = Role.RadioButton
-            )
-            .padding(horizontal = 16.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        RadioButton(
-            selected = selected,
-            onClick = null
-        )
-        Text(
-            text = device.name,
-            style = MaterialTheme.typography.bodyLarge,
-            modifier = Modifier.padding(start = 16.dp)
-        )
     }
 }
