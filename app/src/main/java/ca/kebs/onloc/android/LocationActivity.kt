@@ -27,6 +27,7 @@ import androidx.compose.material.icons.outlined.GpsFixed
 import androidx.compose.material.icons.outlined.GpsNotFixed
 import androidx.compose.material.icons.outlined.GpsOff
 import androidx.compose.material.icons.outlined.Remove
+import androidx.compose.material.icons.outlined.RingVolume
 import androidx.compose.material.icons.outlined.Route
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.CardDefaults
@@ -89,6 +90,7 @@ import dev.sargunv.maplibrecompose.material3.controls.DisappearingCompassButton
 import dev.sargunv.maplibrecompose.material3.controls.ExpandingAttributionButton
 import dev.sargunv.maplibrecompose.material3.controls.ScaleBar
 import io.github.dellisd.spatialk.geojson.BoundingBox
+import org.json.JSONObject
 
 const val DEFAULT_SLIDER_POSITION = 15f
 
@@ -619,21 +621,47 @@ class LocationActivity : ComponentActivity() {
                         }
 
                         // Center end controls
-                        selectedDevice?.latestLocation?.let {
-                            ElevatedButton(
-                                onClick = {
-                                    openNavigationApp(it)
-                                },
-                                modifier = Modifier
-                                    .align(Alignment.CenterEnd)
-                                    .height(48.dp)
-                                    .width(48.dp),
-                                contentPadding = PaddingValues(0.dp),
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Outlined.Route,
-                                    contentDescription = "Open navigation app",
-                                )
+                        Column(
+                            modifier = Modifier.align(Alignment.CenterEnd),
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            selectedDevice?.latestLocation?.let {
+                                ElevatedButton(
+                                    onClick = {
+                                        openNavigationApp(it)
+                                    },
+                                    modifier = Modifier
+                                        .height(48.dp)
+                                        .width(48.dp),
+                                    contentPadding = PaddingValues(0.dp),
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Outlined.Route,
+                                        contentDescription = "Open navigation app",
+                                    )
+                                }
+                            }
+                            if (selectedDevice != null && SocketManager.isConnected()) {
+                                ElevatedButton(
+                                    onClick = {
+                                        val payload = JSONObject().apply {
+                                            put("deviceId", selectedDeviceId)
+                                        }
+                                        SocketManager.emit(
+                                            "ring",
+                                            payload
+                                        )
+                                    },
+                                    modifier = Modifier
+                                        .height(48.dp)
+                                        .width(48.dp),
+                                    contentPadding = PaddingValues(0.dp),
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Outlined.RingVolume,
+                                        contentDescription = "Ring device",
+                                    )
+                                }
                             }
                         }
                     }

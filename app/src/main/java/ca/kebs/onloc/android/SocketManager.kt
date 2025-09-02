@@ -37,4 +37,8 @@ object SocketManager {
     fun on(event: String, listener: (Array<Any>) -> Unit) {
         socket?.on(event, listener)
     }
+
+    fun isConnected(): Boolean {
+        return socket?.connected() == true
+    }
 }
