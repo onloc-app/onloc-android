@@ -8,7 +8,9 @@ import android.os.Build
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 
-class PostNotificationPermission() : Permission() {
+const val NOTIFICATION_REQUEST_CODE = 0
+
+class PostNotificationPermission : Permission() {
     override fun isGranted(context: Context): Boolean {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             ContextCompat.checkSelfPermission(
@@ -20,14 +22,11 @@ class PostNotificationPermission() : Permission() {
 
     }
 
-    val REQUEST_CODE = 0
-
     override fun request(activity: Activity) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             ActivityCompat.requestPermissions(
-                activity, arrayOf(Manifest.permission.POST_NOTIFICATIONS), REQUEST_CODE
+                activity, arrayOf(Manifest.permission.POST_NOTIFICATIONS), NOTIFICATION_REQUEST_CODE
             )
         }
     }
-
 }

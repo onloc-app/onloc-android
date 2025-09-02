@@ -11,9 +11,14 @@ import android.os.IBinder
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import ca.kebs.onloc.android.SocketManager
+import ca.kebs.onloc.android.helpers.getAccessToken
+import ca.kebs.onloc.android.helpers.getIP
+import ca.kebs.onloc.android.helpers.getSelectedDeviceId
 import ca.kebs.onloc.android.services.ServiceStatus.isWebSocketServiceRunning
 import ca.kebs.onloc.android.singletons.RingerState
 import org.json.JSONObject
+
+const val START_RINGER_WEBSOCKET_SERVICE_NOTIFICATION_ID = 2001
 
 object ServiceStatus {
     var isWebSocketServiceRunning = false
@@ -23,18 +28,6 @@ class RingerWebSocketService : Service() {
     private val deviceEncryptedPreferences by lazy {
         createDeviceProtectedStorageContext()
             .getSharedPreferences("device_protected_preferences", MODE_PRIVATE)
-    }
-
-    private fun getIP(): String? {
-        return deviceEncryptedPreferences.getString("ip", null)
-    }
-
-    private fun getAccessToken(): String? {
-        return deviceEncryptedPreferences.getString("accessToken", null)
-    }
-
-    private fun getSelectedDeviceId(): Int {
-        return deviceEncryptedPreferences.getInt("device_id", -1)
     }
 
     override fun onCreate() {
@@ -48,7 +41,7 @@ class RingerWebSocketService : Service() {
             return
         }
         val notification = createNotification()
-        startForeground(2001, notification)
+        startForeground(START_RINGER_WEBSOCKET_SERVICE_NOTIFICATION_ID, notification)
     }
 
     private fun createNotification(): Notification {
@@ -70,9 +63,9 @@ class RingerWebSocketService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         isWebSocketServiceRunning = true
 
-        val ip = getIP()
-        val token = getAccessToken()
-        val deviceId = getSelectedDeviceId()
+        val ip = getIP(deviceEncryptedPreferences)
+        val token = getAccessToken(deviceEncryptedPreferences)
+        val deviceId = getSelectedDeviceId(deviceEncryptedPreferences)
 
         if (deviceId == -1) {
             return START_STICKY

@@ -108,6 +108,8 @@ import dev.sargunv.maplibrecompose.material3.controls.ExpandingAttributionButton
 import dev.sargunv.maplibrecompose.material3.controls.ScaleBar
 import io.github.dellisd.spatialk.geojson.BoundingBox
 
+const val DEFAULT_SLIDER_POSITION = 15f
+
 class LocationActivity : ComponentActivity() {
     @SuppressLint("MissingPermission")
     @OptIn(ExperimentalMaterial3Api::class)
@@ -116,7 +118,9 @@ class LocationActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             val context = LocalContext.current
-            val preferences = Preferences(context)
+            val appPreferences = AppPreferences(context)
+            val servicePreferences = ServicePreferences(context)
+            val userPreferences = UserPreferences(context)
             val locationManager = context.getSystemService(LOCATION_SERVICE) as LocationManager
 
             var showBottomSheet by remember { mutableStateOf(false) }
@@ -125,11 +129,11 @@ class LocationActivity : ComponentActivity() {
 
             var devices by remember { mutableStateOf<List<Device>>(emptyList()) }
             var devicesErrorMessage by remember { mutableStateOf("") }
-            var selectedDeviceId by remember { mutableIntStateOf(preferences.getDeviceId()) }
+            var selectedDeviceId by remember { mutableIntStateOf(appPreferences.getDeviceId()) }
 
-            val credentials = preferences.getUserCredentials()
+            val credentials = userPreferences.getUserCredentials()
             val accessToken = credentials.accessToken
-            val ip = preferences.getIP()
+            val ip = appPreferences.getIP()
 
             fun fetchDevices() {
                 if (accessToken != null && ip != null) {
@@ -151,7 +155,7 @@ class LocationActivity : ComponentActivity() {
 
             // Location service
             var isLocationServiceRunning by remember {
-                mutableStateOf(preferences.getLocationServiceStatus())
+                mutableStateOf(servicePreferences.getLocationServiceStatus())
             }
 
             LaunchedEffect(isLocationServiceRunning) {
@@ -173,13 +177,16 @@ class LocationActivity : ComponentActivity() {
 
             var currentLocation by remember { mutableStateOf<Location?>(null) }
             LocationCallbackManager.callback = { location ->
-                if (ip != null && accessToken != null && location != null && selectedDeviceId != -1) {
+                val canUpdateLocation = ip != null && accessToken != null && location != null && selectedDeviceId != -1
+                if (canUpdateLocation) {
                     val parsedLocation = Location.fromAndroidLocation(0, selectedDeviceId, location)
                     currentLocation = parsedLocation
                 }
             }
 
-            var notificationsGranted by remember { mutableStateOf(PostNotificationPermission().isGranted(context)) }
+            var notificationsGranted by remember {
+                mutableStateOf(PostNotificationPermission().isGranted(context))
+            }
             var locationGranted by remember { mutableStateOf(LocationPermission().isGranted(context)) }
 
             fun grabCurrentLocation() {
@@ -222,7 +229,8 @@ class LocationActivity : ComponentActivity() {
 
             fun openNavigationApp(location: Location) {
                 val uri =
-                    "geo:${location.latitude},${location.longitude}?q=${location.latitude},${location.longitude}".toUri()
+                    "geo:${location.latitude},${location.longitude}?q=${location.latitude},${location.longitude}"
+                        .toUri()
                 val intent = Intent(Intent.ACTION_VIEW, uri)
                 startActivity(intent)
             }
@@ -323,7 +331,9 @@ class LocationActivity : ComponentActivity() {
                                         defaultElevation = 6.dp
                                     ),
                                     modifier = Modifier.fillMaxWidth(),
-                                    colors = CardDefaults.cardColors(MaterialTheme.colorScheme.surfaceContainer)
+                                    colors = CardDefaults.cardColors(
+                                        MaterialTheme.colorScheme.surfaceContainer
+                                    )
                                 ) {
                                     Column(
                                         modifier = Modifier
@@ -333,17 +343,21 @@ class LocationActivity : ComponentActivity() {
                                         Text(
                                             text = "Interval between uploads",
                                         )
-                                        var sliderPosition by remember { mutableFloatStateOf(30f) }
-                                        if (preferences.getLocationUpdatesInterval() != -1) {
-                                            sliderPosition = preferences.getLocationUpdatesInterval().toFloat()
+                                        var sliderPosition by remember {
+                                            mutableFloatStateOf(DEFAULT_SLIDER_POSITION)
+                                        }
+                                        if (servicePreferences.getLocationUpdatesInterval() != -1) {
+                                            sliderPosition = servicePreferences.getLocationUpdatesInterval().toFloat()
                                         } else {
-                                            preferences.createLocationUpdatesInterval(sliderPosition.toInt())
+                                            servicePreferences.createLocationUpdatesInterval(
+                                                sliderPosition.toInt()
+                                            )
                                         }
                                         Slider(
                                             value = sliderPosition,
                                             onValueChange = {
                                                 sliderPosition = it
-                                                preferences.createLocationUpdatesInterval(it.toInt())
+                                                servicePreferences.createLocationUpdatesInterval(it.toInt())
                                             },
                                             colors = SliderDefaults.colors(
                                                 thumbColor = MaterialTheme.colorScheme.secondary,
@@ -364,7 +378,7 @@ class LocationActivity : ComponentActivity() {
                                 }
                             }
 
-                            Permissions(onPermissionsChanged = {
+                            Permissions(onPermissionsChange = {
                                 notificationsGranted = PostNotificationPermission().isGranted(context)
                                 locationGranted = PostNotificationPermission().isGranted(context)
                             })
@@ -377,6 +391,7 @@ class LocationActivity : ComponentActivity() {
                                 onDismissBottomSheet = { showBottomSheet = false }
                             ) { id ->
                                 selectedDeviceId = id
+                                showBottomSheet = false
                             }
                         }
                     }) {
@@ -394,42 +409,46 @@ class LocationActivity : ComponentActivity() {
                         styleState = styleState,
                     ) {
                         // Display current location
-                        val longitude = currentLocation?.longitude
-                        val latitude = currentLocation?.latitude
-                        val accuracy = currentLocation?.accuracy?.toDouble()
-                        val name = devices.find { it.id == selectedDeviceId }?.name
+                        if (currentLocation != null) {
+                            val longitude = currentLocation!!.longitude
+                            val latitude = currentLocation!!.latitude
+                            val accuracy = currentLocation?.accuracy?.toDouble()
+                            val name = devices.find { it.id == selectedDeviceId }?.name
 
-                        if (longitude != null && latitude != null && accuracy != null && name != null) {
-                            allPositions.add(Position(longitude, latitude))
+                            val canDisplayCurrentLocation = accuracy != null && name != null
 
-                            val markerSource = rememberGeoJsonSource(
-                                data = GeoJsonData.Features(
-                                    Point(
-                                        Position(longitude, latitude),
+                            if (canDisplayCurrentLocation) {
+                                allPositions.add(Position(longitude, latitude))
+
+                                val markerSource = rememberGeoJsonSource(
+                                    data = GeoJsonData.Features(
+                                        Point(
+                                            Position(longitude, latitude),
+                                        )
                                     )
                                 )
-                            )
 
-                            LocationPuck(
-                                id = 0,
-                                source = markerSource,
-                                accuracy = accuracy,
-                                metersPerDp = cameraState.metersPerDpAtTarget,
-                                color = MaterialTheme.colorScheme.secondary,
-                                onClick = {
-                                    coroutineScope.launch {
-                                        cameraState.animateTo(
-                                            CameraPosition(
-                                                target = Position(
-                                                    longitude,
-                                                    latitude,
-                                                ),
-                                                zoom = 16.0,
+                                LocationPuck(
+                                    id = 0,
+                                    source = markerSource,
+                                    accuracy = accuracy,
+                                    metersPerDp = cameraState.metersPerDpAtTarget,
+                                    color = MaterialTheme.colorScheme.secondary,
+                                    onClick = {
+                                        coroutineScope.launch {
+                                            cameraState.animateTo(
+                                                CameraPosition(
+                                                    target = Position(
+                                                        longitude,
+                                                        latitude,
+                                                    ),
+                                                    zoom = 16.0,
+                                                )
                                             )
-                                        )
-                                    }
-                                },
-                            )
+                                        }
+                                    },
+                                )
+                            }
                         }
 
                         // Display the location of every other device
@@ -643,16 +662,20 @@ class LocationActivity : ComponentActivity() {
 }
 
 @Composable
-fun Avatar() {
+fun Avatar(modifier: Modifier = Modifier) {
     var accountDialogOpened by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
-    val preferences = Preferences(context)
+    val appPreferences = AppPreferences(context)
+    val userPreferences = UserPreferences(context)
 
-    val ip = preferences.getIP()
-    val user = preferences.getUserCredentials().user
+    val ip = appPreferences.getIP()
+    val user = userPreferences.getUserCredentials().user
 
-    IconButton(onClick = { accountDialogOpened = true }) {
+    IconButton(
+        onClick = { accountDialogOpened = true },
+        modifier = modifier
+    ) {
         Icon(
             Icons.Outlined.AccountCircle,
             contentDescription = "Account"
@@ -725,15 +748,15 @@ fun Avatar() {
                                             ServiceManager.stopLocationService(context)
                                             ServiceManager.stopRingerWebSocketService(context)
 
-                                            val accessToken = preferences.getUserCredentials().accessToken
-                                            val refreshToken = preferences.getUserCredentials().refreshToken
+                                            val accessToken = userPreferences.getUserCredentials().accessToken
+                                            val refreshToken = userPreferences.getUserCredentials().refreshToken
                                             if (ip != null && accessToken != null && refreshToken != null) {
                                                 val authApiService = AuthApiService(context, ip)
                                                 authApiService.logout(accessToken, refreshToken)
                                             }
 
-                                            preferences.deleteUserCredentials()
-                                            preferences.deleteDeviceId()
+                                            userPreferences.deleteUserCredentials()
+                                            appPreferences.deleteDeviceId()
 
                                             val intent = Intent(context, MainActivity::class.java)
                                             intent.flags =
@@ -761,10 +784,8 @@ fun DeviceSelector(
     selectedDeviceId: Int,
     showBottomSheet: Boolean,
     onDismissBottomSheet: () -> Unit,
-    onDeviceSelected: (id: Int) -> Unit
+    onDeviceSelect: (id: Int) -> Unit
 ) {
-    val preferences = Preferences(LocalContext.current)
-
     val sheetState = rememberModalBottomSheetState(
         skipPartiallyExpanded = false,
     )
@@ -778,44 +799,14 @@ fun DeviceSelector(
             if (devices.isNotEmpty()) {
                 LazyColumn {
                     items(devices) { device ->
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(56.dp)
-                                .selectable(
-                                    selected = (device.id == selectedDeviceId),
-                                    onClick = {
-                                        val lastDeviceId = selectedDeviceId
-                                        onDeviceSelected(device.id)
-                                        preferences.createDeviceId(device.id)
-
-                                        val unregisterPayload = JSONObject().apply {
-                                            put("deviceId", lastDeviceId)
-                                        }
-                                        SocketManager.emit("unregister-device", unregisterPayload)
-
-                                        val registerPayload = JSONObject().apply {
-                                            put("deviceId", device.id)
-                                        }
-                                        SocketManager.emit("register-device", registerPayload)
-
-                                        onDismissBottomSheet()
-                                    },
-                                    role = Role.RadioButton
-                                )
-                                .padding(horizontal = 16.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            RadioButton(
-                                selected = (device.id == selectedDeviceId),
-                                onClick = null
-                            )
-                            Text(
-                                text = device.name,
-                                style = MaterialTheme.typography.bodyLarge,
-                                modifier = Modifier.padding(start = 16.dp)
-                            )
-                        }
+                        DeviceRow(
+                            device = device,
+                            selected = device.id == selectedDeviceId,
+                            onSelect = {
+                                onDeviceSelect(device.id)
+                                onDismissBottomSheet()
+                            },
+                        )
                     }
                 }
             } else {
@@ -827,11 +818,60 @@ fun DeviceSelector(
                     )
                 } else {
                     Text(
-                        text = "No device found.",
+                        text = "No device found",
                         modifier = Modifier.padding(16.dp)
                     )
                 }
             }
         }
+    }
+}
+
+@Composable
+fun DeviceRow(
+    device: Device,
+    selected: Boolean,
+    onSelect: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val appPreferences = AppPreferences(LocalContext.current)
+
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(56.dp)
+            .selectable(
+                selected = selected,
+                onClick = {
+                    val lastDeviceId = device.id
+
+                    appPreferences.createDeviceId(device.id)
+
+                    val unregisterPayload = JSONObject().apply {
+                        put("deviceId", lastDeviceId)
+                    }
+                    SocketManager.emit("unregister-device", unregisterPayload)
+
+                    val registerPayload = JSONObject().apply {
+                        put("deviceId", device.id)
+                    }
+                    SocketManager.emit("register-device", registerPayload)
+
+                    onSelect()
+                },
+                role = Role.RadioButton
+            )
+            .padding(horizontal = 16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        RadioButton(
+            selected = selected,
+            onClick = null
+        )
+        Text(
+            text = device.name,
+            style = MaterialTheme.typography.bodyLarge,
+            modifier = Modifier.padding(start = 16.dp)
+        )
     }
 }

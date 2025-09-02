@@ -7,7 +7,9 @@ import android.content.pm.PackageManager.PERMISSION_GRANTED
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 
-class LocationPermission() : Permission() {
+const val LOCATION_REQUEST_CODE = 1
+
+class LocationPermission : Permission() {
     fun isForegroundGranted(context: Context): Boolean {
         return ContextCompat.checkSelfPermission(
             context, Manifest.permission.ACCESS_FINE_LOCATION
@@ -24,14 +26,12 @@ class LocationPermission() : Permission() {
         return isForegroundGranted(context) && isBackgroundLocationGranted(context)
     }
 
-    val REQUEST_CODE = 1
-
     override fun request(activity: Activity) {
         if (!isForegroundGranted(activity.applicationContext)) {
             ActivityCompat.requestPermissions(
                 activity,
                 arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-                REQUEST_CODE,
+                LOCATION_REQUEST_CODE,
             )
             return
         }
@@ -39,9 +39,8 @@ class LocationPermission() : Permission() {
             ActivityCompat.requestPermissions(
                 activity,
                 arrayOf(Manifest.permission.ACCESS_BACKGROUND_LOCATION),
-                REQUEST_CODE,
+                LOCATION_REQUEST_CODE,
             )
         }
     }
-
 }

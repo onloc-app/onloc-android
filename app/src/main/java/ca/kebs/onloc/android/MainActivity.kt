@@ -1,6 +1,7 @@
 package ca.kebs.onloc.android
 
 import android.content.Intent
+import android.net.http.HttpException
 import android.os.Build
 import android.os.Bundle
 import android.util.Patterns
@@ -9,7 +10,15 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.RequiresExtension
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.AbsoluteRoundedCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -49,6 +58,9 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import ca.kebs.onloc.android.api.AuthApiService
 import ca.kebs.onloc.android.ui.theme.OnlocAndroidTheme
+import okio.IOException
+
+private const val LOGIN_FORM_WIDTH = 0.8f
 
 class MainActivity : ComponentActivity() {
     @RequiresExtension(extension = Build.VERSION_CODES.TIRAMISU, version = 7)
@@ -57,12 +69,13 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             val context = LocalContext.current
-            val preferences = Preferences(context)
+            val appPreferences = AppPreferences(context)
+            val userPreferences = UserPreferences(context)
 
-            val credentials = preferences.getUserCredentials()
+            val credentials = userPreferences.getUserCredentials()
             val accessToken = credentials.accessToken
             val user = credentials.user
-            val ip = preferences.getIP()
+            val ip = appPreferences.getIP()
 
             if (accessToken != null && user != null && ip != null) {
                 val authApiService = AuthApiService(context, ip)
@@ -107,12 +120,13 @@ class MainActivity : ComponentActivity() {
 
 @RequiresExtension(extension = Build.VERSION_CODES.TIRAMISU, version = 7)
 @Composable
-fun LoginForm() {
+fun LoginForm(modifier: Modifier = Modifier) {
     val context = LocalContext.current
-    val preferences = Preferences(context)
+    val appPreferences = AppPreferences(context)
+    val userPreferences = UserPreferences(context)
     val lifecycleOwner = LocalLifecycleOwner.current
 
-    var storedIp = preferences.getIP()
+    var storedIp = appPreferences.getIP()
     if (storedIp == null)
         storedIp = ""
 
@@ -144,11 +158,11 @@ fun LoginForm() {
     }
 
     Box(
-        modifier = Modifier.imePadding(),
+        modifier = modifier.imePadding(),
         contentAlignment = Alignment.Center
     ) {
         Column(
-            modifier = Modifier.fillMaxWidth(0.8f),
+            modifier = Modifier.fillMaxWidth(LOGIN_FORM_WIDTH),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             OutlinedTextField(
@@ -303,19 +317,21 @@ fun LoginForm() {
                         try {
                             authApiService.login(username, password) { tokens, user, errorMessage ->
                                 if (tokens != null && user != null) {
-                                    preferences.createIP(ip)
-                                    preferences.createUserCredentials(tokens, user)
+                                    appPreferences.createIP(ip)
+                                    userPreferences.createUserCredentials(tokens, user)
 
                                     val intent = Intent(context, LocationActivity::class.java)
                                     intent.flags =
                                         Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                                     context.startActivity(intent)
                                 } else {
-                                    error = errorMessage ?: "Failure."
+                                    error = errorMessage ?: "Failure"
                                 }
                             }
-                        } catch (e: Exception) {
-                            error = e.message ?: "Failure."
+                        } catch (e: IOException) {
+                            error = "Network error: ${e.message}"
+                        } catch (e: HttpException) {
+                            error = "Server error: ${e.message}"
                         }
                     }
                 },
@@ -331,7 +347,8 @@ fun LoginForm() {
 fun PasswordTextField(
     password: String,
     onPasswordChange: (String) -> Unit,
-    isPasswordError: String
+    isPasswordError: String,
+    modifier: Modifier = Modifier,
 ) {
     var passwordVisible by remember { mutableStateOf(false) }
 
@@ -368,7 +385,7 @@ fun PasswordTextField(
                 )
             }
         },
-        modifier = Modifier.fillMaxWidth()
+        modifier = modifier.fillMaxWidth()
     )
 }
 

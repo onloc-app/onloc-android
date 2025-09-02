@@ -29,6 +29,8 @@ import ca.kebs.onloc.android.singletons.RingerState
 import ca.kebs.onloc.android.ui.theme.OnlocAndroidTheme
 import kotlinx.coroutines.delay
 
+const val DURATION = 60000L
+
 class RingerActivity : ComponentActivity() {
     private var ringtone: Ringtone? = null
     private var oldRingerMode: Int? = null
@@ -46,7 +48,7 @@ class RingerActivity : ComponentActivity() {
             ringtone = RingtoneManager.getRingtone(context, ringtoneUri)
 
             LaunchedEffect(Unit) {
-                startRinging(60)
+                startRinging(DURATION)
             }
 
             OnlocAndroidTheme {
@@ -82,11 +84,11 @@ class RingerActivity : ComponentActivity() {
         RingerState.isRinging = false
     }
 
-    private suspend fun startRinging(durationSec: Int) {
+    private suspend fun startRinging(duration: Long) {
         raiseVolume()
         ringtone?.play()
 
-        delay(durationSec * 1000L)
+        delay(duration)
 
         finish()
     }

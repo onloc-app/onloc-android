@@ -11,6 +11,8 @@ import androidx.core.app.NotificationCompat
 import ca.kebs.onloc.android.RingerActivity
 import ca.kebs.onloc.android.singletons.RingerState
 
+const val START_RINGER_SERVICE_NOTIFICATION_ID = 3001
+
 class RingerService : Service() {
     override fun onCreate() {
         super.onCreate()
@@ -20,7 +22,7 @@ class RingerService : Service() {
             RingerState.isRinging = true
 
             val notification = createRingerNotification()
-            startForeground(3001, notification)
+            startForeground(START_RINGER_SERVICE_NOTIFICATION_ID, notification)
 
             val intent = Intent(this, RingerActivity::class.java).apply {
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)

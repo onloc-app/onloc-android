@@ -1,9 +1,11 @@
+import org.gradle.kotlin.dsl.detektPlugins
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    id("io.gitlab.arturbosch.detekt") version("1.23.8")
 }
 
 android {
@@ -44,6 +46,12 @@ kotlin {
     }
 }
 
+detekt {
+    toolVersion = "1.23.8"
+    config.setFrom(file("config/detekt/detekt.yml"))
+    buildUponDefaultConfig = true
+}
+
 dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -73,4 +81,5 @@ dependencies {
     implementation(libs.socket.io.client)
     implementation(libs.maplibre.compose)
     implementation(libs.maplibre.composeMaterial3)
+    detektPlugins(libs.detekt)
 }

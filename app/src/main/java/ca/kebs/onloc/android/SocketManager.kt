@@ -3,24 +3,22 @@ package ca.kebs.onloc.android
 import io.socket.client.IO
 import io.socket.client.Socket
 import org.json.JSONObject
-import java.net.URISyntaxException
+
+const val RECONNECTION_DELAY = 2000L
+const val RECONNECTION_DELAY_MAX = 60000L
 
 object SocketManager {
     private var socket: Socket? = null
 
     fun initialize(url: String, token: String) {
-        try {
-            val options = IO.Options().apply {
-                auth = mapOf("token" to token)
-                reconnection = true
-                reconnectionAttempts = Int.MAX_VALUE
-                reconnectionDelay = 2000
-                reconnectionDelayMax = 60000
-            }
-            socket = IO.socket(url, options)
-        } catch (e: URISyntaxException) {
-            e.printStackTrace()
+        val options = IO.Options().apply {
+            auth = mapOf("token" to token)
+            reconnection = true
+            reconnectionAttempts = Int.MAX_VALUE
+            reconnectionDelay = RECONNECTION_DELAY
+            reconnectionDelayMax = RECONNECTION_DELAY_MAX
         }
+        socket = IO.socket(url, options)
     }
 
     fun connect() {

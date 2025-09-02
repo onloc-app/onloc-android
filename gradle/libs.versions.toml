@@ -1,5 +1,6 @@
 [versions]
 agp = "8.10.1"
+detekt = "0.4.27"
 gson = "2.11.0"
 kotlin = "2.2.0"
 coreKtx = "1.17.0"
@@ -25,6 +26,7 @@ androidx-material-icons-extended-android = { module = "androidx.compose.material
 androidx-security-crypto = { module = "androidx.security:security-crypto", version.ref = "securityCrypto" }
 androidx-work-runtime = { module = "androidx.work:work-runtime", version.ref = "workRuntimeKtx" }
 androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "workRuntimeKtx" }
+detekt = { module = "io.nlopez.compose.rules:detekt", version.ref = "detekt" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }

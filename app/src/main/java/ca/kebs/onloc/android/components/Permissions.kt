@@ -23,6 +23,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -39,7 +40,8 @@ import ca.kebs.onloc.android.services.ServiceManager
 
 @Composable
 fun Permissions(
-    onPermissionsChanged: () -> Unit = {},
+    modifier: Modifier = Modifier,
+    onPermissionsChange: () -> Unit = {},
 ) {
     val context = LocalContext.current
     val activity = context as Activity
@@ -50,6 +52,8 @@ fun Permissions(
     var doNotDisturbGranted by remember { mutableStateOf(DoNotDisturbPermission().isGranted(context)) }
     var overlayGranted by remember { mutableStateOf(OverlayPermission().isGranted(context)) }
 
+    val currentOnPermissionsChange by rememberUpdatedState(onPermissionsChange)
+
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
@@ -57,7 +61,7 @@ fun Permissions(
                 locationGranted = LocationPermission().isGranted(context)
                 doNotDisturbGranted = DoNotDisturbPermission().isGranted(context)
                 overlayGranted = OverlayPermission().isGranted(context)
-                onPermissionsChanged()
+                currentOnPermissionsChange()
             }
         }
 
@@ -69,7 +73,7 @@ fun Permissions(
     }
 
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
     ) {
         Text(
@@ -87,12 +91,12 @@ fun Permissions(
                 PermissionCard(name = "Notifications", isGranted = notificationsGranted, onGrantClick = {
                     PostNotificationPermission().request(activity)
                     notificationsGranted = PostNotificationPermission().isGranted(context)
-                    onPermissionsChanged()
+                    onPermissionsChange()
                 })
                 PermissionCard(name = "Location", isGranted = locationGranted, onGrantClick = {
                     LocationPermission().request(activity)
                     locationGranted = LocationPermission().isGranted(context)
-                    onPermissionsChanged()
+                    onPermissionsChange()
                 })
             }
         )
@@ -107,17 +111,17 @@ fun Permissions(
             PermissionCard(name = "Notifications", isGranted = notificationsGranted, onGrantClick = {
                 PostNotificationPermission().request(activity)
                 notificationsGranted = PostNotificationPermission().isGranted(context)
-                onPermissionsChanged()
+                onPermissionsChange()
             })
             PermissionCard(name = "Do Not Disturb Access", isGranted = doNotDisturbGranted, onGrantClick = {
                 DoNotDisturbPermission().request(context)
                 doNotDisturbGranted = DoNotDisturbPermission().isGranted(context)
-                onPermissionsChanged()
+                onPermissionsChange()
             })
             PermissionCard(name = "Overlay Permission", isGranted = overlayGranted, onGrantClick = {
                 OverlayPermission().request(activity)
                 overlayGranted = OverlayPermission().isGranted(context)
-                onPermissionsChanged()
+                onPermissionsChange()
             })
         }
     }
@@ -128,17 +132,20 @@ fun FeatureCard(
     name: String,
     description: String,
     isGranted: Boolean,
+    modifier: Modifier = Modifier,
     onGrant: () -> Unit = {},
     permissionCards: @Composable () -> Unit,
 ) {
+    val currentOnGrant by rememberUpdatedState(onGrant)
+
     LaunchedEffect(isGranted) {
         if (isGranted) {
-            onGrant()
+            currentOnGrant()
         }
     }
 
     Box(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(bottom = 16.dp)
     ) {
@@ -180,9 +187,10 @@ fun PermissionCard(
     name: String,
     isGranted: Boolean,
     onGrantClick: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {

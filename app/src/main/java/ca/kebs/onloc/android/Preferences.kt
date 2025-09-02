@@ -6,6 +6,8 @@ import androidx.security.crypto.MasterKey
 import ca.kebs.onloc.android.models.User
 import com.google.gson.Gson
 import androidx.core.content.edit
+import kotlin.apply
+import kotlin.getValue
 
 const val IP_KEY = "ip"
 const val DEVICE_ID_KEY = "device_id"
@@ -16,13 +18,13 @@ const val USER_KEY = "user"
 const val LOCATION_SERVICE_KEY = "location"
 const val LOCATION_UPDATES_INTERVAL_KEY = "interval"
 
-class Preferences(private val context: Context) {
-    private val deviceProtectedPreferences by lazy {
+private class ProtectedPreferences(context: Context) {
+    val deviceProtectedPreferences by lazy {
         context.createDeviceProtectedStorageContext()
             .getSharedPreferences("device_protected_preferences", Context.MODE_PRIVATE)
     }
 
-    private fun saveToDeviceEncryptedStorage(key: String, value: Any) {
+    fun saveToDeviceEncryptedStorage(key: String, value: Any) {
         deviceProtectedPreferences.edit {
             when (value) {
                 is String -> putString(key, value)
@@ -32,6 +34,88 @@ class Preferences(private val context: Context) {
             }
         }
     }
+
+    fun deleteFromDeviceEncryptedStorage(key: String) {
+        deviceProtectedPreferences.edit {
+            remove(key)
+            apply()
+        }
+    }
+}
+
+class AppPreferences(private val context: Context) {
+    private val protectedPreferences by lazy { ProtectedPreferences(context) }
+
+    private val preferences =
+        context.getSharedPreferences("app_preferences", Context.MODE_PRIVATE)
+
+    fun getIP(): String? {
+        return preferences.getString(IP_KEY, "")
+    }
+
+    fun createIP(ip: String) {
+        preferences.edit().apply {
+            putString(IP_KEY, ip)
+            apply()
+        }
+        protectedPreferences.saveToDeviceEncryptedStorage(IP_KEY, ip)
+    }
+
+    fun getDeviceId(): Int {
+        return preferences.getInt(DEVICE_ID_KEY, -1)
+    }
+
+    fun createDeviceId(id: Int) {
+        preferences.edit().apply {
+            putInt(DEVICE_ID_KEY, id)
+            apply()
+        }
+        protectedPreferences.saveToDeviceEncryptedStorage(DEVICE_ID_KEY, id)
+    }
+
+    fun deleteDeviceId() {
+        preferences.edit().apply {
+            remove(DEVICE_ID_KEY)
+            apply()
+        }
+        protectedPreferences.deleteFromDeviceEncryptedStorage(DEVICE_ID_KEY)
+    }
+}
+
+class ServicePreferences(private val context: Context) {
+    private val protectedPreferences by lazy { ProtectedPreferences(context) }
+
+    private val preferences =
+        context.getSharedPreferences("service_preferences", Context.MODE_PRIVATE)
+
+
+    fun getLocationServiceStatus(): Boolean {
+        return preferences.getBoolean(LOCATION_SERVICE_KEY, false)
+    }
+
+    fun createLocationServiceStatus(status: Boolean) {
+        preferences.edit().apply {
+            putBoolean(LOCATION_SERVICE_KEY, status)
+            apply()
+        }
+        protectedPreferences.saveToDeviceEncryptedStorage(LOCATION_SERVICE_KEY, status)
+    }
+
+    fun getLocationUpdatesInterval(): Int {
+        return preferences.getInt(LOCATION_UPDATES_INTERVAL_KEY, -1)
+    }
+
+    fun createLocationUpdatesInterval(interval: Int) {
+        preferences.edit().apply {
+            putInt(LOCATION_UPDATES_INTERVAL_KEY, interval)
+            apply()
+        }
+        protectedPreferences.saveToDeviceEncryptedStorage(LOCATION_UPDATES_INTERVAL_KEY, interval)
+    }
+}
+
+class UserPreferences(private val context: Context) {
+    private val protectedPreferences by lazy { ProtectedPreferences(context) }
 
     private val masterKey: MasterKey by lazy {
         MasterKey.Builder(context)
@@ -47,80 +131,6 @@ class Preferences(private val context: Context) {
             EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
             EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
         )
-    }
-
-    private val appPreferences =
-        context.getSharedPreferences("app_preferences", Context.MODE_PRIVATE)
-    private val servicesPreferences =
-        context.getSharedPreferences("service_preferences", Context.MODE_PRIVATE)
-
-    fun getIP(): String? {
-        return appPreferences.getString(IP_KEY, "")
-    }
-
-    fun createIP(ip: String) {
-        appPreferences.edit().apply {
-            putString(IP_KEY, ip)
-            apply()
-        }
-        saveToDeviceEncryptedStorage(IP_KEY, ip)
-    }
-
-    fun deleteIP() {
-        appPreferences.edit().apply {
-            remove(IP_KEY)
-            apply()
-        }
-        deviceProtectedPreferences.edit().apply {
-            remove(IP_KEY)
-            apply()
-        }
-    }
-
-    fun getDeviceId(): Int {
-        return appPreferences.getInt(DEVICE_ID_KEY, -1)
-    }
-
-    fun createDeviceId(id: Int) {
-        appPreferences.edit().apply {
-            putInt(DEVICE_ID_KEY, id)
-            apply()
-        }
-        saveToDeviceEncryptedStorage(DEVICE_ID_KEY, id)
-    }
-
-    fun deleteDeviceId() {
-        appPreferences.edit().apply {
-            remove(DEVICE_ID_KEY)
-            apply()
-        }
-        deviceProtectedPreferences.edit().apply {
-            remove(DEVICE_ID_KEY)
-            apply()
-        }
-    }
-
-    fun getLocationServiceStatus(): Boolean {
-        return servicesPreferences.getBoolean(LOCATION_SERVICE_KEY, false)
-    }
-
-    fun createLocationServiceStatus(status: Boolean) {
-        servicesPreferences.edit().apply {
-            putBoolean(LOCATION_SERVICE_KEY, status)
-            apply()
-        }
-        saveToDeviceEncryptedStorage(LOCATION_SERVICE_KEY, status)
-    }
-
-    fun deleteLocationServiceStatus() {
-        servicesPreferences.edit().apply {
-            remove(LOCATION_SERVICE_KEY)
-            apply()
-        }
-        deviceProtectedPreferences.edit().apply {
-            remove(LOCATION_SERVICE_KEY)
-            apply()
-        }
     }
 
     data class UserCredentials(val accessToken: String?, val refreshToken: String?, val user: User?)
@@ -145,8 +155,8 @@ class Preferences(private val context: Context) {
             putString(USER_KEY, Gson().toJson(user))
             apply()
         }
-        saveToDeviceEncryptedStorage(ACCESS_TOKEN_KEY, tokens.first)
-        saveToDeviceEncryptedStorage(REFRESH_TOKEN_KEY, tokens.second)
+        protectedPreferences.saveToDeviceEncryptedStorage(ACCESS_TOKEN_KEY, tokens.first)
+        protectedPreferences.saveToDeviceEncryptedStorage(REFRESH_TOKEN_KEY, tokens.second)
     }
 
     fun deleteUserCredentials() {
@@ -154,14 +164,8 @@ class Preferences(private val context: Context) {
             clear()
             apply()
         }
-        deviceProtectedPreferences.edit().apply {
-            remove(ACCESS_TOKEN_KEY)
-            apply()
-        }
-        deviceProtectedPreferences.edit().apply {
-            remove(REFRESH_TOKEN_KEY)
-            apply()
-        }
+        protectedPreferences.deleteFromDeviceEncryptedStorage(ACCESS_TOKEN_KEY)
+        protectedPreferences.deleteFromDeviceEncryptedStorage(REFRESH_TOKEN_KEY)
     }
 
     fun updateAccessToken(accessToken: String) {
@@ -169,29 +173,6 @@ class Preferences(private val context: Context) {
             putString(ACCESS_TOKEN_KEY, accessToken)
             apply()
         }
-        saveToDeviceEncryptedStorage(ACCESS_TOKEN_KEY, accessToken)
-    }
-
-    fun getLocationUpdatesInterval(): Int {
-        return servicesPreferences.getInt(LOCATION_UPDATES_INTERVAL_KEY, -1)
-    }
-
-    fun createLocationUpdatesInterval(interval: Int) {
-        servicesPreferences.edit().apply {
-            putInt(LOCATION_UPDATES_INTERVAL_KEY, interval)
-            apply()
-        }
-        saveToDeviceEncryptedStorage(LOCATION_UPDATES_INTERVAL_KEY, interval)
-    }
-
-    fun deleteLocationUpdatesInterval() {
-        servicesPreferences.edit().apply {
-            remove(LOCATION_UPDATES_INTERVAL_KEY)
-            apply()
-        }
-        deviceProtectedPreferences.edit().apply {
-            remove(LOCATION_UPDATES_INTERVAL_KEY)
-            apply()
-        }
+        protectedPreferences.saveToDeviceEncryptedStorage(ACCESS_TOKEN_KEY, accessToken)
     }
 }

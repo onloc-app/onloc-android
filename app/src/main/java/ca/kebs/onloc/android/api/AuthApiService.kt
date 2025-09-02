@@ -8,6 +8,7 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
+import org.json.JSONException
 import org.json.JSONObject
 import java.io.IOException
 
@@ -34,41 +35,35 @@ class AuthApiService(context: Context, private val ip: String) {
 
             override fun onResponse(call: Call, response: Response) {
                 response.use {
-                    val responseBody = response.body?.string()
+                    val responseBody = response.body.string()
 
-                    if (responseBody != null) {
-                        if (response.isSuccessful) {
-                            try {
-                                val json = JSONObject(responseBody)
-                                val accessToken = json.getString("accessToken")
-                                val refreshToken = json.getString("refreshToken")
-                                val userInfo = json.getJSONObject("user")
+                    if (response.isSuccessful) {
+                        try {
+                            val json = JSONObject(responseBody)
+                            val accessToken = json.getString("accessToken")
+                            val refreshToken = json.getString("refreshToken")
+                            val userInfo = json.getJSONObject("user")
 
-                                val user = User(
-                                    id = userInfo.getInt("id"),
-                                    username = userInfo.getString("username"),
-                                    createdAt = userInfo.getString("created_at"),
-                                    updatedAt = userInfo.getString("updated_at")
-                                )
+                            val user = User(
+                                id = userInfo.getInt("id"),
+                                username = userInfo.getString("username"),
+                                createdAt = userInfo.getString("created_at"),
+                                updatedAt = userInfo.getString("updated_at")
+                            )
 
-                                callback(accessToken to refreshToken, user, null)
-                            } catch (e: Exception) {
-                                e.printStackTrace()
-                                callback(null, null, "Error parsing response: ${e.message}")
-                            }
-                        } else {
-                            try {
-                                val errorJson = JSONObject(responseBody)
-                                val errorMessage = errorJson.getString("message")
-                                callback(null, null, errorMessage)
-                            } catch (e: Exception) {
-                                e.printStackTrace()
-                                callback(null, null, "Error parsing response: ${e.message}")
-                            }
+                            callback(accessToken to refreshToken, user, null)
+                        } catch (e: JSONException) {
+                            callback(null, null, "Error parsing response: ${e.message}")
                         }
                     } else {
-                        callback(null, null, "Empty response body")
-                        return
+                        try {
+                            val errorJson = JSONObject(responseBody)
+                            val errorMessage = errorJson.getString("message")
+                            callback(null, null, errorMessage)
+                        } catch (e: JSONException) {
+                            e.printStackTrace()
+                            callback(null, null, "Error parsing response: ${e.message}")
+                        }
                     }
                 }
             }
@@ -123,38 +118,33 @@ class AuthApiService(context: Context, private val ip: String) {
 
             override fun onResponse(call: Call, response: Response) {
                 response.use {
-                    val responseBody = response.body?.string()
+                    val responseBody = response.body.string()
 
-                    if (responseBody != null) {
-                        if (response.isSuccessful) {
-                            try {
-                                val json = JSONObject(responseBody).getJSONObject("user")
+                    if (response.isSuccessful) {
+                        try {
+                            val json = JSONObject(responseBody).getJSONObject("user")
 
-                                val user = User(
-                                    id = json.getInt("id"),
-                                    username = json.getString("username"),
-                                    createdAt = json.getString("created_at"),
-                                    updatedAt = json.getString("updated_at")
-                                )
+                            val user = User(
+                                id = json.getInt("id"),
+                                username = json.getString("username"),
+                                createdAt = json.getString("created_at"),
+                                updatedAt = json.getString("updated_at")
+                            )
 
-                                callback(user, null)
-                            } catch (e: Exception) {
-                                e.printStackTrace()
-                                callback(null, "Error parsing response: ${e.message}")
-                            }
-                        } else {
-                            try {
-                                val errorJson = JSONObject(responseBody)
-                                val errorMessage = errorJson.getString("message")
-                                callback(null, errorMessage)
-                            } catch (e: Exception) {
-                                e.printStackTrace()
-                                callback(null, "Error parsing response: ${e.message}")
-                            }
+                            callback(user, null)
+                        } catch (e: JSONException) {
+                            e.printStackTrace()
+                            callback(null, "Error parsing response: ${e.message}")
                         }
                     } else {
-                        callback(null, "Empty response body")
-                        return
+                        try {
+                            val errorJson = JSONObject(responseBody)
+                            val errorMessage = errorJson.getString("message")
+                            callback(null, errorMessage)
+                        } catch (e: JSONException) {
+                            e.printStackTrace()
+                            callback(null, "Error parsing response: ${e.message}")
+                        }
                     }
                 }
             }
@@ -178,9 +168,8 @@ class AuthApiService(context: Context, private val ip: String) {
 
         client.newCall(request).execute().use { response ->
             if (!response.isSuccessful) throw IOException("Refresh failed ${response.code}")
-            val json = JSONObject(response.body!!.string())
+            val json = JSONObject(response.body.string())
             return json.getString("accessToken")
         }
     }
-
 }

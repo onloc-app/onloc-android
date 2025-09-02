@@ -15,6 +15,14 @@ import android.os.IBinder
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import ca.kebs.onloc.android.api.LocationsApiService
+import ca.kebs.onloc.android.helpers.getAccessToken
+import ca.kebs.onloc.android.helpers.getIP
+import ca.kebs.onloc.android.helpers.getInterval
+import ca.kebs.onloc.android.helpers.getSelectedDeviceId
+
+const val MINUTE = 60000L
+const val START_LOCATION_SERVICE_NOTIFICATION_ID = 1001
+const val STOP_LOCATION_SERVICE_NOTIFICATION_ID = 1002
 
 class LocationForegroundService : Service() {
     private val locationManager: LocationManager by lazy {
@@ -26,28 +34,12 @@ class LocationForegroundService : Service() {
             .getSharedPreferences("device_protected_preferences", MODE_PRIVATE)
     }
 
-    private fun getIP(): String? {
-        return deviceEncryptedPreferences.getString("ip", null)
-    }
-
-    private fun getAccessToken(): String? {
-        return deviceEncryptedPreferences.getString("accessToken", null)
-    }
-
-    private fun getSelectedDeviceId(): Int {
-        return deviceEncryptedPreferences.getInt("device_id", -1)
-    }
-
-    private fun getInterval(): Int {
-        return deviceEncryptedPreferences.getInt("interval", -1)
-    }
-
     private val locationListener = LocationListener { location ->
         println("Latitude: ${location.latitude}, Longitude: ${location.longitude}")
 
-        val ip = getIP()
-        val accessToken = getAccessToken()
-        val selectedDeviceId = getSelectedDeviceId()
+        val ip = getIP(deviceEncryptedPreferences)
+        val accessToken = getAccessToken(deviceEncryptedPreferences)
+        val selectedDeviceId = getSelectedDeviceId(deviceEncryptedPreferences)
 
         val batteryManager = applicationContext.getSystemService(BATTERY_SERVICE) as BatteryManager
         val batteryLevel: Int = batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY)
@@ -83,7 +75,7 @@ class LocationForegroundService : Service() {
 
         val provider = LocationManager.FUSED_PROVIDER
 
-        val interval = getInterval() * 60000L
+        val interval = getInterval(deviceEncryptedPreferences) * MINUTE
 
         locationManager.requestLocationUpdates(
             provider,
@@ -102,7 +94,7 @@ class LocationForegroundService : Service() {
         ) {
             return
         }
-        startForeground(1001, createStartForegroundNotification())
+        startForeground(START_LOCATION_SERVICE_NOTIFICATION_ID, createStartForegroundNotification())
     }
 
     private fun createStartForegroundNotification(): Notification {
@@ -142,7 +134,10 @@ class LocationForegroundService : Service() {
 
         val notificationManager =
             getSystemService(NOTIFICATION_SERVICE) as NotificationManager
-        notificationManager.notify(1002, createStopForegroundNotification())
+        notificationManager.notify(
+            STOP_LOCATION_SERVICE_NOTIFICATION_ID,
+            createStopForegroundNotification()
+        )
     }
 
     private fun createStopForegroundNotification(): Notification {

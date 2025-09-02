@@ -17,8 +17,9 @@ import androidx.compose.ui.text.withLink
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun MapAttribution() {
+fun MapAttribution(modifier: Modifier = Modifier) {
     Row(
+        modifier = modifier,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {

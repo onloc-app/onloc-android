@@ -28,17 +28,9 @@ class DevicesApiService(context: Context, private val ip: String, private val to
 
             override fun onResponse(call: Call, response: Response) {
                 if (response.isSuccessful) {
-                    val responseBody = response.body?.string()
-                    if  (responseBody != null) {
-                        try {
-                            val devices = parseDevices(responseBody)
-                            callback(devices, null)
-                        } catch (e: Exception) {
-                            callback(null, "Error parsing devices: ${e.message}")
-                        }
-                    } else {
-                        callback(null, "Empty response body")
-                    }
+                    val responseBody = response.body.string()
+                    val devices = parseDevices(responseBody)
+                    callback(devices, null)
                 } else {
                     callback(null, "Error: ${response.code}")
                 }

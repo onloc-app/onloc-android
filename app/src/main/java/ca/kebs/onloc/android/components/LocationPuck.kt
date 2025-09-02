@@ -14,6 +14,8 @@ import dev.sargunv.maplibrecompose.expressions.dsl.format
 import dev.sargunv.maplibrecompose.expressions.dsl.offset
 import dev.sargunv.maplibrecompose.expressions.dsl.span
 
+private const val ACCURACY_OPACITY = 0.5f
+
 @Composable
 fun LocationPuck(
     id: Int,
@@ -30,7 +32,7 @@ fun LocationPuck(
             id = "location-accuracy-$id",
             source = source,
             radius = const((accuracy / metersPerDp).dp),
-            opacity = const(.5f),
+            opacity = const(ACCURACY_OPACITY),
             color = const(color),
         )
     }
@@ -62,7 +64,7 @@ fun LocationPuck(
             textFont = const(listOf("Noto Sans Regular")),
             textSize = const(1.2f.em),
             textColor = const(textColor),
-            textOffset = offset(0f.em, (1.5f).em),
+            textOffset = offset(0f.em, 1.5f.em),
             onClick = {
                 onClick()
                 ClickResult.Consume
