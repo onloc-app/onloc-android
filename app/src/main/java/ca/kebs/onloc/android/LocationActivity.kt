@@ -502,8 +502,16 @@ class LocationActivity : ComponentActivity() {
                             cameraState = cameraState,
                             modifier = Modifier.align(Alignment.TopEnd)
                         )
+
+                        var attributionExpanded by remember { mutableStateOf(false) }
+                        LaunchedEffect(cameraState.isCameraMoving, cameraState.moveReason) {
+                            if (cameraState.isCameraMoving && cameraState.moveReason == CameraMoveReason.GESTURE) {
+                                attributionExpanded = false
+                            }
+                        }
                         ExpandingAttributionButton(
-                            cameraState = cameraState,
+                            expanded = attributionExpanded,
+                            onClick = { attributionExpanded = !attributionExpanded },
                             styleState = styleState,
                             modifier = Modifier
                                 .align(Alignment.BottomEnd)
