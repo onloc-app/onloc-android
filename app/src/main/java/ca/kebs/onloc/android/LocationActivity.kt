@@ -193,20 +193,34 @@ class LocationActivity : ComponentActivity() {
 
             fun fitMapBounds(positions: List<Position>) {
                 if (positions.isNotEmpty()) {
-                    val maxLongitude = positions.maxOf { it.longitude }
-                    val minLongitude = positions.minOf { it.longitude }
-                    val maxLatitude = positions.maxOf { it.latitude }
-                    val minLatitude = positions.minOf { it.latitude }
-                    coroutineScope.launch {
-                        cameraState.animateTo(
-                            boundingBox = BoundingBox(
-                                west = minLongitude,
-                                north = maxLatitude,
-                                east = maxLongitude,
-                                south = minLatitude,
-                            ),
-                            padding = PaddingValues(128.dp),
-                        )
+                    if (positions.size == 1) {
+                        coroutineScope.launch {
+                            cameraState.animateTo(
+                                CameraPosition(
+                                    target = Position(
+                                        positions[0].longitude,
+                                        positions[0].latitude,
+                                    ),
+                                    zoom = 16.0,
+                                )
+                            )
+                        }
+                    } else {
+                        val maxLongitude = positions.maxOf { it.longitude }
+                        val minLongitude = positions.minOf { it.longitude }
+                        val maxLatitude = positions.maxOf { it.latitude }
+                        val minLatitude = positions.minOf { it.latitude }
+                        coroutineScope.launch {
+                            cameraState.animateTo(
+                                boundingBox = BoundingBox(
+                                    west = minLongitude,
+                                    north = maxLatitude,
+                                    east = maxLongitude,
+                                    south = minLatitude,
+                                ),
+                                padding = PaddingValues(128.dp),
+                            )
+                        }
                     }
                 }
             }
