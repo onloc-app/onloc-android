@@ -47,6 +47,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -91,6 +92,7 @@ import dev.sargunv.maplibrecompose.material3.controls.ExpandingAttributionButton
 import dev.sargunv.maplibrecompose.material3.controls.ScaleBar
 import io.github.dellisd.spatialk.geojson.BoundingBox
 import org.json.JSONObject
+import java.lang.System.currentTimeMillis
 
 const val DEFAULT_SLIDER_POSITION = 15f
 
@@ -151,11 +153,18 @@ class LocationActivity : ComponentActivity() {
             val cameraState = rememberCameraState()
             val styleState = rememberStyleState()
 
+            // Debounce
+            var lastGestureEnd by remember { mutableLongStateOf(0L) }
+
             // On map move
-            LaunchedEffect(cameraState.position) {
+            LaunchedEffect(cameraState.isCameraMoving, cameraState.moveReason) {
                 if (cameraState.moveReason == CameraMoveReason.GESTURE) {
-                    onCurrentLocation = false
-                    selectedDevice = null
+                    val now = currentTimeMillis()
+                    if (now - lastGestureEnd > 300) {
+                        onCurrentLocation = false
+                        selectedDevice = null
+                        lastGestureEnd = now
+                    }
                 }
             }
 
@@ -191,6 +200,23 @@ class LocationActivity : ComponentActivity() {
                 grabCurrentLocation()
             }
 
+            fun goToCurrentLocation() {
+                if (currentLocation != null) {
+                    val cameraPosition = CameraPosition(
+                        target = Position(
+                            currentLocation!!.longitude,
+                            currentLocation!!.latitude
+                        ),
+                        zoom = 16.0,
+                    )
+                    coroutineScope.launch {
+                        cameraState.animateTo(finalPosition = cameraPosition)
+                    }
+                    onCurrentLocation = true
+                    selectedDevice = null
+                }
+            }
+
             fun fitMapBounds(positions: List<Position>) {
                 if (positions.isNotEmpty()) {
                     if (positions.size == 1) {
@@ -222,6 +248,8 @@ class LocationActivity : ComponentActivity() {
                             )
                         }
                     }
+                    onCurrentLocation = false
+                    selectedDevice = null
                 }
             }
 
@@ -394,7 +422,22 @@ class LocationActivity : ComponentActivity() {
                         }
                     }) {
 
-                    val allPositions = mutableListOf<Position>()
+                    val allPositions = remember(devices, currentLocation, selectedDeviceId) {
+                        buildList {
+                            currentLocation?.let {
+                                if (selectedDeviceId != -1) {
+                                    add(Position(it.longitude, it.latitude))
+                                }
+                            }
+                            devices.forEach { device ->
+                                if (isLocationServiceRunning && selectedDeviceId == device.id) return@forEach
+                                device.latestLocation?.let {
+                                    add(Position(it.longitude, it.latitude))
+                                }
+                            }
+                        }
+                    }
+
                     val variant = if (isSystemInDarkTheme()) "dark" else "light"
                     MaplibreMap(
                         baseStyle = BaseStyle.Uri("https://tiles.immich.cloud/v1/style/$variant.json"),
@@ -416,8 +459,6 @@ class LocationActivity : ComponentActivity() {
                             val canDisplayCurrentLocation = accuracy != null && name != null
 
                             if (canDisplayCurrentLocation) {
-                                allPositions.add(Position(longitude, latitude))
-
                                 val markerSource = rememberGeoJsonSource(
                                     data = GeoJsonData.Features(
                                         Point(
@@ -432,69 +473,52 @@ class LocationActivity : ComponentActivity() {
                                     accuracy = accuracy,
                                     metersPerDp = cameraState.metersPerDpAtTarget,
                                     color = MaterialTheme.colorScheme.secondary,
-                                    onClick = {
-                                        coroutineScope.launch {
-                                            cameraState.animateTo(
-                                                CameraPosition(
-                                                    target = Position(
-                                                        longitude,
-                                                        latitude,
-                                                    ),
-                                                    zoom = 16.0,
-                                                )
-                                            )
-                                        }
-                                    },
+                                    onClick = { goToCurrentLocation() },
                                 )
                             }
                         }
 
                         // Display the location of every other device
                         for (device in devices) {
-                            val location = device.latestLocation
-
+                            val location = device.latestLocation ?: continue
                             if (isLocationServiceRunning && selectedDeviceId == device.id) continue
 
-                            if (location != null) {
-                                allPositions.add(Position(location.longitude, location.latitude))
+                            val markerSource = rememberGeoJsonSource(
+                                data = GeoJsonData.Features(
+                                    Point(
+                                        Position(
+                                            location.longitude,
+                                            location.latitude,
+                                        )
+                                    )
+                                ),
+                            )
 
-                                val markerSource = rememberGeoJsonSource(
-                                    data = GeoJsonData.Features(
-                                        Point(
-                                            Position(
-                                                location.longitude,
-                                                location.latitude,
+                            LocationPuck(
+                                id = location.id,
+                                source = markerSource,
+                                accuracy = location.accuracy.toDouble(),
+                                metersPerDp = cameraState.metersPerDpAtTarget,
+                                color = stringToColor(device.name),
+                                name = device.name,
+                                onClick = {
+                                    coroutineScope.launch {
+                                        cameraState.animateTo(
+                                            CameraPosition(
+                                                target = Position(
+                                                    location.longitude,
+                                                    location.latitude,
+                                                ),
+                                                zoom = 16.0,
                                             )
                                         )
-                                    ),
-                                )
-
-                                LocationPuck(
-                                    id = location.id,
-                                    source = markerSource,
-                                    accuracy = location.accuracy.toDouble(),
-                                    metersPerDp = cameraState.metersPerDpAtTarget,
-                                    color = stringToColor(device.name),
-                                    name = device.name,
-                                    onClick = {
-                                        coroutineScope.launch {
-                                            cameraState.animateTo(
-                                                CameraPosition(
-                                                    target = Position(
-                                                        location.longitude,
-                                                        location.latitude,
-                                                    ),
-                                                    zoom = 16.0,
-                                                )
-                                            )
-                                        }
-                                        selectedDevice = device
-                                    },
-                                    onLongClick = {
-                                        openNavigationApp(location)
-                                    },
-                                )
-                            }
+                                    }
+                                    selectedDevice = device
+                                },
+                                onLongClick = {
+                                    openNavigationApp(location)
+                                },
+                            )
                         }
 
                         LaunchedEffect(allPositions) {
@@ -538,19 +562,7 @@ class LocationActivity : ComponentActivity() {
                         ElevatedButton(
                             onClick = {
                                 grabCurrentLocation()
-                                if (currentLocation != null) {
-                                    val cameraPosition = CameraPosition(
-                                        target = Position(
-                                            currentLocation!!.longitude,
-                                            currentLocation!!.latitude
-                                        ),
-                                        zoom = 16.0,
-                                    )
-                                    coroutineScope.launch {
-                                        cameraState.animateTo(finalPosition = cameraPosition)
-                                    }
-                                    onCurrentLocation = true
-                                }
+                                goToCurrentLocation()
                             },
                             modifier = Modifier
                                 .align(Alignment.BottomStart)
