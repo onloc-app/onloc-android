@@ -11,8 +11,12 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import ca.kebs.onloc.android.AppPreferences
+import ca.kebs.onloc.android.SocketManager
 import ca.kebs.onloc.android.models.Device
+import org.json.JSONObject
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -24,6 +28,8 @@ fun DeviceSelector(
     onDismissBottomSheet: () -> Unit,
     onDeviceSelect: (id: Int) -> Unit
 ) {
+    val appPreferences = AppPreferences(LocalContext.current)
+
     val sheetState = rememberModalBottomSheetState(
         skipPartiallyExpanded = false,
     )
@@ -41,6 +47,18 @@ fun DeviceSelector(
                             device = device,
                             selected = device.id == selectedDeviceId,
                             onSelect = {
+                                val unregisterPayload = JSONObject().apply {
+                                    put("deviceId", selectedDeviceId)
+                                }
+                                SocketManager.emit("unregister-device", unregisterPayload)
+
+                                appPreferences.createDeviceId(device.id)
+
+                                val registerPayload = JSONObject().apply {
+                                    put("deviceId", device.id)
+                                }
+                                SocketManager.emit("register-device", registerPayload)
+
                                 onDeviceSelect(device.id)
                                 onDismissBottomSheet()
                             },
