@@ -1,4 +1,4 @@
-package ca.kebs.onloc.android
+package ca.app.onloc.android
 
 import junit.framework.TestCase.assertEquals
 import org.junit.Test
