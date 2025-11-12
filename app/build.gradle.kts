@@ -16,7 +16,7 @@ android {
         applicationId = "app.onloc.android"
         minSdk = 31
         targetSdk = 36
-        versionCode = 105
+        versionCode = 106
         versionName = "1.0.6"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
