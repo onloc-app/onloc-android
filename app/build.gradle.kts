@@ -9,15 +9,15 @@ plugins {
 }
 
 android {
-    namespace = "ca.kebs.onloc.android"
+    namespace = "app.onloc.android"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "ca.kebs.onloc.android"
+        applicationId = "app.onloc.android"
         minSdk = 31
         targetSdk = 36
         versionCode = 1
-        versionName = "1.0"
+        versionName = "1.0.5"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
