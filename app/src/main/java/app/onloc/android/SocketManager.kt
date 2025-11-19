@@ -28,6 +28,8 @@ object SocketManager {
     fun initialize(url: String, token: String) {
         val options = IO.Options().apply {
             auth = mapOf("token" to token)
+            path = "/ws"
+            forceNew = true
             reconnection = true
             reconnectionAttempts = Int.MAX_VALUE
             reconnectionDelay = RECONNECTION_DELAY
