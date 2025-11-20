@@ -118,7 +118,7 @@ class AuthApiService(context: Context, private val ip: String) {
     }
 
     fun userInfo(accessToken: String, callback: (User?, String?) -> Unit) {
-        val url = "$ip/api/users"
+        val url = "$ip/api/users/info"
 
         val request = Request.Builder()
             .url(url)
