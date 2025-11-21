@@ -651,7 +651,7 @@ class LocationActivity : ComponentActivity() {
                                 ElevatedButton(
                                     onClick = {
                                         val payload = JSONObject().apply {
-                                            put("deviceId", selectedDeviceId)
+                                            put("deviceId", selectedDevice!!.id)
                                         }
                                         SocketManager.emit(
                                             "ring",
