@@ -54,26 +54,28 @@ fun DeviceSelector(
             if (devices.isNotEmpty()) {
                 LazyColumn {
                     items(devices) { device ->
-                        DeviceRow(
-                            device = device,
-                            selected = device.id == selectedDeviceId,
-                            onSelect = {
-                                val unregisterPayload = JSONObject().apply {
-                                    put("deviceId", selectedDeviceId)
-                                }
-                                SocketManager.emit("unregister-device", unregisterPayload)
+                        if (device.canRing != null && device.canRing) {
+                            DeviceRow(
+                                device = device,
+                                selected = device.id == selectedDeviceId,
+                                onSelect = {
+                                    val unregisterPayload = JSONObject().apply {
+                                        put("deviceId", selectedDeviceId)
+                                    }
+                                    SocketManager.emit("unregister-device", unregisterPayload)
 
-                                appPreferences.createDeviceId(device.id)
+                                    appPreferences.createDeviceId(device.id)
 
-                                val registerPayload = JSONObject().apply {
-                                    put("deviceId", device.id)
-                                }
-                                SocketManager.emit("register-device", registerPayload)
+                                    val registerPayload = JSONObject().apply {
+                                        put("deviceId", device.id)
+                                    }
+                                    SocketManager.emit("register-device", registerPayload)
 
-                                onDeviceSelect(device.id)
-                                onDismissBottomSheet()
-                            },
-                        )
+                                    onDeviceSelect(device.id)
+                                    onDismissBottomSheet()
+                                },
+                            )
+                        }
                     }
                 }
             } else {

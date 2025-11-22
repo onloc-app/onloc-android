@@ -24,6 +24,10 @@ data class Device(
     val userId: Int,
 
     val name: String,
+
+    @SerializedName("can_ring")
+    val canRing: Boolean?,
+
     val icon: String?,
 
     @SerializedName("latest_location")
