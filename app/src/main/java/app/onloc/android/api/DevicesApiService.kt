@@ -22,6 +22,7 @@ import com.google.gson.Gson
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
 import java.io.IOException
 
@@ -50,6 +51,21 @@ class DevicesApiService(context: Context, private val ip: String, private val to
                     callback(null, "Error: ${response.code}")
                 }
             }
+        })
+    }
+
+    fun ringDevice(deviceId: Int) {
+        val url = "$ip/api/devices/$deviceId/ring"
+
+        val request = Request.Builder()
+            .url(url)
+            .addHeader("Authorization", "Bearer $token")
+            .post("".toRequestBody(null))
+            .build()
+
+        client.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {}
+            override fun onResponse(call: Call, response: Response) {}
         })
     }
 

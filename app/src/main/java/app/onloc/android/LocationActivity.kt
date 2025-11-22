@@ -63,7 +63,6 @@ import io.github.dellisd.spatialk.geojson.BoundingBox
 import io.github.dellisd.spatialk.geojson.Point
 import io.github.dellisd.spatialk.geojson.Position
 import kotlinx.coroutines.launch
-import org.json.JSONObject
 import java.lang.System.currentTimeMillis
 
 const val DEFAULT_SLIDER_POSITION = 15f
@@ -108,6 +107,13 @@ class LocationActivity : ComponentActivity() {
                             context.startActivity(intent)
                         }
                     }
+                }
+            }
+
+            fun ringDevice(deviceId: Int) {
+                if (accessToken != null && ip != null) {
+                    val devicesApiService = DevicesApiService(context, ip, accessToken)
+                    devicesApiService.ringDevice(deviceId)
                 }
             }
 
@@ -647,16 +653,13 @@ class LocationActivity : ComponentActivity() {
                                     )
                                 }
                             }
-                            if (selectedDevice != null && SocketManager.isConnected()) {
+                            if (selectedDevice != null &&
+                                SocketManager.isConnected() &&
+                                selectedDevice?.canRing == true
+                            ) {
                                 ElevatedButton(
                                     onClick = {
-                                        val payload = JSONObject().apply {
-                                            put("deviceId", selectedDevice!!.id)
-                                        }
-                                        SocketManager.emit(
-                                            "ring",
-                                            payload
-                                        )
+                                        ringDevice(selectedDevice!!.id)
                                     },
                                     modifier = Modifier
                                         .height(48.dp)
