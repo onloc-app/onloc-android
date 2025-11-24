@@ -55,8 +55,8 @@ class AuthApiService(context: Context, private val ip: String) {
                     if (response.isSuccessful) {
                         try {
                             val json = JSONObject(responseBody)
-                            val accessToken = json.getString("accessToken")
-                            val refreshToken = json.getString("refreshToken")
+                            val accessToken = json.getString("access_token")
+                            val refreshToken = json.getString("refresh_token")
                             val userInfo = json.getJSONObject("user")
 
                             val user = User(
@@ -89,7 +89,7 @@ class AuthApiService(context: Context, private val ip: String) {
         val url = "$ip/api/tokens"
 
         val jsonBody = JSONObject().apply {
-            put("refreshToken", refreshToken)
+            put("refresh_token", refreshToken)
         }
 
         val requestBody = jsonBody.toString().toRequestBody("application/json; charset=utf-8".toMediaType())
@@ -170,7 +170,7 @@ class AuthApiService(context: Context, private val ip: String) {
         val url = "$ip/api/auth/refresh"
 
         val jsonBody = JSONObject().apply {
-            put("refreshToken", refreshToken)
+            put("refresh_token", refreshToken)
         }
         val body = jsonBody
             .toString()
@@ -184,7 +184,7 @@ class AuthApiService(context: Context, private val ip: String) {
         client.newCall(request).execute().use { response ->
             if (!response.isSuccessful) throw IOException("Refresh failed ${response.code}")
             val json = JSONObject(response.body.string())
-            return json.getString("accessToken")
+            return json.getString("access_token")
         }
     }
 }
