@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import app.onloc.android.api.DevicesApiService
 import app.onloc.android.components.Avatar
+import app.onloc.android.components.IntervalPicker
 import app.onloc.android.components.Permissions
 import app.onloc.android.components.devices.DeviceSelector
 import app.onloc.android.components.map.LocationPuck
@@ -65,7 +66,7 @@ import io.github.dellisd.spatialk.geojson.Position
 import kotlinx.coroutines.launch
 import java.lang.System.currentTimeMillis
 
-const val DEFAULT_SLIDER_POSITION = 15f
+const val DEFAULT_SLIDER_POSITION = 900
 
 class LocationActivity : ComponentActivity() {
     @SuppressLint("MissingPermission")
@@ -347,36 +348,23 @@ class LocationActivity : ComponentActivity() {
                                         Text(
                                             text = "Interval between uploads",
                                         )
+                                        Spacer(modifier = Modifier.height(8.dp))
                                         var sliderPosition by remember {
-                                            mutableFloatStateOf(DEFAULT_SLIDER_POSITION)
+                                            mutableIntStateOf(DEFAULT_SLIDER_POSITION)
                                         }
                                         if (servicePreferences.getLocationUpdatesInterval() != -1) {
-                                            sliderPosition = servicePreferences.getLocationUpdatesInterval().toFloat()
+                                            sliderPosition = servicePreferences.getLocationUpdatesInterval()
                                         } else {
                                             servicePreferences.createLocationUpdatesInterval(
-                                                sliderPosition.toInt()
+                                                sliderPosition
                                             )
                                         }
-                                        Slider(
+                                        IntervalPicker(
                                             value = sliderPosition,
-                                            onValueChange = {
+                                            enabled = !isLocationServiceRunning,
+                                            onChange = {
                                                 sliderPosition = it
-                                                servicePreferences.createLocationUpdatesInterval(it.toInt())
                                             },
-                                            colors = SliderDefaults.colors(
-                                                thumbColor = MaterialTheme.colorScheme.secondary,
-                                                activeTrackColor = MaterialTheme.colorScheme.secondary,
-                                                inactiveTickColor = MaterialTheme.colorScheme.secondaryContainer,
-                                            ),
-                                            steps = 3,
-                                            valueRange = 1f..60f,
-                                            enabled = !isLocationServiceRunning
-                                        )
-                                        Text(
-                                            text = "${sliderPosition.toInt()} ${
-                                                if (sliderPosition > 1) "minutes"
-                                                else "minute"
-                                            }"
                                         )
                                     }
                                 }
@@ -536,14 +524,14 @@ class LocationActivity : ComponentActivity() {
                             expandedContent = { MapAttribution() },
                         )
 
-                        // Bottom start controls
+                        // Top end controls
                         ElevatedButton(
                             onClick = {
                                 grabCurrentLocation()
                                 goToCurrentLocation()
                             },
                             modifier = Modifier
-                                .align(Alignment.BottomStart)
+                                .align(Alignment.TopEnd)
                                 .height(48.dp)
                                 .width(48.dp),
                             contentPadding = PaddingValues(0.dp),

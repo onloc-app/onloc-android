@@ -35,7 +35,7 @@ import app.onloc.android.helpers.getIP
 import app.onloc.android.helpers.getInterval
 import app.onloc.android.helpers.getSelectedDeviceId
 
-const val MINUTE = 60000L
+const val SECOND = 1000L
 const val START_LOCATION_SERVICE_NOTIFICATION_ID = 1001
 const val STOP_LOCATION_SERVICE_NOTIFICATION_ID = 1002
 
@@ -90,7 +90,7 @@ class LocationForegroundService : Service() {
 
         val provider = LocationManager.FUSED_PROVIDER
 
-        val interval = getInterval(deviceEncryptedPreferences) * MINUTE
+        val interval = getInterval(deviceEncryptedPreferences) * SECOND
 
         locationManager.requestLocationUpdates(
             provider,

@@ -24,8 +24,8 @@ import com.google.gson.Gson
 
 const val IP_KEY = "ip"
 const val DEVICE_ID_KEY = "device_id"
-const val ACCESS_TOKEN_KEY = "accessToken"
-const val REFRESH_TOKEN_KEY = "refreshToken"
+const val ACCESS_TOKEN_KEY = "access_token"
+const val REFRESH_TOKEN_KEY = "refresh_token"
 const val USER_KEY = "user"
 
 const val LOCATION_SERVICE_KEY = "location"
