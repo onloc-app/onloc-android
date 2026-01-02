@@ -64,8 +64,8 @@ class DevicesApiService(context: Context, private val ip: String, private val to
             .build()
 
         client.newCall(request).enqueue(object : Callback {
-            override fun onFailure(call: Call, e: IOException) {}
-            override fun onResponse(call: Call, response: Response) {}
+            override fun onFailure(call: Call, e: IOException) = Unit
+            override fun onResponse(call: Call, response: Response) = Unit
         })
     }
 
