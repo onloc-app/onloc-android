@@ -23,9 +23,11 @@ import android.content.Intent
 import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationCompat
+import app.onloc.android.R
 import app.onloc.android.RingerActivity
 import app.onloc.android.singletons.RingerState
 
+private const val CHANNEL_ID = "ringer_channel"
 const val START_RINGER_SERVICE_NOTIFICATION_ID = 3001
 
 class RingerService : Service() {
@@ -50,16 +52,16 @@ class RingerService : Service() {
     override fun onBind(intent: Intent?): IBinder? = null
 
     private fun createRingerNotification(): Notification {
-        val channelId = "ringer_channel"
-        val channelName = "Ringer channel"
+        val channelId = CHANNEL_ID
+        val channelName = getString(R.string.service_ringer_channel_name)
         val channel = NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_HIGH)
 
         val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.createNotificationChannel(channel)
 
         return NotificationCompat.Builder(this, channelId)
-            .setContentTitle("Ringing...")
-            .setContentText("Device is ringing")
+            .setContentTitle(getString(R.string.service_ringer_start_notification_title))
+            .setContentText(getString(R.string.service_ringer_start_notification_description))
             .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .build()

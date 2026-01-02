@@ -34,6 +34,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import app.onloc.android.api.DevicesApiService
@@ -66,7 +67,7 @@ import io.github.dellisd.spatialk.geojson.Position
 import kotlinx.coroutines.launch
 import java.lang.System.currentTimeMillis
 
-const val DEFAULT_SLIDER_POSITION = 900
+const val DEFAULT_SLIDER_POSITION = 15 * 60 // 15 minutes
 
 class LocationActivity : ComponentActivity() {
     @SuppressLint("MissingPermission")
@@ -244,8 +245,10 @@ class LocationActivity : ComponentActivity() {
                 val defaultPadding = 16.dp
 
                 val serviceStatus = when {
-                    selectedDeviceId == -1 -> "No device selected"
-                    !notificationsGranted || !locationGranted -> "Required permissions missing"
+                    selectedDeviceId == -1 -> stringResource(R.string.main_service_status_no_selection)
+                    !notificationsGranted || !locationGranted ->
+                        stringResource(R.string.main_service_status_missing_permissions)
+
                     else -> ""
                 }
                 val canStartLocationService = selectedDeviceId != -1 && notificationsGranted && locationGranted
@@ -253,7 +256,7 @@ class LocationActivity : ComponentActivity() {
                 BottomSheetScaffold(
                     topBar = {
                         TopAppBar(
-                            title = { Text("Onloc") },
+                            title = { Text(stringResource(R.string.main_title)) },
                             colors = TopAppBarDefaults.topAppBarColors(
                                 containerColor = MaterialTheme.colorScheme.secondaryContainer,
                                 titleContentColor = MaterialTheme.colorScheme.primary
@@ -264,16 +267,11 @@ class LocationActivity : ComponentActivity() {
                                     enabled = !isLocationServiceRunning
                                 ) {
                                     if (selectedDeviceId == -1) {
-                                        Text("Select a device")
+                                        Text(stringResource(R.string.main_device_button_label))
                                     } else {
                                         val device = devices.find { it.id == selectedDeviceId }
                                         if (device != null) {
                                             Text(device.name)
-                                        } else {
-                                            Text(
-                                                "Error",
-                                                color = MaterialTheme.colorScheme.error
-                                            )
                                         }
                                     }
                                 }
@@ -296,7 +294,7 @@ class LocationActivity : ComponentActivity() {
                                     horizontalArrangement = Arrangement.spacedBy(defaultPadding),
                                 ) {
                                     Text(
-                                        text = "Location service",
+                                        text = stringResource(R.string.main_location_service_switch_label),
                                         style = MaterialTheme.typography.titleMedium,
                                         color = if (!canStartLocationService)
                                             MaterialTheme.colorScheme.onBackground else Color.Unspecified,
@@ -323,7 +321,7 @@ class LocationActivity : ComponentActivity() {
                             }
 
                             Text(
-                                text = "Settings",
+                                text = stringResource(R.string.main_settings_header),
                                 style = MaterialTheme.typography.titleLarge,
                             )
 
@@ -346,7 +344,7 @@ class LocationActivity : ComponentActivity() {
                                             .padding(defaultPadding)
                                     ) {
                                         Text(
-                                            text = "Interval between uploads",
+                                            text = stringResource(R.string.main_interval_slider_label),
                                         )
                                         Spacer(modifier = Modifier.height(8.dp))
                                         var sliderPosition by remember {

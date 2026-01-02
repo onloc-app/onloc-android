@@ -1,5 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Onloc</string>
     <string name="title_activity_location">Location Activity</string>
     <string name="title_activity_ringer">Ringer Activity</string>
+    <string name="login_username_field_label">Username</string>
+    <string name="login_password_field_label">Password</string>
+    <string name="login_ip_field_label">Server\'s IP</string>
+    <string name="login_found_servers_button">Show found servers</string>
+    <string name="login_found_servers_dialog_title">Found servers</string>
+    <string name="login_title">Onloc</string>
+    <string name="login_description">Log into an instance</string>
+    <string name="login_submit_button_label">Login</string>
+    <string name="main_title">Onloc</string>
+    <string name="main_service_status_no_selection">No device selected</string>
+    <string name="main_service_status_missing_permissions">Required permissions missing</string>
+    <string name="main_device_button_label">Select a device</string>
+    <string name="avatar_dialog_title">Account</string>
+    <string name="avatar_logout_button_label">Logout</string>
+    <string name="avatar_close_button_description">Close</string>
+    <string name="main_location_service_switch_label">Location service</string>
+    <string name="main_settings_header">Settings</string>
+    <string name="permissions_header">Features and Permissions</string>
+    <string name="main_interval_slider_label">Interval between uploads</string>
+    <plurals name="interval_picker_seconds">
+        <item quantity="one">Second</item>
+        <item quantity="other">Seconds</item>
+    </plurals>
+    <plurals name="interval_picker_minutes">
+        <item quantity="one">Minute</item>
+        <item quantity="other">Minutes</item>
+    </plurals>
+    <plurals name="interval_picker_hours">
+        <item quantity="one">Hour</item>
+        <item quantity="other">Hours</item>
+    </plurals>
+    <plurals name="interval_picker_days">
+        <item quantity="one">Day</item>
+        <item quantity="other">Days</item>
+    </plurals>
+
+    <!-- Permissions -->
+    <string name="permissions_background_location_header">Background Location</string>
+    <string name="permissions_background_location_description">
+        Allows the app to share your device\'s location with the server even when the app is not in use.
+    </string>
+    <string name="permissions_notifications_label">Notifications</string>
+    <string name="permissions_location_label">Location</string>
+    <string name="permissions_do_not_disturb_label">Do Not Disturb access</string>
+    <string name="permissions_overlay_label">Display over other apps</string>
+    <string name="permissions_ring_header">Ring Over the Air</string>
+    <string name="permissions_ring_description">
+        The app will listen for commands from the server and ring when commanded to.
+    </string>
+    <string name="permissions_grant_button_label">Grant</string>
+    <string name="permissions_granted_button_label">Granted</string>
+
+    <!-- Services -->
+    <string name="service_location_channel_name">Location Service</string>
+    <string name="service_location_start_notification_title">Location Service Started</string>
+    <string name="service_location_start_notification_description">Tracking your location in the background</string>
+    <string name="service_location_stop_notification_title">Location Service Stopped</string>
+    <string name="service_location_stop_notification_description">
+        The location tracking service has been stopped
+    </string>
+
+    <string name="service_ringer_websocket_channel_name">Ringer WebSocket Service</string>
+    <string name="service_ringer_websocket_start_notification_title">Listening for commands</string>
+    <string name="service_ringer_websocket_start_notification_description">
+        The device will ring when commanded to
+    </string>
+
+    <string name="service_ringer_channel_name">Ring</string>
+    <string name="service_ringer_start_notification_title">Ringing...</string>
+    <string name="service_ringer_start_notification_description">Device is ringing</string>
 </resources>

@@ -32,8 +32,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -41,14 +39,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import app.onloc.android.api.AuthApiService
+import app.onloc.android.components.PasswordTextField
 import app.onloc.android.ui.theme.OnlocAndroidTheme
 import okio.IOException
 
@@ -94,11 +92,11 @@ class MainActivity : ComponentActivity() {
                         verticalArrangement = Arrangement.Center
                     ) {
                         Text(
-                            text = "Onloc",
+                            text = stringResource(R.string.login_title),
                             style = MaterialTheme.typography.headlineLarge,
                         )
                         Text(
-                            text = "Log into an instance",
+                            text = stringResource(R.string.login_description),
                             style = MaterialTheme.typography.titleMedium,
                             modifier = Modifier.padding(bottom = 8.dp)
                         )
@@ -160,7 +158,7 @@ fun LoginForm(modifier: Modifier = Modifier) {
             OutlinedTextField(
                 value = ip,
                 onValueChange = { ip = it },
-                label = { Text("Server's IP") },
+                label = { Text(stringResource(R.string.login_ip_field_label)) },
                 singleLine = true,
                 isError = isIpError.isNotEmpty(),
                 supportingText = {
@@ -186,7 +184,7 @@ fun LoginForm(modifier: Modifier = Modifier) {
                         showFoundServers = true
                     }
                 ) {
-                    Text(text = "Show found servers")
+                    Text(text = stringResource(R.string.login_found_servers_button))
                 }
             }
 
@@ -220,7 +218,7 @@ fun LoginForm(modifier: Modifier = Modifier) {
                                 }
 
                                 Text(
-                                    text = "Found Servers",
+                                    text = stringResource(R.string.login_found_servers_dialog_title),
                                     modifier = Modifier.align(Alignment.Center),
                                     textAlign = TextAlign.Center,
                                     style = MaterialTheme.typography.titleLarge,
@@ -264,7 +262,7 @@ fun LoginForm(modifier: Modifier = Modifier) {
             OutlinedTextField(
                 value = username,
                 onValueChange = { username = it },
-                label = { Text("Username") },
+                label = { Text(stringResource(R.string.login_username_field_label)) },
                 singleLine = true,
                 isError = isUsernameError.isNotEmpty(),
                 supportingText = {
@@ -329,56 +327,10 @@ fun LoginForm(modifier: Modifier = Modifier) {
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Login")
+                Text(stringResource(R.string.login_submit_button_label))
             }
         }
     }
-}
-
-@Composable
-fun PasswordTextField(
-    password: String,
-    onPasswordChange: (String) -> Unit,
-    isPasswordError: String,
-    modifier: Modifier = Modifier,
-) {
-    var passwordVisible by remember { mutableStateOf(false) }
-
-    OutlinedTextField(
-        value = password,
-        onValueChange = onPasswordChange,
-        label = { Text("Password") },
-        singleLine = true,
-        visualTransformation =
-            if (passwordVisible)
-                VisualTransformation.None
-            else
-                PasswordVisualTransformation(),
-        trailingIcon = {
-            val image = if (passwordVisible)
-                Icons.Default.Visibility
-            else
-                Icons.Default.VisibilityOff
-
-            IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                Icon(
-                    imageVector = image,
-                    contentDescription = if (passwordVisible) "Hide password" else "Show password"
-                )
-            }
-        },
-        isError = isPasswordError.isNotEmpty(),
-        supportingText = {
-            if (isPasswordError.isNotEmpty()) {
-                Text(
-                    modifier = Modifier.fillMaxWidth(),
-                    text = isPasswordError,
-                    color = MaterialTheme.colorScheme.error
-                )
-            }
-        },
-        modifier = modifier.fillMaxWidth()
-    )
 }
 
 fun validateInputs(

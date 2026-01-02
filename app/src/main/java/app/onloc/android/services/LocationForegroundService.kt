@@ -29,12 +29,14 @@ import android.os.BatteryManager
 import android.os.IBinder
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
+import app.onloc.android.R
 import app.onloc.android.api.LocationsApiService
 import app.onloc.android.helpers.getAccessToken
 import app.onloc.android.helpers.getIP
 import app.onloc.android.helpers.getInterval
 import app.onloc.android.helpers.getSelectedDeviceId
 
+private const val CHANNEL_ID = "location_channel"
 const val SECOND = 1000L
 const val START_LOCATION_SERVICE_NOTIFICATION_ID = 1001
 const val STOP_LOCATION_SERVICE_NOTIFICATION_ID = 1002
@@ -113,8 +115,8 @@ class LocationForegroundService : Service() {
     }
 
     private fun createStartForegroundNotification(): Notification {
-        val channelId = "location_channel"
-        val channelName = "Location channel"
+        val channelId = CHANNEL_ID
+        val channelName = getString(R.string.service_location_channel_name)
         val channel =
             NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_DEFAULT)
 
@@ -123,8 +125,8 @@ class LocationForegroundService : Service() {
         notificationManager.createNotificationChannel(channel)
 
         return NotificationCompat.Builder(this, channelId)
-            .setContentTitle("Location Tracking")
-            .setContentText("Tracking your location in the background")
+            .setContentTitle(getString(R.string.service_location_start_notification_title))
+            .setContentText(getString(R.string.service_location_start_notification_description))
             .setSmallIcon(android.R.drawable.ic_menu_mylocation)
             .build()
     }
@@ -156,8 +158,8 @@ class LocationForegroundService : Service() {
     }
 
     private fun createStopForegroundNotification(): Notification {
-        val channelId = "service_stop_channel"
-        val channelName = "Service stop channel"
+        val channelId = CHANNEL_ID
+        val channelName = getString(R.string.service_location_channel_name)
         val channel =
             NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_HIGH)
 
@@ -167,8 +169,8 @@ class LocationForegroundService : Service() {
 
         return NotificationCompat.Builder(this, channelId)
             .setSmallIcon(android.R.drawable.ic_dialog_alert)
-            .setContentTitle("Service Stopped")
-            .setContentText("The location tracking service has been stopped.")
+            .setContentTitle(getString(R.string.service_location_stop_notification_title))
+            .setContentText(getString(R.string.service_location_stop_notification_description))
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .build()
     }

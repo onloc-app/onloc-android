@@ -17,17 +17,22 @@ package app.onloc.android.components
 
 import android.app.Activity
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import app.onloc.android.R
 import app.onloc.android.permissions.DoNotDisturbPermission
 import app.onloc.android.permissions.LocationPermission
 import app.onloc.android.permissions.OverlayPermission
@@ -70,55 +75,68 @@ fun Permissions(
 
     Column(
         modifier = modifier
-            .fillMaxWidth()
+            .fillMaxWidth(),
     ) {
         Text(
-            text = "Features & Permissions",
+            text = stringResource(R.string.permissions_header),
             style = MaterialTheme.typography.titleLarge
         )
         Spacer(modifier = Modifier.height(16.dp))
 
         FeatureCard(
-            name = "Background Location",
-            description =
-                "Allows the app to share your device's location with the server even when the app is not in use.",
+            name = stringResource(R.string.permissions_background_location_header),
+            description = stringResource(R.string.permissions_background_location_description),
             isGranted = notificationsGranted && locationGranted,
             permissionCards = {
-                PermissionCard(name = "Notifications", isGranted = notificationsGranted, onGrantClick = {
-                    PostNotificationPermission().request(activity)
-                    notificationsGranted = PostNotificationPermission().isGranted(context)
-                    onPermissionsChange()
-                })
-                PermissionCard(name = "Location", isGranted = locationGranted, onGrantClick = {
-                    LocationPermission().request(activity)
-                    locationGranted = LocationPermission().isGranted(context)
-                    onPermissionsChange()
-                })
+                PermissionCard(
+                    name = stringResource(R.string.permissions_notifications_label),
+                    isGranted = notificationsGranted,
+                    onGrantClick = {
+                        PostNotificationPermission().request(activity)
+                        notificationsGranted = PostNotificationPermission().isGranted(context)
+                        onPermissionsChange()
+                    })
+                PermissionCard(
+                    name = stringResource(R.string.permissions_location_label),
+                    isGranted = locationGranted,
+                    onGrantClick = {
+                        LocationPermission().request(activity)
+                        locationGranted = LocationPermission().isGranted(context)
+                        onPermissionsChange()
+                    })
             }
         )
 
         FeatureCard(
-            name = "Ring Over the Air",
-            description =
-                "The app will listen for commands from the server and ring when commanded to.",
+            name = stringResource(R.string.permissions_ring_header),
+            description = stringResource(R.string.permissions_ring_description),
             isGranted = notificationsGranted && doNotDisturbGranted && overlayGranted,
             onGrant = { ServiceManager.startRingerWebSocketServiceIfAllowed(context) }
         ) {
-            PermissionCard(name = "Notifications", isGranted = notificationsGranted, onGrantClick = {
-                PostNotificationPermission().request(activity)
-                notificationsGranted = PostNotificationPermission().isGranted(context)
-                onPermissionsChange()
-            })
-            PermissionCard(name = "Do Not Disturb Access", isGranted = doNotDisturbGranted, onGrantClick = {
-                DoNotDisturbPermission().request(context)
-                doNotDisturbGranted = DoNotDisturbPermission().isGranted(context)
-                onPermissionsChange()
-            })
-            PermissionCard(name = "Overlay Permission", isGranted = overlayGranted, onGrantClick = {
-                OverlayPermission().request(activity)
-                overlayGranted = OverlayPermission().isGranted(context)
-                onPermissionsChange()
-            })
+            PermissionCard(
+                name = stringResource(R.string.permissions_notifications_label),
+                isGranted = notificationsGranted,
+                onGrantClick = {
+                    PostNotificationPermission().request(activity)
+                    notificationsGranted = PostNotificationPermission().isGranted(context)
+                    onPermissionsChange()
+                })
+            PermissionCard(
+                name = stringResource(R.string.permissions_do_not_disturb_label),
+                isGranted = doNotDisturbGranted,
+                onGrantClick = {
+                    DoNotDisturbPermission().request(context)
+                    doNotDisturbGranted = DoNotDisturbPermission().isGranted(context)
+                    onPermissionsChange()
+                })
+            PermissionCard(
+                name = stringResource(R.string.permissions_overlay_label),
+                isGranted = overlayGranted,
+                onGrantClick = {
+                    OverlayPermission().request(activity)
+                    overlayGranted = OverlayPermission().isGranted(context)
+                    onPermissionsChange()
+                })
         }
     }
 }
@@ -190,12 +208,19 @@ fun PermissionCard(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
-        Text(text = name, style = MaterialTheme.typography.titleSmall)
+        Text(text = name, style = MaterialTheme.typography.titleSmall, modifier = Modifier.weight(2f))
         OutlinedButton(
             onClick = onGrantClick,
             enabled = !isGranted,
+            modifier = Modifier.weight(1f),
         ) {
-            Text(if (isGranted) "Granted" else "Grant")
+            Text(
+                if (isGranted) {
+                    stringResource(R.string.permissions_granted_button_label)
+                } else {
+                    stringResource(R.string.permissions_grant_button_label)
+                }
+            )
         }
     }
 }

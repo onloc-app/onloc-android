@@ -26,11 +26,13 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import app.onloc.android.AppPreferences
 import app.onloc.android.MainActivity
+import app.onloc.android.R
 import app.onloc.android.UserPreferences
 import app.onloc.android.api.AuthApiService
 import app.onloc.android.services.ServiceManager
@@ -52,7 +54,7 @@ fun Avatar(modifier: Modifier = Modifier) {
     ) {
         Icon(
             Icons.Outlined.AccountCircle,
-            contentDescription = "Account"
+            contentDescription = stringResource(R.string.avatar_dialog_title)
         )
         when {
             accountDialogOpened -> {
@@ -80,13 +82,14 @@ fun Avatar(modifier: Modifier = Modifier) {
                                     ) {
                                         Icon(
                                             imageVector = Icons.Filled.Close,
-                                            contentDescription = "Close",
+                                            contentDescription =
+                                                stringResource(R.string.avatar_close_button_description),
                                             tint = MaterialTheme.colorScheme.onSurface
                                         )
                                     }
 
                                     Text(
-                                        text = "Account",
+                                        text = stringResource(R.string.avatar_dialog_title),
                                         modifier = Modifier.align(Alignment.Center),
                                         textAlign = TextAlign.Center,
                                         style = MaterialTheme.typography.titleLarge,
@@ -107,7 +110,7 @@ fun Avatar(modifier: Modifier = Modifier) {
                                     ) {
                                         Icon(
                                             Icons.Outlined.AccountCircle,
-                                            contentDescription = "Avatar",
+                                            contentDescription = null,
                                             modifier = Modifier.size(48.dp)
                                         )
 
@@ -138,7 +141,7 @@ fun Avatar(modifier: Modifier = Modifier) {
                                             context.startActivity(intent)
                                         }
                                     ) {
-                                        Text("Logout")
+                                        Text(stringResource(R.string.avatar_logout_button_label))
                                     }
                                 }
                             }

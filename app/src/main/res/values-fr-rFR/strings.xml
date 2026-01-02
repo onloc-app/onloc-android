@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Onloc</string>
+    <string name="title_activity_location">Activité de localisation</string>
+    <string name="title_activity_ringer">Activité de sonnerie</string>
+    <string name="login_username_field_label">Nom d\'utilisateur</string>
+    <string name="login_password_field_label">Mot de passe</string>
+    <string name="login_ip_field_label">Adresse IP du serveur</string>
+    <string name="login_found_servers_button">Afficher les serveurs trouvés</string>
+    <string name="login_found_servers_dialog_title">Serveurs trouvés</string>
+    <string name="login_title">Onloc</string>
+    <string name="login_description">Connectez-vous à une instance</string>
+    <string name="login_submit_button_label">Se connecter</string>
+    <string name="main_title">Onloc</string>
+    <string name="main_service_status_no_selection">Aucun appareil sélectionné</string>
+    <string name="main_service_status_missing_permissions">Autorisations obligatoires manquantes</string>
+    <string name="main_device_button_label">Sélectionner un appareil</string>
+    <string name="avatar_dialog_title">Compte</string>
+    <string name="avatar_logout_button_label">Se déconnecter</string>
+    <string name="avatar_close_button_description">Fermer</string>
+    <string name="main_location_service_switch_label">Service de localisation</string>
+    <string name="main_settings_header">Paramètres</string>
+    <string name="permissions_header">Fonctionnalités et autorisations</string>
+    <string name="main_interval_slider_label">Intervalle entre les téléversements</string>
+    <plurals name="interval_picker_seconds">
+        <item quantity="one">Seconde</item>
+        <item quantity="other">Secondes</item>
+    </plurals>
+    <plurals name="interval_picker_minutes">
+        <item quantity="one">Minute</item>
+        <item quantity="other">Minutes</item>
+    </plurals>
+    <plurals name="interval_picker_hours">
+        <item quantity="one">Heure</item>
+        <item quantity="other">Heures</item>
+    </plurals>
+    <plurals name="interval_picker_days">
+        <item quantity="one">Jour</item>
+        <item quantity="other">Jours</item>
+    </plurals>
+
+    <!-- Permissions -->
+    <string name="permissions_background_location_header">Localisation en arrière-plan</string>
+    <string name="permissions_background_location_description">
+        Permet à l\'application de partager l\'emplacement de votre appareil avec le serveur même lorsque l\'application
+        n\'est pas utilisée.
+    </string>
+    <string name="permissions_notifications_label">Notifications</string>
+    <string name="permissions_location_label">Localisation</string>
+    <string name="permissions_do_not_disturb_label">Accès au mode Ne pas déranger</string>
+    <string name="permissions_overlay_label">Afficher par-dessus les autres applications</string>
+    <string name="permissions_ring_header">Faire sonner à distance</string>
+    <string name="permissions_ring_description">
+        L\'application écoute les commandes envoyées par le serveur et déclenche la sonnerie quand elle en reçoit
+        l\'instruction.
+    </string>
+    <string name="permissions_grant_button_label">Accorder</string>
+    <string name="permissions_granted_button_label">Accordé</string>
+
+    <!-- Services -->
+    <string name="service_location_channel_name">Service de localisation</string>
+    <string name="service_location_start_notification_title">Service de localisation démarré</string>
+    <string name="service_location_start_notification_description">Suivi de votre localisation en arrière-plan</string>
+    <string name="service_location_stop_notification_title">Service de localisation arrêté</string>
+    <string name="service_location_stop_notification_description">
+        Le service de suivi de localisation a été arrêté
+    </string>
+
+    <string name="service_ringer_websocket_channel_name">Service de sonnerie à distance</string>
+    <string name="service_ringer_websocket_start_notification_title">À l\'écoute des commandes</string>
+    <string name="service_ringer_websocket_start_notification_description">
+        L\'appareil sonnera lorsqu\'une commande sera reçue
+    </string>
+
+    <string name="service_ringer_channel_name">Sonnerie</string>
+    <string name="service_ringer_start_notification_title">Sonnerie en cours...</string>
+    <string name="service_ringer_start_notification_description">L\'appareil est en train de sonner</string>
+</resources>

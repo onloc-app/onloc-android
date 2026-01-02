@@ -25,6 +25,7 @@ import android.content.pm.PackageManager
 import android.os.IBinder
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
+import app.onloc.android.R
 import app.onloc.android.SocketManager
 import app.onloc.android.helpers.getAccessToken
 import app.onloc.android.helpers.getIP
@@ -33,6 +34,7 @@ import app.onloc.android.services.ServiceStatus.isWebSocketServiceRunning
 import app.onloc.android.singletons.RingerState
 import org.json.JSONObject
 
+private const val CHANNEL_ID = "ringer_websocket_channel"
 const val START_RINGER_WEBSOCKET_SERVICE_NOTIFICATION_ID = 2001
 
 object ServiceStatus {
@@ -60,16 +62,16 @@ class RingerWebSocketService : Service() {
     }
 
     private fun createNotification(): Notification {
-        val channelId = "ringer_websocket_channel"
-        val channelName = "Ringer WebSocket channel"
+        val channelId = CHANNEL_ID
+        val channelName = getString(R.string.service_ringer_websocket_channel_name)
         val channel = NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_HIGH)
 
         val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.createNotificationChannel(channel)
 
         return NotificationCompat.Builder(this, channelId)
-            .setContentTitle("Listening for commands")
-            .setContentText("The device will ring when commanded to")
+            .setContentTitle(getString(R.string.service_ringer_websocket_start_notification_title))
+            .setContentText(getString(R.string.service_ringer_websocket_start_notification_description))
             .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .build()
