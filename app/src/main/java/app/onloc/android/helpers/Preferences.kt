@@ -16,19 +16,23 @@
 package app.onloc.android.helpers
 
 import android.content.SharedPreferences
+import app.onloc.android.ACCESS_TOKEN_KEY
+import app.onloc.android.DEVICE_ID_KEY
+import app.onloc.android.IP_KEY
+import app.onloc.android.LOCATION_UPDATES_INTERVAL_KEY
 
 fun getIP(deviceEncryptedPreferences: SharedPreferences): String? {
-    return deviceEncryptedPreferences.getString("ip", null)
+    return deviceEncryptedPreferences.getString(IP_KEY, null)
 }
 
 fun getAccessToken(deviceEncryptedPreferences: SharedPreferences): String? {
-    return deviceEncryptedPreferences.getString("accessToken", null)
+    return deviceEncryptedPreferences.getString(ACCESS_TOKEN_KEY, null)
 }
 
 fun getSelectedDeviceId(deviceEncryptedPreferences: SharedPreferences): Int {
-    return deviceEncryptedPreferences.getInt("device_id", -1)
+    return deviceEncryptedPreferences.getInt(DEVICE_ID_KEY, -1)
 }
 
 fun getInterval(deviceEncryptedPreferences: SharedPreferences): Int {
-    return deviceEncryptedPreferences.getInt("interval", -1)
+    return deviceEncryptedPreferences.getInt(LOCATION_UPDATES_INTERVAL_KEY, -1)
 }

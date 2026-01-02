@@ -16,6 +16,7 @@
 package app.onloc.android
 
 import android.content.Context
+import android.content.SharedPreferences
 import androidx.core.content.edit
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
@@ -30,6 +31,8 @@ const val USER_KEY = "user"
 
 const val LOCATION_SERVICE_KEY = "location"
 const val LOCATION_UPDATES_INTERVAL_KEY = "interval"
+
+private const val USER_CREDENTIALS_FILENAME = "user_credentials"
 
 private class ProtectedPreferences(context: Context) {
     val deviceProtectedPreferences by lazy {
@@ -136,22 +139,37 @@ class UserPreferences(private val context: Context) {
             .build()
     }
 
-    private val encryptedSharedPreferences by lazy {
-        EncryptedSharedPreferences.create(
-            context,
-            "user_credentials",
-            masterKey,
-            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-        )
+    private fun getEncryptedSharedPreferences(): SharedPreferences {
+        return try {
+            EncryptedSharedPreferences.create(
+                context,
+                USER_CREDENTIALS_FILENAME,
+                masterKey,
+                EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+            )
+        } catch (_: Throwable) {
+            context.deleteSharedPreferences(USER_CREDENTIALS_FILENAME)
+            protectedPreferences.deleteFromDeviceEncryptedStorage(ACCESS_TOKEN_KEY)
+            protectedPreferences.deleteFromDeviceEncryptedStorage(REFRESH_TOKEN_KEY)
+            EncryptedSharedPreferences.create(
+                context,
+                USER_CREDENTIALS_FILENAME,
+                masterKey,
+                EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+            )
+        }
     }
 
     data class UserCredentials(val accessToken: String?, val refreshToken: String?, val user: User?)
 
     fun getUserCredentials(): UserCredentials {
-        val accessToken = encryptedSharedPreferences.getString(ACCESS_TOKEN_KEY, null)
-        val refreshToken = encryptedSharedPreferences.getString(REFRESH_TOKEN_KEY, null)
-        val userJson = encryptedSharedPreferences.getString(USER_KEY, null)
+        val prefs = getEncryptedSharedPreferences()
+
+        val accessToken = prefs.getString(ACCESS_TOKEN_KEY, null)
+        val refreshToken = prefs.getString(REFRESH_TOKEN_KEY, null)
+        val userJson = prefs.getString(USER_KEY, null)
 
         return if (accessToken != null && refreshToken != null && userJson != null) {
             val user = Gson().fromJson(userJson, User::class.java)
@@ -162,7 +180,9 @@ class UserPreferences(private val context: Context) {
     }
 
     fun createUserCredentials(tokens: Pair<String, String>, user: User) {
-        encryptedSharedPreferences.edit().apply {
+        val prefs = getEncryptedSharedPreferences()
+
+        prefs.edit().apply {
             putString(ACCESS_TOKEN_KEY, tokens.first)
             putString(REFRESH_TOKEN_KEY, tokens.second)
             putString(USER_KEY, Gson().toJson(user))
@@ -173,7 +193,9 @@ class UserPreferences(private val context: Context) {
     }
 
     fun deleteUserCredentials() {
-        encryptedSharedPreferences.edit().apply {
+        val prefs = getEncryptedSharedPreferences()
+
+        prefs.edit().apply {
             clear()
             apply()
         }
@@ -182,7 +204,9 @@ class UserPreferences(private val context: Context) {
     }
 
     fun updateAccessToken(accessToken: String) {
-        encryptedSharedPreferences.edit().apply {
+        val prefs = getEncryptedSharedPreferences()
+
+        prefs.edit().apply {
             putString(ACCESS_TOKEN_KEY, accessToken)
             apply()
         }
