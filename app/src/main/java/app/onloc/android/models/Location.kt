@@ -15,8 +15,10 @@
 
 package app.onloc.android.models
 
+import androidx.annotation.Keep
 import com.google.gson.annotations.SerializedName
 
+@Keep
 data class Location(
     val id: Int,
 

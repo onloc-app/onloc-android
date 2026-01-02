@@ -15,8 +15,10 @@
 
 package app.onloc.android.models
 
+import androidx.annotation.Keep
 import com.google.gson.annotations.SerializedName
 
+@Keep
 data class Device(
     val id: Int,
 
@@ -40,6 +42,7 @@ data class Device(
     val updatedAt: String?
 )
 
+@Keep
 data class DeviceResponse(
     val devices: List<Device>
 )
