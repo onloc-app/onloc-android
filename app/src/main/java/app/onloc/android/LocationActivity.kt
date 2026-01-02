@@ -544,10 +544,6 @@ class LocationActivity : ComponentActivity() {
                             metersPerDp = cameraState.metersPerDpAtTarget,
                             modifier = Modifier.align(Alignment.TopStart),
                         )
-                        DisappearingCompassButton(
-                            cameraState = cameraState,
-                            modifier = Modifier.align(Alignment.TopEnd)
-                        )
 
                         var attributionExpanded by remember { mutableStateOf(false) }
                         LaunchedEffect(cameraState.isCameraMoving, cameraState.moveReason) {
@@ -567,30 +563,35 @@ class LocationActivity : ComponentActivity() {
                         )
 
                         // Top end controls
-                        ElevatedButton(
-                            onClick = {
-                                grabCurrentLocation()
-                                goToCurrentLocation()
-                            },
-                            modifier = Modifier
-                                .align(Alignment.TopEnd)
-                                .height(48.dp)
-                                .width(48.dp),
-                            contentPadding = PaddingValues(0.dp),
-                            enabled = notificationsGranted
+                        Column(
+                            modifier = Modifier.align(Alignment.TopEnd),
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
-                            var icon = Icons.Outlined.GpsOff
-                            if (notificationsGranted) {
-                                icon = if (onCurrentLocation) {
-                                    Icons.Outlined.GpsFixed
-                                } else {
-                                    Icons.Outlined.GpsNotFixed
+                            ElevatedButton(
+                                onClick = {
+                                    grabCurrentLocation()
+                                    goToCurrentLocation()
+                                },
+                                modifier = Modifier
+                                    .height(48.dp)
+                                    .width(48.dp),
+                                contentPadding = PaddingValues(0.dp),
+                                enabled = notificationsGranted
+                            ) {
+                                var icon = Icons.Outlined.GpsOff
+                                if (notificationsGranted) {
+                                    icon = if (onCurrentLocation) {
+                                        Icons.Outlined.GpsFixed
+                                    } else {
+                                        Icons.Outlined.GpsNotFixed
+                                    }
                                 }
+                                Icon(
+                                    imageVector = icon,
+                                    contentDescription = "Go to current location",
+                                )
                             }
-                            Icon(
-                                imageVector = icon,
-                                contentDescription = "Go to current location",
-                            )
+                            DisappearingCompassButton(cameraState = cameraState)
                         }
 
                         // Center start controls
