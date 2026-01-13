@@ -223,11 +223,11 @@ class LocationActivity : ComponentActivity() {
             }
 
             fun goToCurrentLocation() {
-                if (currentLocation != null) {
+                currentLocation?.let {
                     val cameraPosition = CameraPosition(
                         target = Position(
-                            currentLocation!!.longitude,
-                            currentLocation!!.latitude
+                            it.longitude,
+                            it.latitude
                         ),
                         zoom = 16.0,
                     )
@@ -456,13 +456,13 @@ class LocationActivity : ComponentActivity() {
                         styleState = styleState,
                     ) {
                         // Display current location
-                        if (currentLocation != null) {
-                            val longitude = currentLocation!!.longitude
-                            val latitude = currentLocation!!.latitude
-                            val accuracy = currentLocation?.accuracy?.toDouble()
+                        currentLocation?.let { currentLocation ->
+                            val longitude = currentLocation.longitude
+                            val latitude = currentLocation.latitude
+                            val accuracy = currentLocation.accuracy.toDouble()
                             val name = devices.find { it.id == selectedDeviceId }?.name
 
-                            val canDisplayCurrentLocation = accuracy != null && name != null
+                            val canDisplayCurrentLocation = name != null
 
                             if (canDisplayCurrentLocation) {
                                 val markerSource = rememberGeoJsonSource(
@@ -489,44 +489,44 @@ class LocationActivity : ComponentActivity() {
                             .filter { it.latestLocation != null }
                             .filterNot { isLocationServiceRunning && selectedDeviceId == it.id }
                             .forEach { device ->
-                                val location = device.latestLocation!!
-
-                                val markerSource = rememberGeoJsonSource(
-                                    data = GeoJsonData.Features(
-                                        Point(
-                                            Position(
-                                                location.longitude,
-                                                location.latitude,
-                                            )
-                                        )
-                                    ),
-                                )
-
-                                LocationPuck(
-                                    id = location.id,
-                                    source = markerSource,
-                                    accuracy = location.accuracy.toDouble(),
-                                    metersPerDp = cameraState.metersPerDpAtTarget,
-                                    color = stringToColor(device.name),
-                                    name = device.name,
-                                    onClick = {
-                                        coroutineScope.launch {
-                                            cameraState.animateTo(
-                                                CameraPosition(
-                                                    target = Position(
-                                                        location.longitude,
-                                                        location.latitude,
-                                                    ),
-                                                    zoom = 16.0,
+                                device.latestLocation?.let { location ->
+                                    val markerSource = rememberGeoJsonSource(
+                                        data = GeoJsonData.Features(
+                                            Point(
+                                                Position(
+                                                    location.longitude,
+                                                    location.latitude,
                                                 )
                                             )
-                                        }
-                                        selectedDevice = device
-                                    },
-                                    onLongClick = {
-                                        openNavigationApp(location)
-                                    },
-                                )
+                                        ),
+                                    )
+
+                                    LocationPuck(
+                                        id = location.id,
+                                        source = markerSource,
+                                        accuracy = location.accuracy.toDouble(),
+                                        metersPerDp = cameraState.metersPerDpAtTarget,
+                                        color = stringToColor(device.name),
+                                        name = device.name,
+                                        onClick = {
+                                            coroutineScope.launch {
+                                                cameraState.animateTo(
+                                                    CameraPosition(
+                                                        target = Position(
+                                                            location.longitude,
+                                                            location.latitude,
+                                                        ),
+                                                        zoom = 16.0,
+                                                    )
+                                                )
+                                            }
+                                            selectedDevice = device
+                                        },
+                                        onLongClick = {
+                                            openNavigationApp(location)
+                                        },
+                                    )
+                                }
                             }
 
                         LaunchedEffect(allPositions) {
@@ -684,23 +684,22 @@ class LocationActivity : ComponentActivity() {
                                     )
                                 }
                             }
-                            if (selectedDevice != null &&
-                                SocketManager.isConnected() &&
-                                selectedDevice?.canRing == true
-                            ) {
-                                ElevatedButton(
-                                    onClick = {
-                                        ringDevice(selectedDevice!!.id)
-                                    },
-                                    modifier = Modifier
-                                        .height(48.dp)
-                                        .width(48.dp),
-                                    contentPadding = PaddingValues(0.dp),
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Outlined.RingVolume,
-                                        contentDescription = "Ring device",
-                                    )
+                            selectedDevice?.let {
+                                if (SocketManager.isConnected() && it.canRing == true) {
+                                    ElevatedButton(
+                                        onClick = {
+                                            ringDevice(it.id)
+                                        },
+                                        modifier = Modifier
+                                            .height(48.dp)
+                                            .width(48.dp),
+                                        contentPadding = PaddingValues(0.dp),
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Outlined.RingVolume,
+                                            contentDescription = "Ring device",
+                                        )
+                                    }
                                 }
                             }
                         }

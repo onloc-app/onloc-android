@@ -82,7 +82,9 @@ class RingerWebSocketService : Service() {
             }
         }
         val request = NetworkRequest.Builder().build()
-        connectivityManager.registerNetworkCallback(request, networkCallback!!)
+        networkCallback?.let {
+            connectivityManager.registerNetworkCallback(request, it)
+        }
     }
 
     private fun connectSocket() {

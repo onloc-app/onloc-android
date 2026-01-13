@@ -341,10 +341,10 @@ fun LoginForm(modifier: Modifier = Modifier) {
                                     error = errorMessage ?: "Failure"
                                 }
                             }
-                        } catch (e: IOException) {
-                            error = "Network error: ${e.message}"
                         } catch (e: HttpException) {
                             error = "Server error: ${e.message}"
+                        } catch (e: IOException) {
+                            error = "Network error: ${e.message}"
                         }
                     }
                 },

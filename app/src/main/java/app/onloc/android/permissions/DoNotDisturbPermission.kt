@@ -21,7 +21,7 @@ import android.content.Context
 import android.content.Intent
 import android.provider.Settings
 
-class DoNotDisturbPermission : Permission() {
+class DoNotDisturbPermission : Permission {
     override fun isGranted(context: Context): Boolean {
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         return notificationManager.isNotificationPolicyAccessGranted

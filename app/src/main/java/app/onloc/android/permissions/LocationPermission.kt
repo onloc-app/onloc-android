@@ -24,7 +24,7 @@ import androidx.core.content.ContextCompat
 
 const val LOCATION_REQUEST_CODE = 1
 
-class LocationPermission : Permission() {
+class LocationPermission : Permission {
     fun isForegroundGranted(context: Context): Boolean {
         return ContextCompat.checkSelfPermission(
             context, Manifest.permission.ACCESS_FINE_LOCATION

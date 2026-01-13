@@ -21,7 +21,7 @@ import android.content.Intent
 import android.provider.Settings
 import androidx.core.net.toUri
 
-class OverlayPermission : Permission() {
+class OverlayPermission : Permission {
     override fun isGranted(context: Context): Boolean {
         return Settings.canDrawOverlays(context)
     }

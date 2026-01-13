@@ -35,7 +35,7 @@ const val LOCATION_UPDATES_INTERVAL_KEY = "interval"
 private const val USER_CREDENTIALS_FILENAME = "user_credentials"
 
 private class ProtectedPreferences(context: Context) {
-    val deviceProtectedPreferences by lazy {
+    val deviceProtectedPreferences: SharedPreferences by lazy {
         context.createDeviceProtectedStorageContext()
             .getSharedPreferences("device_protected_preferences", Context.MODE_PRIVATE)
     }
