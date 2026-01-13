@@ -55,6 +55,10 @@ object SocketManager {
         socket?.on(event, listener)
     }
 
+    fun off(event: String) {
+        socket?.off(event)
+    }
+
     fun isConnected(): Boolean {
         return socket?.connected() == true
     }

@@ -22,6 +22,9 @@ import android.app.NotificationManager
 import android.app.Service
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.ConnectivityManager
+import android.net.Network
+import android.net.NetworkRequest
 import android.os.IBinder
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
@@ -42,6 +45,13 @@ object ServiceStatus {
 }
 
 class RingerWebSocketService : Service() {
+    private lateinit var connectivityManager: ConnectivityManager
+    private var networkCallback: ConnectivityManager.NetworkCallback? = null
+
+    private val ringCommandEvent = "ring-command"
+    private val disconnectEvent = "disconnect"
+    private val registerDeviceEvent = "register-device"
+
     private val deviceEncryptedPreferences by lazy {
         createDeviceProtectedStorageContext()
             .getSharedPreferences("device_protected_preferences", MODE_PRIVATE)
@@ -49,16 +59,71 @@ class RingerWebSocketService : Service() {
 
     override fun onCreate() {
         super.onCreate()
+
         if (
             ActivityCompat.checkSelfPermission(
                 applicationContext,
                 Manifest.permission.POST_NOTIFICATIONS
-            ) != PackageManager.PERMISSION_GRANTED
+            ) == PackageManager.PERMISSION_GRANTED
         ) {
-            return
+            val notification = createNotification()
+            startForeground(START_RINGER_WEBSOCKET_SERVICE_NOTIFICATION_ID, notification)
         }
-        val notification = createNotification()
-        startForeground(START_RINGER_WEBSOCKET_SERVICE_NOTIFICATION_ID, notification)
+
+        // Watches reconnection to the internet
+        connectivityManager = getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager
+        networkCallback = object : ConnectivityManager.NetworkCallback() {
+            override fun onAvailable(network: Network) {
+                super.onAvailable(network)
+                connectSocket()
+            }
+            override fun onLost(network: Network) {
+                SocketManager.disconnect()
+            }
+        }
+        val request = NetworkRequest.Builder().build()
+        connectivityManager.registerNetworkCallback(request, networkCallback!!)
+    }
+
+    private fun connectSocket() {
+        connectivityManager.activeNetwork ?: return
+
+        val ip = getIP(deviceEncryptedPreferences)
+        val token = getAccessToken(deviceEncryptedPreferences)
+        val deviceId = getSelectedDeviceId(deviceEncryptedPreferences)
+
+        if (ip == null || token == null || deviceId == -1) return
+
+        // Disconnect old listeners
+        SocketManager.off(ringCommandEvent)
+        SocketManager.off(disconnectEvent)
+
+        SocketManager.disconnect()
+        SocketManager.initialize(ip, token)
+        SocketManager.connect()
+
+        SocketManager.emit(
+            registerDeviceEvent,
+            JSONObject().put("device_id", deviceId),
+        )
+
+        SocketManager.on(ringCommandEvent) { _ ->
+            if (!RingerState.isRinging) {
+                RingerState.isRinging = true
+                val ringerIntent = Intent(
+                    this,
+                    app.onloc.android.RingerActivity::class.java,
+                )
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                    .addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
+                startActivity(ringerIntent)
+            }
+        }
+
+        SocketManager.on(disconnectEvent) {
+            connectSocket()
+        }
     }
 
     private fun createNotification(): Notification {
@@ -80,47 +145,20 @@ class RingerWebSocketService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         isWebSocketServiceRunning = true
 
-        val ip = getIP(deviceEncryptedPreferences)
-        val token = getAccessToken(deviceEncryptedPreferences)
-        val deviceId = getSelectedDeviceId(deviceEncryptedPreferences)
-
-        if (deviceId == -1) {
-            return START_STICKY
-        }
-
-        SocketManager.disconnect()
-
-        if (ip != null && token != null) {
-            SocketManager.initialize(ip, token)
-            SocketManager.connect()
-
-            val registerPayload = JSONObject().apply {
-                put("deviceId", deviceId)
-            }
-            SocketManager.emit("register-device", registerPayload)
-
-            SocketManager.on("ring-command") { _ ->
-                if (!RingerState.isRinging) {
-                    RingerState.isRinging = true
-
-                    val ringerIntent = Intent(
-                        this,
-                        app.onloc.android.RingerActivity::class.java
-                    )
-                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                        .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                        .addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
-                    startActivity(ringerIntent)
-                }
-            }
-        }
+        connectSocket()
 
         return START_STICKY
     }
 
     override fun onDestroy() {
         super.onDestroy()
+
         isWebSocketServiceRunning = false
+
+        networkCallback?.let {
+            connectivityManager.unregisterNetworkCallback(it)
+        }
+
         SocketManager.disconnect()
     }
 
