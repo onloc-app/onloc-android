@@ -1,0 +1,6 @@
+The app now monitors the device's network status to reconnect the websocket service after connection to the internet
+was lost.
+
+This makes the whole Onloc experience more reliable.
+
+For this version of the app to work smoothly, please also update your server. (UI and API)
