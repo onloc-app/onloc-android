@@ -66,13 +66,17 @@
         Le service de suivi de localisation a été arrêté
     </string>
 
-    <string name="service_ringer_websocket_channel_name">Service de sonnerie à distance</string>
-    <string name="service_ringer_websocket_start_notification_title">À l\'écoute des commandes</string>
-    <string name="service_ringer_websocket_start_notification_description">
-        L\'appareil sonnera lorsqu\'une commande sera reçue
-    </string>
+    <string name="service_websocket_channel_name">Service de sonnerie à distance</string>
+    <string name="service_websocket_start_notification_title">À l\'écoute des commandes</string>
+    <string name="service_websocket_start_notification_description">L’appareil répondra aux commandes</string>
 
     <string name="service_ringer_channel_name">Sonnerie</string>
     <string name="service_ringer_start_notification_title">Sonnerie en cours...</string>
     <string name="service_ringer_start_notification_description">L\'appareil est en train de sonner</string>
+    <string name="permissions_admin_label">Administrateur de l\'appareil</string>
+    <string name="permissions_lock_header">Verouiller l\'appareil</string>
+    <string name="permissions_lock_description">Autorise l’application à verrouiller l’appareil et à afficher un message
+        en cas de perte ou de vol.
+    </string>
+    <string name="service_websocket_lock_screen_notification_title">Information</string>
 </resources>

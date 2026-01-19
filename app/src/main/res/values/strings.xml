@@ -64,13 +64,15 @@
         The location tracking service has been stopped
     </string>
 
-    <string name="service_ringer_websocket_channel_name">Ringer WebSocket Service</string>
-    <string name="service_ringer_websocket_start_notification_title">Listening for commands</string>
-    <string name="service_ringer_websocket_start_notification_description">
-        The device will ring when commanded to
-    </string>
+    <string name="service_websocket_channel_name">Ringer WebSocket Service</string>
+    <string name="service_websocket_start_notification_title">Listening for commands</string>
+    <string name="service_websocket_start_notification_description">The device will respond to commands</string>
 
     <string name="service_ringer_channel_name">Ring</string>
     <string name="service_ringer_start_notification_title">Ringing...</string>
     <string name="service_ringer_start_notification_description">Device is ringing</string>
+    <string name="permissions_admin_label">Device Admin</string>
+    <string name="permissions_lock_header">Lock Device</string>
+    <string name="permissions_lock_description">Allows the app to remotely lock your device if it is lost or stolen.</string>
+    <string name="service_websocket_lock_screen_notification_title">Information</string>
 </resources>

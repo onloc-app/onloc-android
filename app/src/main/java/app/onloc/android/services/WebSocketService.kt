@@ -20,6 +20,7 @@ import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
+import android.app.admin.DevicePolicyManager
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.ConnectivityManager
@@ -33,6 +34,10 @@ import app.onloc.android.SocketManager
 import app.onloc.android.helpers.getAccessToken
 import app.onloc.android.helpers.getIP
 import app.onloc.android.helpers.getSelectedDeviceId
+import app.onloc.android.permissions.AdminPermission
+import app.onloc.android.permissions.DoNotDisturbPermission
+import app.onloc.android.permissions.OverlayPermission
+import app.onloc.android.permissions.PostNotificationPermission
 import app.onloc.android.services.ServiceStatus.isWebSocketServiceRunning
 import app.onloc.android.singletons.RingerState
 import org.json.JSONObject
@@ -40,15 +45,19 @@ import org.json.JSONObject
 private const val CHANNEL_ID = "ringer_websocket_channel"
 const val START_RINGER_WEBSOCKET_SERVICE_NOTIFICATION_ID = 2001
 
+private const val LOCK_SCREEN_CHANNEL_ID = "lock_screen_channel"
+const val LOCK_SCREEN_NOTIFICATION_ID = 9999
+
 object ServiceStatus {
     var isWebSocketServiceRunning = false
 }
 
-class RingerWebSocketService : Service() {
+class WebSocketService : Service() {
     private lateinit var connectivityManager: ConnectivityManager
     private var networkCallback: ConnectivityManager.NetworkCallback? = null
 
     private val ringCommandEvent = "ring-command"
+    private val lockCommandEvent = "lock-command"
     private val disconnectEvent = "disconnect"
     private val registerDeviceEvent = "register-device"
 
@@ -77,6 +86,7 @@ class RingerWebSocketService : Service() {
                 super.onAvailable(network)
                 connectSocket()
             }
+
             override fun onLost(network: Network) {
                 SocketManager.disconnect()
             }
@@ -98,6 +108,7 @@ class RingerWebSocketService : Service() {
 
         // Disconnect old listeners
         SocketManager.off(ringCommandEvent)
+        SocketManager.off(lockCommandEvent)
         SocketManager.off(disconnectEvent)
 
         SocketManager.disconnect()
@@ -109,17 +120,67 @@ class RingerWebSocketService : Service() {
             JSONObject().put("device_id", deviceId),
         )
 
-        SocketManager.on(ringCommandEvent) { _ ->
-            if (!RingerState.isRinging) {
-                RingerState.isRinging = true
-                val ringerIntent = Intent(
-                    this,
-                    app.onloc.android.RingerActivity::class.java,
-                )
-                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                    .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                    .addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
-                startActivity(ringerIntent)
+        val postNotificationPermission = PostNotificationPermission()
+        val doNotDisturbPermission = DoNotDisturbPermission()
+        val overlayPermission = OverlayPermission()
+        val adminPermission = AdminPermission()
+
+        if (
+            postNotificationPermission.isGranted(this) &&
+            doNotDisturbPermission.isGranted(this) &&
+            overlayPermission.isGranted(this)
+        ) {
+            SocketManager.on(ringCommandEvent) { _ ->
+                if (!RingerState.isRinging) {
+                    RingerState.isRinging = true
+                    val ringerIntent = Intent(
+                        this,
+                        app.onloc.android.RingerActivity::class.java,
+                    )
+                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                        .addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
+                    startActivity(ringerIntent)
+                }
+            }
+        }
+
+        if (
+            postNotificationPermission.isGranted(this) &&
+            adminPermission.isGranted(this)
+        ) {
+            SocketManager.on(lockCommandEvent) { args ->
+                if (args.isNotEmpty()) {
+                    val data = args[0] as JSONObject
+                    val message = data.optString("message")
+
+                    if (message.isNotBlank()) {
+                        val lockChannel = NotificationChannel(
+                            LOCK_SCREEN_CHANNEL_ID,
+                            "Lock Screen Info",
+                            NotificationManager.IMPORTANCE_HIGH,
+                        )
+
+                        val lockNotification = NotificationCompat.Builder(
+                            this,
+                            LOCK_SCREEN_CHANNEL_ID
+                        )
+                            .setSmallIcon(android.R.drawable.ic_menu_info_details)
+                            .setContentTitle(getString(R.string.service_websocket_lock_screen_notification_title))
+                            .setContentText(message)
+                            .setPriority(NotificationCompat.PRIORITY_HIGH)
+                            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                            .setOngoing(true)
+                            .build()
+                        val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+
+                        notificationManager.createNotificationChannel(lockChannel)
+                        notificationManager.notify(LOCK_SCREEN_NOTIFICATION_ID, lockNotification)
+                    }
+                }
+                val devicePolicyManager = getSystemService(DEVICE_POLICY_SERVICE) as DevicePolicyManager
+
+                devicePolicyManager.lockNow()
             }
         }
 
@@ -130,15 +191,15 @@ class RingerWebSocketService : Service() {
 
     private fun createNotification(): Notification {
         val channelId = CHANNEL_ID
-        val channelName = getString(R.string.service_ringer_websocket_channel_name)
+        val channelName = getString(R.string.service_websocket_channel_name)
         val channel = NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_HIGH)
 
         val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.createNotificationChannel(channel)
 
         return NotificationCompat.Builder(this, channelId)
-            .setContentTitle(getString(R.string.service_ringer_websocket_start_notification_title))
-            .setContentText(getString(R.string.service_ringer_websocket_start_notification_description))
+            .setContentTitle(getString(R.string.service_websocket_start_notification_title))
+            .setContentText(getString(R.string.service_websocket_start_notification_description))
             .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .build()

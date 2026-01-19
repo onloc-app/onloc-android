@@ -36,7 +36,7 @@
             android:usesCleartextTraffic="true"
             android:enableOnBackInvokedCallback="true"
             tools:targetApi="tiramisu">
-        <activity android:name="app.onloc.android.RingerActivity"
+        <activity android:name=".RingerActivity"
                   android:exported="true"
                   android:launchMode="singleTop"
                   android:showWhenLocked="true"
@@ -45,12 +45,12 @@
                   android:label="@string/title_activity_ringer"
                   android:theme="@style/Theme.OnlocAndroid"/>
         <activity
-                android:name="app.onloc.android.LocationActivity"
+                android:name=".LocationActivity"
                 android:exported="false"
                 android:label="@string/title_activity_location"
                 android:theme="@style/Theme.OnlocAndroid"/>
         <activity
-                android:name="app.onloc.android.MainActivity"
+                android:name=".MainActivity"
                 android:exported="true"
                 android:theme="@style/Theme.OnlocAndroid">
             <intent-filter>
@@ -59,31 +59,43 @@
             </intent-filter>
         </activity>
         <service
-                android:name="app.onloc.android.services.LocationForegroundService"
+                android:name=".services.LocationForegroundService"
                 android:directBootAware="true"
                 android:foregroundServiceType="location"
                 android:exported="false">
         </service>
         <service
-                android:name="app.onloc.android.services.RingerService"
+                android:name=".services.RingerService"
                 android:directBootAware="true"
                 android:foregroundServiceType="mediaPlayback"
                 android:exported="false">
         </service>
         <service
-                android:name="app.onloc.android.services.RingerWebSocketService"
+                android:name=".services.WebSocketService"
                 android:directBootAware="true"
                 android:foregroundServiceType="mediaPlayback"
                 android:exported="false">
         </service>
         <receiver
-                android:name="app.onloc.android.BootReceiver"
+                android:name=".receivers.BootReceiver"
                 android:directBootAware="true"
                 android:enabled="true"
                 android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.LOCKED_BOOT_COMPLETED"/>
                 <action android:name="android.intent.action.BOOT_COMPLETED"/>
+            </intent-filter>
+        </receiver>
+        <receiver
+                android:name=".receivers.DeviceAdminReceiver"
+                android:exported="true"
+                android:permission="android.permission.BIND_DEVICE_ADMIN">
+            <meta-data
+                android:name="android.app.device_admin"
+                android:resource="@xml/device_admin_policy"
+            />
+            <intent-filter>
+                <action android:name="android.app.action.DEVICE_ADMIN_ENABLED" />
             </intent-filter>
         </receiver>
 

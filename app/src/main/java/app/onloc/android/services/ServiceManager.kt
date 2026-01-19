@@ -45,22 +45,13 @@ object ServiceManager {
         context.stopService(intent)
     }
 
-    fun startRingerWebSocketServiceIfAllowed(context: Context) {
-        val postNotificationPermission = PostNotificationPermission()
-        val doNotDisturbPermission = DoNotDisturbPermission()
-        val overlayPermission = OverlayPermission()
-
-        if (postNotificationPermission.isGranted(context) &&
-            doNotDisturbPermission.isGranted(context) &&
-            overlayPermission.isGranted(context)
-        ) {
-            val intent = Intent(context, RingerWebSocketService::class.java)
-            ContextCompat.startForegroundService(context, intent)
-        }
+    fun startWebSocketServiceIfAllowed(context: Context) {
+        val intent = Intent(context, WebSocketService::class.java)
+        ContextCompat.startForegroundService(context, intent)
     }
 
-    fun stopRingerWebSocketService(context: Context) {
-        val intent = Intent(context, RingerWebSocketService::class.java)
+    fun stopWebSocketService(context: Context) {
+        val intent = Intent(context, WebSocketService::class.java)
         context.stopService(intent)
     }
 }

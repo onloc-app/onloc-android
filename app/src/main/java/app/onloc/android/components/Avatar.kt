@@ -138,7 +138,7 @@ fun Avatar(modifier: Modifier = Modifier) {
                                     Button(
                                         onClick = {
                                             ServiceManager.stopLocationService(context)
-                                            ServiceManager.stopRingerWebSocketService(context)
+                                            ServiceManager.stopWebSocketService(context)
 
                                             val accessToken = userPreferences.getUserCredentials().accessToken
                                             val refreshToken = userPreferences.getUserCredentials().refreshToken
