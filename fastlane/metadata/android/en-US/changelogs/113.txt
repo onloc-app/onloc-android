@@ -1,0 +1,1 @@
+Adds the ability to lock your device from the server in case it's lost or stolen.
