@@ -64,14 +64,14 @@ fun DeviceSelector(
                                 selected = device.id == selectedDeviceId,
                                 onSelect = {
                                     val unregisterPayload = JSONObject().apply {
-                                        put("deviceId", selectedDeviceId)
+                                        put("device_id", selectedDeviceId)
                                     }
                                     SocketManager.emit("unregister-device", unregisterPayload)
 
                                     appPreferences.createDeviceId(device.id)
 
                                     val registerPayload = JSONObject().apply {
-                                        put("deviceId", device.id)
+                                        put("device_id", device.id)
                                     }
                                     SocketManager.emit("register-device", registerPayload)
 

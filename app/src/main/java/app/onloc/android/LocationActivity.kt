@@ -33,6 +33,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -46,6 +47,7 @@ import androidx.compose.material.icons.outlined.Remove
 import androidx.compose.material.icons.outlined.RingVolume
 import androidx.compose.material.icons.outlined.Route
 import androidx.compose.material3.BottomSheetScaffold
+import androidx.compose.material3.Button
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ElevatedCard
@@ -58,6 +60,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
@@ -220,6 +223,13 @@ class LocationActivity : ComponentActivity() {
 
             LaunchedEffect(Unit) {
                 grabCurrentLocation()
+            }
+
+            // Makes sure selectedDeviceId is valid
+            LaunchedEffect(selectedDeviceId) {
+                if (devices.isNotEmpty() && !devices.any { it.id == selectedDeviceId }) {
+                    selectedDeviceId = -1
+                }
             }
 
             fun goToCurrentLocation() {
@@ -446,7 +456,7 @@ class LocationActivity : ComponentActivity() {
 
                     val variant = if (isSystemInDarkTheme()) "dark" else "light"
                     MaplibreMap(
-                        baseStyle = BaseStyle.Uri("https://tiles.immich.cloud/v1/style/$variant.json"),
+                        baseStyle = BaseStyle.Uri("asset://map_styles/$variant.json"),
                         modifier = Modifier.fillMaxSize(),
                         options = MapOptions(
                             ornamentOptions = OrnamentOptions.AllDisabled,
@@ -556,9 +566,8 @@ class LocationActivity : ComponentActivity() {
                             onClick = { attributionExpanded = !attributionExpanded },
                             styleState = styleState,
                             modifier = Modifier
-                                .align(Alignment.BottomEnd)
-                                .height(48.dp),
-                            contentAlignment = Alignment.BottomEnd,
+                                .height(48.dp)
+                                .align(Alignment.BottomEnd),
                             expandedContent = { MapAttribution() },
                         )
 

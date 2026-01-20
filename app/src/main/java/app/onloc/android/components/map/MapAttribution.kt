@@ -59,7 +59,7 @@ fun MapAttribution(modifier: Modifier = Modifier) {
             buildAnnotatedString {
                 withLink(
                     LinkAnnotation.Url(
-                        "https://immich.app/",
+                        "https://maps.black/",
                         TextLinkStyles(
                             style = SpanStyle(
                                 textDecoration = TextDecoration.Underline,
@@ -67,7 +67,7 @@ fun MapAttribution(modifier: Modifier = Modifier) {
                         ),
                     ),
                 ) {
-                    append("Immich")
+                    append("Maps.black")
                 }
             }
         )
