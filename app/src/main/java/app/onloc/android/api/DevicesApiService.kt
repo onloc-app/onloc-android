@@ -69,8 +69,23 @@ class DevicesApiService(context: Context, private val ip: String, private val to
         })
     }
 
+    fun lockDevice(deviceId: Int) {
+        val url = "$ip/api/devices/$deviceId/lock"
+
+        val request = Request.Builder()
+            .url(url)
+            .addHeader("Authorization", "Bearer $token")
+            .post("".toRequestBody(null))
+            .build()
+
+        client.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) = Unit
+            override fun onResponse(call: Call, response: Response) = Unit
+        })
+    }
+
     private fun parseDevices(json: String): List<Device> {
-        val response =  Gson().fromJson(json, DeviceResponse::class.java)
+        val response = Gson().fromJson(json, DeviceResponse::class.java)
         return response.devices
     }
 }

@@ -30,6 +30,9 @@ data class Device(
     @SerializedName("can_ring")
     val canRing: Boolean?,
 
+    @SerializedName("can_lock")
+    val canLock: Boolean?,
+
     val icon: String?,
 
     @SerializedName("latest_location")

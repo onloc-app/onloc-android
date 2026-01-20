@@ -43,6 +43,7 @@ import androidx.compose.material.icons.outlined.FitScreen
 import androidx.compose.material.icons.outlined.GpsFixed
 import androidx.compose.material.icons.outlined.GpsNotFixed
 import androidx.compose.material.icons.outlined.GpsOff
+import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.Remove
 import androidx.compose.material.icons.outlined.RingVolume
 import androidx.compose.material.icons.outlined.Route
@@ -161,6 +162,13 @@ class LocationActivity : ComponentActivity() {
                 if (accessToken != null && ip != null) {
                     val devicesApiService = DevicesApiService(context, ip, accessToken)
                     devicesApiService.ringDevice(deviceId)
+                }
+            }
+
+            fun lockDevice(deviceId: Int) {
+                if (accessToken != null && ip != null) {
+                    val devicesApiService = DevicesApiService(context, ip, accessToken)
+                    devicesApiService.lockDevice(deviceId)
                 }
             }
 
@@ -694,20 +702,38 @@ class LocationActivity : ComponentActivity() {
                                 }
                             }
                             selectedDevice?.let {
-                                if (SocketManager.isConnected() && it.canRing == true) {
-                                    ElevatedButton(
-                                        onClick = {
-                                            ringDevice(it.id)
-                                        },
-                                        modifier = Modifier
-                                            .height(48.dp)
-                                            .width(48.dp),
-                                        contentPadding = PaddingValues(0.dp),
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Outlined.RingVolume,
-                                            contentDescription = "Ring device",
-                                        )
+                                if (SocketManager.isConnected()) {
+                                    if (it.canRing == true) {
+                                        ElevatedButton(
+                                            onClick = {
+                                                ringDevice(it.id)
+                                            },
+                                            modifier = Modifier
+                                                .height(48.dp)
+                                                .width(48.dp),
+                                            contentPadding = PaddingValues(0.dp),
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Outlined.RingVolume,
+                                                contentDescription = "Ring device",
+                                            )
+                                        }
+                                    }
+                                    if (it.canLock == true) {
+                                        ElevatedButton(
+                                            onClick = {
+                                                lockDevice(it.id)
+                                            },
+                                            modifier = Modifier
+                                                .height(48.dp)
+                                                .width(48.dp),
+                                            contentPadding = PaddingValues(0.dp),
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Outlined.Lock,
+                                                contentDescription = "Lock device",
+                                            )
+                                        }
                                     }
                                 }
                             }

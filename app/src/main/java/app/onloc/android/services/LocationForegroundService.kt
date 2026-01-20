@@ -52,8 +52,6 @@ class LocationForegroundService : Service() {
     }
 
     private val locationListener = LocationListener { location ->
-        println("Latitude: ${location.latitude}, Longitude: ${location.longitude}")
-
         val ip = getIP(deviceEncryptedPreferences)
         val accessToken = getAccessToken(deviceEncryptedPreferences)
         val selectedDeviceId = getSelectedDeviceId(deviceEncryptedPreferences)
@@ -67,7 +65,6 @@ class LocationForegroundService : Service() {
             location,
         )
         parsedLocation.battery = batteryLevel
-        println("Battery: ${parsedLocation.battery}")
 
         if (ip != null && accessToken != null && selectedDeviceId != -1) {
             val locationsApiService = LocationsApiService(applicationContext, ip, accessToken)
@@ -81,7 +78,7 @@ class LocationForegroundService : Service() {
             ActivityCompat.checkSelfPermission(
                 applicationContext,
                 Manifest.permission.ACCESS_FINE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED &&
+            ) != PackageManager.PERMISSION_GRANTED ||
             ActivityCompat.checkSelfPermission(
                 applicationContext,
                 Manifest.permission.ACCESS_BACKGROUND_LOCATION
@@ -98,7 +95,7 @@ class LocationForegroundService : Service() {
             provider,
             interval,
             0f,
-            locationListener
+            locationListener,
         )
     }
 
