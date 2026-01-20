@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">Onloc</string>
     <string name="title_activity_location">Activité de localisation</string>
+    <string name="title_activity_login">Activité de connexion</string>
     <string name="title_activity_ringer">Activité de sonnerie</string>
     <string name="login_username_field_label">Nom d\'utilisateur</string>
     <string name="login_password_field_label">Mot de passe</string>
@@ -23,19 +24,23 @@
     <string name="permissions_header">Fonctionnalités et autorisations</string>
     <string name="main_interval_slider_label">Intervalle entre les téléversements</string>
     <plurals name="interval_picker_seconds">
-        <item quantity="one">Seconde</item>
+        <item quantity="one" tools:ignore="ImpliedQuantity">Seconde</item>
+        <item quantity="many">Secondes</item>
         <item quantity="other">Secondes</item>
     </plurals>
     <plurals name="interval_picker_minutes">
-        <item quantity="one">Minute</item>
+        <item quantity="one" tools:ignore="ImpliedQuantity">Minute</item>
+        <item quantity="many">Minutes</item>
         <item quantity="other">Minutes</item>
     </plurals>
     <plurals name="interval_picker_hours">
-        <item quantity="one">Heure</item>
+        <item quantity="one" tools:ignore="ImpliedQuantity">Heure</item>
+        <item quantity="many">Heures</item>
         <item quantity="other">Heures</item>
     </plurals>
     <plurals name="interval_picker_days">
-        <item quantity="one">Jour</item>
+        <item quantity="one" tools:ignore="ImpliedQuantity">Jour</item>
+        <item quantity="many">Jours</item>
         <item quantity="other">Jours</item>
     </plurals>
 
@@ -71,7 +76,7 @@
     <string name="service_websocket_start_notification_description">L’appareil répondra aux commandes</string>
 
     <string name="service_ringer_channel_name">Sonnerie</string>
-    <string name="service_ringer_start_notification_title">Sonnerie en cours...</string>
+    <string name="service_ringer_start_notification_title">Sonnerie en cours…</string>
     <string name="service_ringer_start_notification_description">L\'appareil est en train de sonner</string>
     <string name="permissions_admin_label">Administrateur de l\'appareil</string>
     <string name="permissions_lock_header">Verouiller l\'appareil</string>

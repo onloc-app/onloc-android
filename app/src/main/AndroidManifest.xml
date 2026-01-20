@@ -3,30 +3,24 @@
           xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
-
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION"/>
-
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"/>
-
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
-
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE"/>
-
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
-
     <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY"/>
-
 
     <application
             android:allowBackup="true"
             android:dataExtractionRules="@xml/data_extraction_rules"
+            android:enableOnBackInvokedCallback="true"
             android:fullBackupContent="@xml/backup_rules"
             android:icon="@mipmap/ic_launcher"
             android:label="@string/app_name"
@@ -34,16 +28,21 @@
             android:supportsRtl="true"
             android:theme="@style/Theme.OnlocAndroid"
             android:usesCleartextTraffic="true"
-            android:enableOnBackInvokedCallback="true"
             tools:targetApi="tiramisu">
-        <activity android:name=".RingerActivity"
-                  android:exported="true"
-                  android:launchMode="singleTop"
-                  android:showWhenLocked="true"
-                  android:turnScreenOn="true"
-                  android:excludeFromRecents="true"
-                  android:label="@string/title_activity_ringer"
-                  android:theme="@style/Theme.OnlocAndroid"/>
+        <activity
+                android:name=".LoginActivity"
+                android:exported="false"
+                android:label="@string/title_activity_login"
+                android:theme="@style/Theme.OnlocAndroid"/>
+        <activity
+                android:name=".RingerActivity"
+                android:excludeFromRecents="true"
+                android:exported="true"
+                android:label="@string/title_activity_ringer"
+                android:launchMode="singleTop"
+                android:showWhenLocked="true"
+                android:theme="@style/Theme.OnlocAndroid"
+                android:turnScreenOn="true"/>
         <activity
                 android:name=".LocationActivity"
                 android:exported="false"
@@ -55,27 +54,30 @@
                 android:theme="@style/Theme.OnlocAndroid">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
+
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+
         <service
                 android:name=".services.LocationForegroundService"
                 android:directBootAware="true"
-                android:foregroundServiceType="location"
-                android:exported="false">
+                android:exported="false"
+                android:foregroundServiceType="location">
         </service>
         <service
                 android:name=".services.RingerService"
                 android:directBootAware="true"
-                android:foregroundServiceType="mediaPlayback"
-                android:exported="false">
+                android:exported="false"
+                android:foregroundServiceType="mediaPlayback">
         </service>
         <service
                 android:name=".services.WebSocketService"
                 android:directBootAware="true"
-                android:foregroundServiceType="mediaPlayback"
-                android:exported="false">
+                android:exported="false"
+                android:foregroundServiceType="mediaPlayback">
         </service>
+
         <receiver
                 android:name=".receivers.BootReceiver"
                 android:directBootAware="true"
@@ -91,14 +93,13 @@
                 android:exported="true"
                 android:permission="android.permission.BIND_DEVICE_ADMIN">
             <meta-data
-                android:name="android.app.device_admin"
-                android:resource="@xml/device_admin_policy"
-            />
+                    android:name="android.app.device_admin"
+                    android:resource="@xml/device_admin_policy"/>
+
             <intent-filter>
-                <action android:name="android.app.action.DEVICE_ADMIN_ENABLED" />
+                <action android:name="android.app.action.DEVICE_ADMIN_ENABLED"/>
             </intent-filter>
         </receiver>
-
     </application>
 
 </manifest>

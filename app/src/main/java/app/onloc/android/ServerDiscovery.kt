@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Thomas Lavoie
+ * Copyright (C) 2026 Thomas Lavoie
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General
  * Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option)
@@ -22,6 +22,8 @@ import android.net.wifi.WifiManager
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresExtension
+
+const val MIN_TIRAMISU_VERSION = 7
 
 private const val SERVICE_TYPE = "_http._tcp"
 private const val SERVICE_NAME = "onloc"
@@ -70,7 +72,7 @@ class ServerDiscovery(context: Context, callback: (service: Pair<String, Int>) -
             resolving = false
         }
 
-        @RequiresExtension(extension = Build.VERSION_CODES.TIRAMISU, version = 12)
+        @RequiresExtension(extension = Build.VERSION_CODES.TIRAMISU, version = MIN_TIRAMISU_VERSION)
         override fun onServiceResolved(serviceInfo: NsdServiceInfo) {
             Log.d("ServerDiscovery", "Service resolved: $serviceInfo")
             if (serviceInfo.hostAddresses.isNotEmpty() && serviceInfo.hostAddresses.first() != null) {
@@ -99,7 +101,7 @@ class ServerDiscovery(context: Context, callback: (service: Pair<String, Int>) -
         registered = true
     }
 
-    @RequiresExtension(extension = Build.VERSION_CODES.TIRAMISU, version = 7)
+    @RequiresExtension(extension = Build.VERSION_CODES.TIRAMISU, version = MIN_TIRAMISU_VERSION)
     fun stopDiscovery() {
         try {
             if (registered) {

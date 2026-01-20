@@ -2,6 +2,7 @@
 <resources>
     <string name="app_name">Onloc</string>
     <string name="title_activity_location">Location Activity</string>
+    <string name="title_activity_login">Login Activity</string>
     <string name="title_activity_ringer">Ringer Activity</string>
     <string name="login_username_field_label">Username</string>
     <string name="login_password_field_label">Password</string>
@@ -24,18 +25,22 @@
     <string name="main_interval_slider_label">Interval between uploads</string>
     <plurals name="interval_picker_seconds">
         <item quantity="one">Second</item>
+        <item quantity="many">Seconds</item>
         <item quantity="other">Seconds</item>
     </plurals>
     <plurals name="interval_picker_minutes">
         <item quantity="one">Minute</item>
+        <item quantity="many">Minutes</item>
         <item quantity="other">Minutes</item>
     </plurals>
     <plurals name="interval_picker_hours">
         <item quantity="one">Hour</item>
+        <item quantity="many">Hours</item>
         <item quantity="other">Hours</item>
     </plurals>
     <plurals name="interval_picker_days">
         <item quantity="one">Day</item>
+        <item quantity="many">Days</item>
         <item quantity="other">Days</item>
     </plurals>
 
@@ -54,6 +59,10 @@
     </string>
     <string name="permissions_grant_button_label">Grant</string>
     <string name="permissions_granted_button_label">Granted</string>
+    <string name="permissions_admin_label">Device Admin</string>
+    <string name="permissions_lock_header">Lock Device</string>
+    <string name="permissions_lock_description">Allows the app to remotely lock your device if it is lost or stolen.
+    </string>
 
     <!-- Services -->
     <string name="service_location_channel_name">Location Service</string>
@@ -69,10 +78,7 @@
     <string name="service_websocket_start_notification_description">The device will respond to commands</string>
 
     <string name="service_ringer_channel_name">Ring</string>
-    <string name="service_ringer_start_notification_title">Ringing...</string>
+    <string name="service_ringer_start_notification_title">Ringing…</string>
     <string name="service_ringer_start_notification_description">Device is ringing</string>
-    <string name="permissions_admin_label">Device Admin</string>
-    <string name="permissions_lock_header">Lock Device</string>
-    <string name="permissions_lock_description">Allows the app to remotely lock your device if it is lost or stolen.</string>
     <string name="service_websocket_lock_screen_notification_title">Information</string>
 </resources>
