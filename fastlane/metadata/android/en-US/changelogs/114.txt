@@ -1,1 +1,2 @@
-Changed the map provider to Maps.black.
+- Changed the map provider to Maps.black
+- Added the ability to lock other devices
