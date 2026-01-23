@@ -1,4 +1,5 @@
-Onloc lets you track your device in case it gets lost.
+Never Lose Track of Your Devices
 
-- See your device's location in real time
-- Ring lost devices
+- Real-time Location: See exactly where your device is, anytime.
+- Instant Ring: Make your lost device ring.
+- Remote Lock & Message: Secure your device and leave a message for whoever finds it.
