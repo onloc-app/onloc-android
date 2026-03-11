@@ -54,6 +54,31 @@ class DevicesApiService(context: Context, private val ip: String, private val to
         })
     }
 
+    fun getSharedDevices(callback: (List<Device>?, String?) -> Unit) {
+        val url = "$ip/api/devices/shared"
+
+        val request = Request.Builder()
+            .url(url)
+            .addHeader("Authorization", "Bearer $token")
+            .build()
+
+        client.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                callback(null, "Failed to fetch shared devices: ${e.message}")
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                if (response.isSuccessful) {
+                    val responseBody = response.body.string()
+                    val devices = parseDevices(responseBody)
+                    callback(devices, null)
+                } else {
+                    callback(null, "Error: ${response.code}")
+                }
+            }
+        })
+    }
+
     fun ringDevice(deviceId: Int) {
         val url = "$ip/api/devices/$deviceId/ring"
 

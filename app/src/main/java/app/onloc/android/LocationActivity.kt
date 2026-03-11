@@ -33,7 +33,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -48,7 +47,6 @@ import androidx.compose.material.icons.outlined.Remove
 import androidx.compose.material.icons.outlined.RingVolume
 import androidx.compose.material.icons.outlined.Route
 import androidx.compose.material3.BottomSheetScaffold
-import androidx.compose.material3.Button
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ElevatedCard
@@ -61,7 +59,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
@@ -75,6 +72,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.core.graphics.toColor
 import androidx.core.net.toUri
 import app.onloc.android.api.DevicesApiService
 import app.onloc.android.components.Avatar
@@ -111,6 +109,9 @@ import io.github.dellisd.spatialk.geojson.Position
 import kotlinx.coroutines.launch
 import java.lang.System.currentTimeMillis
 import kotlin.collections.emptyList
+import androidx.core.graphics.toColorInt
+import app.onloc.android.components.map.SharedLocationPuck
+import app.onloc.android.models.DeviceShare
 
 private const val DEFAULT_SLIDER_POSITION = 15 * 60 // 15 minutes
 private const val MAP_MOVE_BUFFER = 300
@@ -133,6 +134,7 @@ class LocationActivity : ComponentActivity() {
             var selectedDevice by remember { mutableStateOf<Device?>(null) }
 
             var devices by remember { mutableStateOf<List<Device>>(emptyList()) }
+            var sharedDevices by remember { mutableStateOf<List<Device>>(emptyList()) }
             var devicesErrorMessage by remember { mutableStateOf("") }
             var selectedDeviceId by remember { mutableIntStateOf(appPreferences.getDeviceId()) }
 
@@ -143,16 +145,14 @@ class LocationActivity : ComponentActivity() {
             fun fetchDevices() {
                 if (accessToken != null && ip != null) {
                     val devicesApiService = DevicesApiService(context, ip, accessToken)
-                    devicesApiService.getDevices { foundDevices, errorMessage ->
+                    devicesApiService.getDevices { foundDevices, _ ->
                         if (foundDevices != null) {
                             devices = foundDevices
                         }
-                        if (errorMessage != null) {
-                            devicesErrorMessage = errorMessage
-                            val intent = Intent(context, MainActivity::class.java)
-                            intent.flags =
-                                Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                            context.startActivity(intent)
+                    }
+                    devicesApiService.getSharedDevices { foundDevices, _ ->
+                        if (foundDevices != null) {
+                            sharedDevices = foundDevices
                         }
                     }
                 }
@@ -483,20 +483,13 @@ class LocationActivity : ComponentActivity() {
                             val canDisplayCurrentLocation = name != null
 
                             if (canDisplayCurrentLocation) {
-                                val markerSource = rememberGeoJsonSource(
-                                    data = GeoJsonData.Features(
-                                        Point(
-                                            Position(longitude, latitude),
-                                        )
-                                    )
-                                )
-
                                 LocationPuck(
                                     id = 0,
-                                    source = markerSource,
+                                    longitude = longitude,
+                                    latitude = latitude,
                                     accuracy = accuracy,
-                                    metersPerDp = cameraState.metersPerDpAtTarget,
                                     color = MaterialTheme.colorScheme.secondary,
+                                    metersPerDp = cameraState.metersPerDpAtTarget,
                                     onClick = { goToCurrentLocation() },
                                 )
                             }
@@ -508,24 +501,11 @@ class LocationActivity : ComponentActivity() {
                             .filterNot { isLocationServiceRunning && selectedDeviceId == it.id }
                             .forEach { device ->
                                 device.latestLocation?.let { location ->
-                                    val markerSource = rememberGeoJsonSource(
-                                        data = GeoJsonData.Features(
-                                            Point(
-                                                Position(
-                                                    location.longitude,
-                                                    location.latitude,
-                                                )
-                                            )
-                                        ),
-                                    )
-
                                     LocationPuck(
                                         id = location.id,
-                                        source = markerSource,
-                                        accuracy = location.accuracy.toDouble(),
+                                        location = location,
+                                        device = device,
                                         metersPerDp = cameraState.metersPerDpAtTarget,
-                                        color = stringToColor(device.name),
-                                        name = device.name,
                                         onClick = {
                                             coroutineScope.launch {
                                                 cameraState.animateTo(
@@ -546,6 +526,35 @@ class LocationActivity : ComponentActivity() {
                                     )
                                 }
                             }
+
+                        // Display the location of shared devices
+                        sharedDevices.forEach { device ->
+                            device.latestLocation?.let { location ->
+                                SharedLocationPuck(
+                                    id = location.id,
+                                    location = location,
+                                    device = device,
+                                    metersPerDp = cameraState.metersPerDpAtTarget,
+                                    onClick = {
+                                        coroutineScope.launch {
+                                            cameraState.animateTo(
+                                                CameraPosition(
+                                                    target = Position(
+                                                        location.longitude,
+                                                        location.latitude,
+                                                    ),
+                                                    zoom = 16.0,
+                                                )
+                                            )
+                                        }
+                                        selectedDevice = device
+                                    },
+                                    onLongClick = {
+                                        openNavigationApp(location)
+                                    },
+                                )
+                            }
+                        }
 
                         LaunchedEffect(allPositions) {
                             fitMapBounds(allPositions)
@@ -701,39 +710,37 @@ class LocationActivity : ComponentActivity() {
                                     )
                                 }
                             }
-                            selectedDevice?.let {
-                                if (SocketManager.isConnected()) {
-                                    if (it.canRing == true) {
-                                        ElevatedButton(
-                                            onClick = {
-                                                ringDevice(it.id)
-                                            },
-                                            modifier = Modifier
-                                                .height(48.dp)
-                                                .width(48.dp),
-                                            contentPadding = PaddingValues(0.dp),
-                                        ) {
-                                            Icon(
-                                                imageVector = Icons.Outlined.RingVolume,
-                                                contentDescription = "Ring device",
-                                            )
-                                        }
+                            selectedDevice?.let { device ->
+                                if (device.canRing == true) {
+                                    ElevatedButton(
+                                        onClick = {
+                                            ringDevice(device.id)
+                                        },
+                                        modifier = Modifier
+                                            .height(48.dp)
+                                            .width(48.dp),
+                                        contentPadding = PaddingValues(0.dp),
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Outlined.RingVolume,
+                                            contentDescription = "Ring device",
+                                        )
                                     }
-                                    if (it.canLock == true) {
-                                        ElevatedButton(
-                                            onClick = {
-                                                lockDevice(it.id)
-                                            },
-                                            modifier = Modifier
-                                                .height(48.dp)
-                                                .width(48.dp),
-                                            contentPadding = PaddingValues(0.dp),
-                                        ) {
-                                            Icon(
-                                                imageVector = Icons.Outlined.Lock,
-                                                contentDescription = "Lock device",
-                                            )
-                                        }
+                                }
+                                if (device.canLock == true) {
+                                    ElevatedButton(
+                                        onClick = {
+                                            lockDevice(device.id)
+                                        },
+                                        modifier = Modifier
+                                            .height(48.dp)
+                                            .width(48.dp),
+                                        contentPadding = PaddingValues(0.dp),
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Outlined.Lock,
+                                            contentDescription = "Lock device",
+                                        )
                                     }
                                 }
                             }

@@ -19,35 +19,25 @@ import androidx.annotation.Keep
 import com.google.gson.annotations.SerializedName
 
 @Keep
-data class Device(
+data class Connection(
     val id: Int,
 
-    @SerializedName("user_id")
-    val userId: Int,
+    @SerializedName("requester_id")
+    val requesterId: Int,
 
-    val name: String,
+    @SerializedName("addressee_id")
+    val addresseeId: Int,
 
-    val color: String?,
-
-    @SerializedName("can_ring")
-    val canRing: Boolean?,
-
-    @SerializedName("can_lock")
-    val canLock: Boolean?,
-
-    val icon: String?,
-
-    @SerializedName("latest_location")
-    val latestLocation: Location?,
+    val status: String,
 
     @SerializedName("created_at")
-    val createdAt: String?,
+    val createdAt: String,
 
     @SerializedName("updated_at")
-    val updatedAt: String?
+    val updatedAt: String,
 )
 
 @Keep
-data class DeviceResponse(
-    val devices: List<Device>
+data class ConnectionResponse(
+    val connections: List<Connection>
 )

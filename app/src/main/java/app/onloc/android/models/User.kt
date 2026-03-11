@@ -29,3 +29,8 @@ data class User(
     @SerializedName("updated_at")
     val updatedAt: String?
 )
+
+@Keep
+data class UserResponse(
+    val user: User
+)

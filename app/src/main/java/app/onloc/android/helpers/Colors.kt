@@ -26,6 +26,7 @@ private const val LIGHTNESS_BASE = 50
 private const val LIGHTNESS_RANGE = 30
 private const val HASH_SHIFT = 5
 
+@Suppress("MagicNumber")
 fun stringToColor(str: String): Color {
     var hash = 0
     for (ch in str) {
@@ -33,11 +34,19 @@ fun stringToColor(str: String): Color {
     }
 
     val hue = abs(hash) % HUE_MAX
-    val saturation = SATURATION_BASE + (abs(hash) % SATURATION_RANGE)
-    val lightness = LIGHTNESS_BASE + (abs(hash) % LIGHTNESS_RANGE)
+    val saturation = (SATURATION_BASE + (abs(hash) % SATURATION_RANGE)) / 100f
+    val lightness = (LIGHTNESS_BASE + (abs(hash) % LIGHTNESS_RANGE)) / 100f
 
-    val hsl = floatArrayOf(hue.toFloat(), saturation.toFloat(), lightness.toFloat())
-    val colorInt = ColorUtils.HSLToColor(hsl)
+    val a = saturation * minOf(lightness, 1f - lightness)
+    fun f(n: Int): Float {
+        val k = (n + hue / 30f) % 12f
+        return (lightness - a * maxOf(-1f, minOf(k - 3f, 9f - k, 1f)))
+            .coerceIn(0f, 1f)
+    }
 
-    return Color(colorInt)
+    return Color(
+        red = f(0),
+        green = f(8),
+        blue = f(4),
+    )
 }
