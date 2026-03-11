@@ -1,0 +1,2 @@
+Adds connections.
+Connections are like "friendships" that lets you add other users and share devices and locations.
