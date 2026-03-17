@@ -28,7 +28,6 @@ const val DEVICE_ID_KEY = "device_id"
 const val ACCESS_TOKEN_KEY = "access_token"
 const val REFRESH_TOKEN_KEY = "refresh_token"
 const val USER_KEY = "user"
-
 const val LOCATION_SERVICE_KEY = "location"
 const val LOCATION_UPDATES_INTERVAL_KEY = "interval"
 
@@ -52,48 +51,40 @@ private class ProtectedPreferences(context: Context) {
     }
 
     fun deleteFromDeviceEncryptedStorage(key: String) {
-        deviceProtectedPreferences.edit {
-            remove(key)
-            apply()
-        }
+        deviceProtectedPreferences.edit { remove(key) }
     }
 }
 
 class AppPreferences(private val context: Context) {
     private val protectedPreferences by lazy { ProtectedPreferences(context) }
 
-    private val preferences =
+    private val preferences by lazy {
         context.getSharedPreferences("app_preferences", Context.MODE_PRIVATE)
+    }
 
     fun getIP(): String? {
-        return preferences.getString(IP_KEY, "")
+        return preferences.getString(IP_KEY, null)
     }
 
     fun createIP(ip: String) {
-        preferences.edit().apply {
-            putString(IP_KEY, ip)
-            apply()
-        }
+        preferences.edit { putString(IP_KEY, ip) }
         protectedPreferences.saveToDeviceEncryptedStorage(IP_KEY, ip)
     }
 
-    fun getDeviceId(): Int {
-        return preferences.getInt(DEVICE_ID_KEY, -1)
+    fun getDeviceId(): Int? {
+        val id = preferences.getInt(DEVICE_ID_KEY, -1)
+        return if (id != -1) id else null
     }
 
-    fun createDeviceId(id: Int) {
-        preferences.edit().apply {
-            putInt(DEVICE_ID_KEY, id)
-            apply()
+    fun createDeviceId(id: Int?) {
+        preferences.edit {
+            putInt(DEVICE_ID_KEY, id ?: -1)
         }
-        protectedPreferences.saveToDeviceEncryptedStorage(DEVICE_ID_KEY, id)
+        protectedPreferences.saveToDeviceEncryptedStorage(DEVICE_ID_KEY, id ?: -1)
     }
 
     fun deleteDeviceId() {
-        preferences.edit().apply {
-            remove(DEVICE_ID_KEY)
-            apply()
-        }
+        preferences.edit { remove(DEVICE_ID_KEY) }
         protectedPreferences.deleteFromDeviceEncryptedStorage(DEVICE_ID_KEY)
     }
 }
@@ -101,8 +92,9 @@ class AppPreferences(private val context: Context) {
 class ServicePreferences(private val context: Context) {
     private val protectedPreferences by lazy { ProtectedPreferences(context) }
 
-    private val preferences =
+    private val preferences by lazy {
         context.getSharedPreferences("service_preferences", Context.MODE_PRIVATE)
+    }
 
 
     fun getLocationServiceStatus(): Boolean {
@@ -110,26 +102,22 @@ class ServicePreferences(private val context: Context) {
     }
 
     fun createLocationServiceStatus(status: Boolean) {
-        preferences.edit().apply {
-            putBoolean(LOCATION_SERVICE_KEY, status)
-            apply()
-        }
+        preferences.edit { putBoolean(LOCATION_SERVICE_KEY, status) }
         protectedPreferences.saveToDeviceEncryptedStorage(LOCATION_SERVICE_KEY, status)
     }
 
-    fun getLocationUpdatesInterval(): Int {
-        return preferences.getInt(LOCATION_UPDATES_INTERVAL_KEY, -1)
+    fun getLocationUpdatesInterval(): Int? {
+        val interval = preferences.getInt(LOCATION_UPDATES_INTERVAL_KEY, -1)
+        return if (interval != -1) interval else null
     }
 
-    fun createLocationUpdatesInterval(interval: Int) {
-        preferences.edit().apply {
-            putInt(LOCATION_UPDATES_INTERVAL_KEY, interval)
-            apply()
-        }
-        protectedPreferences.saveToDeviceEncryptedStorage(LOCATION_UPDATES_INTERVAL_KEY, interval)
+    fun createLocationUpdatesInterval(interval: Int?) {
+        preferences.edit { putInt(LOCATION_UPDATES_INTERVAL_KEY, interval ?: -1) }
+        protectedPreferences.saveToDeviceEncryptedStorage(LOCATION_UPDATES_INTERVAL_KEY, interval ?: -1)
     }
 }
 
+@Suppress("DEPRECATION")
 class UserPreferences(private val context: Context) {
     private val protectedPreferences by lazy { ProtectedPreferences(context) }
 
@@ -182,11 +170,10 @@ class UserPreferences(private val context: Context) {
     fun createUserCredentials(tokens: Pair<String, String>, user: User) {
         val prefs = getEncryptedSharedPreferences()
 
-        prefs.edit().apply {
+        prefs.edit {
             putString(ACCESS_TOKEN_KEY, tokens.first)
             putString(REFRESH_TOKEN_KEY, tokens.second)
             putString(USER_KEY, Gson().toJson(user))
-            apply()
         }
         protectedPreferences.saveToDeviceEncryptedStorage(ACCESS_TOKEN_KEY, tokens.first)
         protectedPreferences.saveToDeviceEncryptedStorage(REFRESH_TOKEN_KEY, tokens.second)
@@ -195,10 +182,7 @@ class UserPreferences(private val context: Context) {
     fun deleteUserCredentials() {
         val prefs = getEncryptedSharedPreferences()
 
-        prefs.edit().apply {
-            clear()
-            apply()
-        }
+        prefs.edit { clear() }
         protectedPreferences.deleteFromDeviceEncryptedStorage(ACCESS_TOKEN_KEY)
         protectedPreferences.deleteFromDeviceEncryptedStorage(REFRESH_TOKEN_KEY)
     }
@@ -206,10 +190,7 @@ class UserPreferences(private val context: Context) {
     fun updateAccessToken(accessToken: String) {
         val prefs = getEncryptedSharedPreferences()
 
-        prefs.edit().apply {
-            putString(ACCESS_TOKEN_KEY, accessToken)
-            apply()
-        }
+        prefs.edit { putString(ACCESS_TOKEN_KEY, accessToken) }
         protectedPreferences.saveToDeviceEncryptedStorage(ACCESS_TOKEN_KEY, accessToken)
     }
 }

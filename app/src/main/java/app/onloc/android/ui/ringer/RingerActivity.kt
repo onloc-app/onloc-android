@@ -13,7 +13,7 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-package app.onloc.android
+package app.onloc.android.ui.ringer
 
 import android.content.Context
 import android.content.Intent
@@ -56,11 +56,12 @@ class RingerActivity : ComponentActivity() {
         enableEdgeToEdge()
         setShowWhenLocked(true)
         setTurnScreenOn(true)
+
+        val ringtoneUri = Settings.System.DEFAULT_ALARM_ALERT_URI
+        ringtone = RingtoneManager.getRingtone(applicationContext, ringtoneUri)
+
         setContent {
             val context = LocalContext.current
-
-            val ringtoneUri = Settings.System.DEFAULT_ALARM_ALERT_URI
-            ringtone = RingtoneManager.getRingtone(context, ringtoneUri)
 
             LaunchedEffect(Unit) {
                 startRinging(DURATION)

@@ -19,7 +19,7 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import app.onloc.android.AppPreferences
-import app.onloc.android.MainActivity
+import app.onloc.android.ui.main.MainActivity
 import app.onloc.android.UserPreferences
 import app.onloc.android.services.LocationForegroundService
 import okhttp3.Authenticator

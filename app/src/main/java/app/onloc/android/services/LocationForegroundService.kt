@@ -27,6 +27,7 @@ import android.location.LocationListener
 import android.location.LocationManager
 import android.os.BatteryManager
 import android.os.IBinder
+import android.util.Log
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import app.onloc.android.R
@@ -87,16 +88,26 @@ class LocationForegroundService : Service() {
             return
         }
 
-        val provider = LocationManager.FUSED_PROVIDER
-
         val interval = getInterval(deviceEncryptedPreferences) * SECOND
 
-        locationManager.requestLocationUpdates(
-            provider,
-            interval,
-            0f,
-            locationListener,
-        )
+        if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+            locationManager.requestLocationUpdates(
+                LocationManager.GPS_PROVIDER,
+                interval,
+                0f,
+                locationListener,
+            )
+        }
+
+        if (locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
+            locationManager.requestLocationUpdates(
+                LocationManager.NETWORK_PROVIDER,
+                interval,
+                0f,
+                locationListener,
+            )
+        }
+
     }
 
     private fun startForegroundService() {

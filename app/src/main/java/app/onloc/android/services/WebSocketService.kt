@@ -40,6 +40,7 @@ import app.onloc.android.permissions.OverlayPermission
 import app.onloc.android.permissions.PostNotificationPermission
 import app.onloc.android.services.ServiceStatus.isWebSocketServiceRunning
 import app.onloc.android.singletons.RingerState
+import app.onloc.android.ui.ringer.RingerActivity
 import org.json.JSONObject
 
 private const val CHANNEL_ID = "ringer_websocket_channel"
@@ -135,7 +136,7 @@ class WebSocketService : Service() {
                     RingerState.isRinging = true
                     val ringerIntent = Intent(
                         this,
-                        app.onloc.android.RingerActivity::class.java,
+                        RingerActivity::class.java,
                     )
                         .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                         .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)

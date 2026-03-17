@@ -37,18 +37,12 @@ import org.json.JSONObject
 @Composable
 fun DeviceSelector(
     devices: List<Device>,
-    errorMessage: String,
-    selectedDeviceId: Int,
+    selectedDeviceId: Int?,
     showBottomSheet: Boolean,
     onDismissBottomSheet: () -> Unit,
     onDeviceSelect: (id: Int) -> Unit
 ) {
-    val appPreferences = AppPreferences(LocalContext.current)
-
-    val sheetState = rememberModalBottomSheetState(
-        skipPartiallyExpanded = false,
-    )
-
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
     if (showBottomSheet) {
         ModalBottomSheet(
             modifier = Modifier.fillMaxHeight(),
@@ -62,36 +56,11 @@ fun DeviceSelector(
                             device = device,
                             selected = device.id == selectedDeviceId,
                             onSelect = {
-                                val unregisterPayload = JSONObject().apply {
-                                    put("device_id", selectedDeviceId)
-                                }
-                                SocketManager.emit("unregister-device", unregisterPayload)
-
-                                appPreferences.createDeviceId(device.id)
-
-                                val registerPayload = JSONObject().apply {
-                                    put("device_id", device.id)
-                                }
-                                SocketManager.emit("register-device", registerPayload)
-
                                 onDeviceSelect(device.id)
                                 onDismissBottomSheet()
                             },
                         )
                     }
-                }
-            } else {
-                if (errorMessage != "") {
-                    Text(
-                        text = errorMessage,
-                        color = MaterialTheme.colorScheme.error,
-                        modifier = Modifier.padding(16.dp)
-                    )
-                } else {
-                    Text(
-                        text = "No device found",
-                        modifier = Modifier.padding(16.dp)
-                    )
                 }
             }
         }

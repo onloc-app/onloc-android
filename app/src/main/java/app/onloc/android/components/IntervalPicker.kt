@@ -32,7 +32,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import app.onloc.android.R
-import app.onloc.android.ServicePreferences
 import kotlin.math.roundToInt
 
 private data class TimeStep(
@@ -81,14 +80,6 @@ fun IntervalPicker(
     enabled: Boolean = true,
     onChange: (value: Int) -> Unit = {},
 ) {
-    val context = LocalContext.current
-    val servicePreferences = ServicePreferences(context)
-
-    fun updateInterval(newValue: Int) {
-        onChange(newValue)
-        servicePreferences.createLocationUpdatesInterval(newValue)
-    }
-
     val bestOptionIndex = remember(value) {
         timeSteps.indexOfLast {
             value >= it.multiplier
@@ -107,7 +98,7 @@ fun IntervalPicker(
                     checked = timeStep == selectedOption,
                     onCheckedChange = {
                         selectedOption = timeStep
-                        updateInterval(timeStep.bounds.first * timeStep.multiplier)
+                        onChange(timeStep.bounds.first * timeStep.multiplier)
                     },
                     label = {
                         Text(pluralStringResource(timeStep.pluralResId, value / selectedOption.multiplier))
@@ -121,7 +112,7 @@ fun IntervalPicker(
             value = (value / selectedOption.multiplier).coerceIn(1, selectedOption.bounds.last).toFloat(),
             onValueChange = {
                 val snapped = (it / selectedOption.stepSize).roundToInt() * selectedOption.stepSize
-                updateInterval(snapped * selectedOption.multiplier)
+                onChange(snapped * selectedOption.multiplier)
             },
             colors = SliderDefaults.colors(
                 thumbColor = MaterialTheme.colorScheme.secondary,

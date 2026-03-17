@@ -30,12 +30,12 @@
             android:usesCleartextTraffic="true"
             tools:targetApi="tiramisu">
         <activity
-                android:name=".LoginActivity"
+                android:name=".ui.login.LoginActivity"
                 android:exported="false"
                 android:label="@string/title_activity_login"
                 android:theme="@style/Theme.OnlocAndroid"/>
         <activity
-                android:name=".RingerActivity"
+                android:name=".ui.ringer.RingerActivity"
                 android:excludeFromRecents="true"
                 android:exported="true"
                 android:label="@string/title_activity_ringer"
@@ -44,12 +44,12 @@
                 android:theme="@style/Theme.OnlocAndroid"
                 android:turnScreenOn="true"/>
         <activity
-                android:name=".LocationActivity"
+                android:name=".ui.location.LocationActivity"
                 android:exported="false"
                 android:label="@string/title_activity_location"
                 android:theme="@style/Theme.OnlocAndroid"/>
         <activity
-                android:name=".MainActivity"
+                android:name=".ui.main.MainActivity"
                 android:exported="true"
                 android:theme="@style/Theme.OnlocAndroid">
             <intent-filter>

@@ -13,21 +13,21 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-package app.onloc.android.components
+package app.onloc.android.ui.login
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.AbsoluteRoundedCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -35,7 +35,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -47,26 +46,23 @@ import androidx.compose.ui.window.Dialog
 import app.onloc.android.R
 
 @Composable
-fun Avatar(
-    username: String?,
-    onLogout: () -> Unit,
+fun ServerDiscoveryButton(
+    servers: List<Pair<String, Int>>,
+    onSelect: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    var accountDialogOpened by rememberSaveable { mutableStateOf(false) }
+    var showDialog by rememberSaveable { mutableStateOf(false) }
 
-    IconButton(
-        onClick = { accountDialogOpened = true },
-        modifier = modifier
+    Button(
+        modifier = modifier.padding(bottom = 8.dp),
+        onClick = { showDialog = true },
     ) {
-        Icon(
-            Icons.Outlined.AccountCircle,
-            contentDescription = stringResource(R.string.avatar_dialog_title)
-        )
+        Text(text = stringResource(id = R.string.login_found_servers_button))
     }
 
-    if (accountDialogOpened) {
+    if (showDialog) {
         Dialog(
-            onDismissRequest = { accountDialogOpened = false },
+            onDismissRequest = { showDialog = false },
         ) {
             Card(
                 modifier = Modifier
@@ -80,22 +76,21 @@ fun Avatar(
                         .padding(16.dp)
                 ) {
                     Box(
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
                     ) {
                         IconButton(
-                            onClick = { accountDialogOpened = false },
+                            onClick = { showDialog = false },
                             modifier = Modifier.align(Alignment.CenterEnd)
                         ) {
                             Icon(
                                 imageVector = Icons.Filled.Close,
-                                contentDescription =
-                                    stringResource(R.string.avatar_close_button_description),
+                                contentDescription = "Close",
                                 tint = MaterialTheme.colorScheme.onSurface
                             )
                         }
 
                         Text(
-                            text = stringResource(R.string.avatar_dialog_title),
+                            text = stringResource(R.string.login_found_servers_dialog_title),
                             modifier = Modifier.align(Alignment.Center),
                             textAlign = TextAlign.Center,
                             style = MaterialTheme.typography.titleLarge,
@@ -105,29 +100,30 @@ fun Avatar(
 
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(32.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(top = 64.dp)
                     ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            Icon(
-                                Icons.Outlined.AccountCircle,
-                                contentDescription = null,
-                                modifier = Modifier.size(48.dp)
-                            )
-
-                            Text(
-                                text = username ?: "",
-                                style = MaterialTheme.typography.titleLarge
-                            )
-                        }
-
-                        Button(onClick = onLogout) {
-                            Text(stringResource(R.string.avatar_logout_button_label))
+                        for (server in servers) {
+                            ElevatedCard(
+                                elevation = CardDefaults.cardElevation(2.dp),
+                                colors = CardDefaults.cardColors(MaterialTheme.colorScheme.surfaceVariant),
+                                shape = AbsoluteRoundedCornerShape(16.dp),
+                                onClick = {
+                                    onSelect("http://${server.first}:${server.second}")
+                                    showDialog = false
+                                }
+                            ) {
+                                Box(
+                                    modifier = Modifier.padding(16.dp),
+                                ) {
+                                    Text(
+                                        "http://${server.first}:${server.second}",
+                                        style = MaterialTheme.typography.bodyLarge,
+                                    )
+                                }
+                            }
                         }
                     }
                 }

@@ -13,16 +13,16 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-package app.onloc.android
+package app.onloc.android.ui.login
 
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.os.ext.SdkExtensions
-import android.util.Patterns
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -34,23 +34,15 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.AbsoluteRoundedCornerShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -62,34 +54,36 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import app.onloc.android.api.AuthApiService
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import app.onloc.android.ui.location.LocationActivity
+import app.onloc.android.MIN_TIRAMISU_VERSION
+import app.onloc.android.R
+import app.onloc.android.ServerDiscovery
 import app.onloc.android.components.PasswordTextField
 import app.onloc.android.ui.theme.OnlocAndroidTheme
-import okio.IOException
+import kotlin.jvm.java
 
 private const val LOGIN_FORM_WIDTH = 0.8f
 
 class LoginActivity : ComponentActivity() {
+    private val viewModel by viewModels<LoginViewModel>()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             OnlocAndroidTheme {
                 Surface(modifier = Modifier.fillMaxSize()) {
-                    val scrollState = rememberScrollState()
-
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(16.dp)
-                            .verticalScroll(scrollState),
+                            .verticalScroll(rememberScrollState()),
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
+                        verticalArrangement = Arrangement.Center,
                     ) {
                         Text(
                             text = stringResource(R.string.login_title),
@@ -98,9 +92,9 @@ class LoginActivity : ComponentActivity() {
                         Text(
                             text = stringResource(R.string.login_description),
                             style = MaterialTheme.typography.titleMedium,
-                            modifier = Modifier.padding(bottom = 8.dp)
+                            modifier = Modifier.padding(bottom = 8.dp),
                         )
-                        LoginForm()
+                        LoginForm(viewModel)
                     }
                 }
             }
@@ -109,27 +103,21 @@ class LoginActivity : ComponentActivity() {
 }
 
 @Composable
-fun LoginForm(modifier: Modifier = Modifier) {
+fun LoginForm(viewModel: LoginViewModel, modifier: Modifier = Modifier) {
     val context = LocalContext.current
-    val appPreferences = AppPreferences(context)
-    val userPreferences = UserPreferences(context)
     val lifecycleOwner = LocalLifecycleOwner.current
+    val loginState by viewModel.loginState.collectAsStateWithLifecycle()
 
-    var storedIp = appPreferences.getIP()
-    if (storedIp == null)
-        storedIp = ""
-
-    var ip by rememberSaveable { mutableStateOf(storedIp) }
+    // Form data
+    var ip by rememberSaveable { mutableStateOf(viewModel.storedIp) }
     var isIpError by rememberSaveable { mutableStateOf("") }
     var username by rememberSaveable { mutableStateOf("") }
     var isUsernameError by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
     var isPasswordError by rememberSaveable { mutableStateOf("") }
-    var error by rememberSaveable { mutableStateOf("") }
 
+    // Server discovery
     var showDialogButton by rememberSaveable { mutableStateOf(false) }
-    var showFoundServers by rememberSaveable { mutableStateOf(false) }
-
     val servers = remember { mutableStateListOf<Pair<String, Int>>() }
     val serverDiscovery = remember {
         ServerDiscovery(context) { service ->
@@ -138,13 +126,22 @@ fun LoginForm(modifier: Modifier = Modifier) {
             }
         }
     }
-
     if (SdkExtensions.getExtensionVersion(Build.VERSION_CODES.TIRAMISU) >= MIN_TIRAMISU_VERSION) {
         DisposableEffect(Unit) {
             serverDiscovery.startDiscovery()
             onDispose {
                 serverDiscovery.stopDiscovery()
             }
+        }
+    }
+
+    LaunchedEffect(loginState) {
+        if (loginState is LoginState.Success) {
+            context.startActivity(
+                Intent(context, LocationActivity::class.java).apply {
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                }
+            )
         }
     }
 
@@ -179,85 +176,10 @@ fun LoginForm(modifier: Modifier = Modifier) {
             )
 
             if (showDialogButton && servers.isNotEmpty()) {
-                Button(
-                    modifier = Modifier.padding(bottom = 8.dp),
-                    onClick = {
-                        showFoundServers = true
-                    }
-                ) {
-                    Text(text = stringResource(R.string.login_found_servers_button))
-                }
-            }
-
-            if (showFoundServers) {
-                Dialog(
-                    onDismissRequest = { showFoundServers = false },
-                ) {
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        shape = RoundedCornerShape(16.dp),
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp)
-                        ) {
-                            Box(
-                                modifier = Modifier.fillMaxWidth(),
-                            ) {
-                                IconButton(
-                                    onClick = { showFoundServers = false },
-                                    modifier = Modifier.align(Alignment.CenterEnd)
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Filled.Close,
-                                        contentDescription = "Close",
-                                        tint = MaterialTheme.colorScheme.onSurface
-                                    )
-                                }
-
-                                Text(
-                                    text = stringResource(R.string.login_found_servers_dialog_title),
-                                    modifier = Modifier.align(Alignment.Center),
-                                    textAlign = TextAlign.Center,
-                                    style = MaterialTheme.typography.titleLarge,
-                                    color = MaterialTheme.colorScheme.primary
-                                )
-                            }
-
-                            Column(
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.spacedBy(8.dp),
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(top = 64.dp)
-                            ) {
-                                for (server in servers) {
-                                    ElevatedCard(
-                                        elevation = CardDefaults.cardElevation(2.dp),
-                                        colors = CardDefaults.cardColors(MaterialTheme.colorScheme.surfaceVariant),
-                                        shape = AbsoluteRoundedCornerShape(16.dp),
-                                        onClick = {
-                                            ip = "http://${server.first}:${server.second}"
-                                            showFoundServers = false
-                                        }
-                                    ) {
-                                        Box(
-                                            modifier = Modifier.padding(16.dp),
-                                        ) {
-                                            Text(
-                                                "http://${server.first}:${server.second}",
-                                                style = MaterialTheme.typography.bodyLarge,
-                                            )
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
+                ServerDiscoveryButton(
+                    servers = servers,
+                    onSelect = { ip = it },
+                )
             }
 
             OutlinedTextField(
@@ -284,8 +206,11 @@ fun LoginForm(modifier: Modifier = Modifier) {
                 isPasswordError = isPasswordError
             )
 
-            AnimatedVisibility(error != "") {
-                Text(error, color = MaterialTheme.colorScheme.error)
+            AnimatedVisibility(loginState is LoginState.Error) {
+                Text(
+                    text = (loginState as? LoginState.Error)?.message ?: "",
+                    color = MaterialTheme.colorScheme.error,
+                )
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -300,71 +225,13 @@ fun LoginForm(modifier: Modifier = Modifier) {
                         onUsernameError = { isUsernameError = it },
                         onPasswordError = { isPasswordError = it }
                     )
-
-                    error = ""
-
-                    if (isValid) {
-                        val authApiService = AuthApiService(context, ip)
-                        try {
-                            authApiService.login(username, password) { tokens, user, errorMessage ->
-                                if (tokens != null && user != null) {
-                                    appPreferences.createIP(ip)
-                                    userPreferences.createUserCredentials(tokens, user)
-
-                                    val intent = Intent(context, LocationActivity::class.java)
-                                    intent.flags =
-                                        Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                                    context.startActivity(intent)
-                                } else {
-                                    error = errorMessage ?: "Failure"
-                                }
-                            }
-                        } catch (e: IOException) {
-                            error = "Network error: ${e.message}"
-                        }
-                    }
+                    if (isValid) viewModel.login(ip, username, password)
                 },
+                enabled = loginState !is LoginState.Loading,
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(stringResource(R.string.login_submit_button_label))
             }
         }
     }
-}
-
-fun validateInputs(
-    ip: String,
-    username: String,
-    password: String,
-    onIpError: (String) -> Unit,
-    onUsernameError: (String) -> Unit,
-    onPasswordError: (String) -> Unit
-): Boolean {
-    var isValid = true
-
-    if (ip.isBlank()) {
-        onIpError("IP is required")
-        isValid = false
-    } else if (!Patterns.WEB_URL.matcher(ip).matches()) {
-        onIpError("Invalid IP")
-        isValid = false
-    } else {
-        onIpError("")
-    }
-
-    if (username.isBlank()) {
-        onUsernameError("Username is required")
-        isValid = false
-    } else {
-        onUsernameError("")
-    }
-
-    if (password.isBlank()) {
-        onPasswordError("Password is required")
-        isValid = false
-    } else {
-        onPasswordError("")
-    }
-
-    return isValid
 }

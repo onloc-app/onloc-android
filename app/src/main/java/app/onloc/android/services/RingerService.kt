@@ -24,7 +24,7 @@ import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import app.onloc.android.R
-import app.onloc.android.RingerActivity
+import app.onloc.android.ui.ringer.RingerActivity
 import app.onloc.android.singletons.RingerState
 
 private const val CHANNEL_ID = "ringer_channel"
