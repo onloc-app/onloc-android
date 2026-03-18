@@ -1,7 +1,6 @@
 [versions]
 agp = "8.12.3"
 detekt = "0.5.6"
-gson = "2.13.2"
 kotlin = "2.3.20"
 coreKtx = "1.18.0"
 junit = "4.13.2"
@@ -29,7 +28,6 @@ androidx-security-crypto = { module = "androidx.security:security-crypto", versi
 androidx-work-runtime = { module = "androidx.work:work-runtime", version.ref = "workRuntimeKtx" }
 androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "workRuntimeKtx" }
 detekt = { module = "io.nlopez.compose.rules:detekt", version.ref = "detekt" }
-gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
