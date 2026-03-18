@@ -19,15 +19,11 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class User(
+data class Avatar(
     val id: Int,
-    val username: String,
 
-    @SerialName("created_at")
-    val createdAt: String?,
+    @SerialName("user_id")
+    val userId: Int,
 
-    @SerialName("updated_at")
-    val updatedAt: String?,
-
-    val avatar: Avatar? = null,
+    val url: String,
 )

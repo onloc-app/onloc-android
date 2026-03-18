@@ -5,8 +5,8 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-    id("io.gitlab.arturbosch.detekt") version ("1.23.8")
-    id("org.jetbrains.kotlin.plugin.serialization") version "1.9.10"
+    alias(libs.plugins.detekt)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 android {
@@ -95,5 +95,8 @@ dependencies {
     implementation(libs.socket.io.client)
     implementation(libs.maplibre.compose)
     implementation(libs.maplibre.composeMaterial3)
+    implementation(libs.coil)
+    implementation(libs.coil.network.okhttp)
+    implementation(libs.coil.compose)
     detektPlugins(libs.detekt)
 }

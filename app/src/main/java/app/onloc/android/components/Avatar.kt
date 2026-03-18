@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
@@ -35,33 +36,52 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import app.onloc.android.R
+import app.onloc.android.models.User
+import coil3.compose.AsyncImage
 
 @Composable
 fun Avatar(
-    username: String?,
+    user: User?,
+    ip: String?,
     onLogout: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var accountDialogOpened by rememberSaveable { mutableStateOf(false) }
 
+    @Composable
+    fun AvatarIcon(modifier: Modifier = Modifier) {
+        if (user?.avatar != null && ip != null) {
+            AsyncImage(
+                model = "$ip/${user.avatar.url}",
+                contentDescription = stringResource(R.string.avatar_dialog_title),
+                contentScale = ContentScale.Crop,
+                modifier = modifier.clip(CircleShape),
+            )
+        } else {
+            Icon(
+                Icons.Outlined.AccountCircle,
+                contentDescription = stringResource(R.string.avatar_dialog_title),
+                modifier = modifier,
+            )
+        }
+    }
+
     IconButton(
         onClick = { accountDialogOpened = true },
         modifier = modifier
     ) {
-        Icon(
-            Icons.Outlined.AccountCircle,
-            contentDescription = stringResource(R.string.avatar_dialog_title)
-        )
+        AvatarIcon()
     }
 
     if (accountDialogOpened) {
@@ -114,14 +134,10 @@ fun Avatar(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            Icon(
-                                Icons.Outlined.AccountCircle,
-                                contentDescription = null,
-                                modifier = Modifier.size(48.dp)
-                            )
+                            AvatarIcon(Modifier.size(48.dp))
 
                             Text(
-                                text = username.orEmpty(),
+                                text = user?.username.orEmpty(),
                                 style = MaterialTheme.typography.titleLarge
                             )
                         }

@@ -140,6 +140,7 @@ fun LocationScreen(viewModel: LocationViewModel, modifier: Modifier = Modifier) 
     val isAuthenticated by AuthStateManager.isAuthenticated.collectAsStateWithLifecycle()
 
     val defaultPadding = 16.dp
+    val ip by rememberSaveable { mutableStateOf(viewModel.storedIp) }
     var showBottomSheet by rememberSaveable { mutableStateOf(false) }
     var onCurrentLocation by remember { mutableStateOf(false) }
     var focusedDevice by remember { mutableStateOf<Device?>(null) }
@@ -275,7 +276,8 @@ fun LocationScreen(viewModel: LocationViewModel, modifier: Modifier = Modifier) 
                         }
                     }
                     Avatar(
-                        username = viewModel.user?.username,
+                        user = viewModel.user,
+                        ip = ip,
                         onLogout = {
                             viewModel.logout()
                             context.startActivity(
