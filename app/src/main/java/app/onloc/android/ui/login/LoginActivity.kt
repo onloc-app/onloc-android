@@ -63,6 +63,7 @@ import app.onloc.android.MIN_TIRAMISU_VERSION
 import app.onloc.android.R
 import app.onloc.android.ServerDiscovery
 import app.onloc.android.components.PasswordTextField
+import app.onloc.android.components.ServerDiscoveryButton
 import app.onloc.android.ui.theme.OnlocAndroidTheme
 import kotlin.jvm.java
 
@@ -208,7 +209,7 @@ fun LoginForm(viewModel: LoginViewModel, modifier: Modifier = Modifier) {
 
             AnimatedVisibility(loginState is LoginState.Error) {
                 Text(
-                    text = (loginState as? LoginState.Error)?.message ?: "",
+                    text = (loginState as? LoginState.Error)?.message.orEmpty(),
                     color = MaterialTheme.colorScheme.error,
                 )
             }

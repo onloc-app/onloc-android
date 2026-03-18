@@ -27,15 +27,16 @@ import android.location.LocationListener
 import android.location.LocationManager
 import android.os.BatteryManager
 import android.os.IBinder
-import android.util.Log
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import app.onloc.android.R
-import app.onloc.android.api.LocationsApiService
-import app.onloc.android.helpers.getAccessToken
+import app.onloc.android.api.locations.LocationsApiService
 import app.onloc.android.helpers.getIP
 import app.onloc.android.helpers.getInterval
 import app.onloc.android.helpers.getSelectedDeviceId
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 private const val CHANNEL_ID = "location_channel"
 const val SECOND = 1000L
@@ -54,7 +55,6 @@ class LocationForegroundService : Service() {
 
     private val locationListener = LocationListener { location ->
         val ip = getIP(deviceEncryptedPreferences)
-        val accessToken = getAccessToken(deviceEncryptedPreferences)
         val selectedDeviceId = getSelectedDeviceId(deviceEncryptedPreferences)
 
         val batteryManager = applicationContext.getSystemService(BATTERY_SERVICE) as BatteryManager
@@ -62,14 +62,15 @@ class LocationForegroundService : Service() {
 
         val parsedLocation = app.onloc.android.models.Location.fromAndroidLocation(
             0,
-            selectedDeviceId,
+            selectedDeviceId ?: 0,
             location,
         )
         parsedLocation.battery = batteryLevel
 
-        if (ip != null && accessToken != null && selectedDeviceId != -1) {
-            val locationsApiService = LocationsApiService(applicationContext, ip, accessToken)
-            locationsApiService.postLocation(parsedLocation)
+        if (ip != null && selectedDeviceId != null) {
+            CoroutineScope(Dispatchers.IO).launch {
+                LocationsApiService(applicationContext, ip).postLocation(parsedLocation)
+            }
         }
         LocationCallbackManager.callback?.invoke(location)
     }
@@ -88,12 +89,13 @@ class LocationForegroundService : Service() {
             return
         }
 
-        val interval = getInterval(deviceEncryptedPreferences) * SECOND
+        val interval = getInterval(deviceEncryptedPreferences) ?: return
+        val finalInterval = interval * SECOND
 
         if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
             locationManager.requestLocationUpdates(
                 LocationManager.GPS_PROVIDER,
-                interval,
+                finalInterval,
                 0f,
                 locationListener,
             )
@@ -102,7 +104,7 @@ class LocationForegroundService : Service() {
         if (locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
             locationManager.requestLocationUpdates(
                 LocationManager.NETWORK_PROVIDER,
-                interval,
+                finalInterval,
                 0f,
                 locationListener,
             )

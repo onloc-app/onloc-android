@@ -13,19 +13,23 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-package app.onloc.android.models
+package app.onloc.android.models.api
 
-import kotlinx.serialization.SerialName
+import app.onloc.android.models.User
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class User(
-    val id: Int,
-    val username: String,
-
-    @SerialName("created_at")
-    val createdAt: String?,
-
-    @SerialName("updated_at")
-    val updatedAt: String?
+data class GetUsersResponse(
+    val users: List<User>,
 )
+
+@Serializable
+data class GetUserResponse(
+    val user: User,
+)
+
+@Serializable
+data class GetUserInfoResponse(
+    val user: User,
+)
+

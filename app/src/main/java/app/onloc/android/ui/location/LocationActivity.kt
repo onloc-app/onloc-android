@@ -103,6 +103,7 @@ import io.github.dellisd.spatialk.geojson.Position
 import kotlinx.coroutines.launch
 import java.lang.System.currentTimeMillis
 import app.onloc.android.R
+import app.onloc.android.api.AuthStateManager
 import app.onloc.android.components.map.SharedLocationPuck
 import app.onloc.android.ui.main.MainActivity
 
@@ -131,10 +132,12 @@ fun LocationScreen(viewModel: LocationViewModel, modifier: Modifier = Modifier) 
 
     val devices by viewModel.devices.collectAsStateWithLifecycle()
     val sharedDevices by viewModel.sharedDevices.collectAsStateWithLifecycle()
+    val sharedDeviceUsers by viewModel.sharedDeviceUsers.collectAsStateWithLifecycle()
     val currentLocation by viewModel.currentLocation.collectAsStateWithLifecycle()
     val selectedDevice by viewModel.selectedDevice.collectAsStateWithLifecycle()
     val isLocationServiceRunning by viewModel.isLocationServiceRunning.collectAsStateWithLifecycle()
     val locationUpdateInterval by viewModel.locationUpdateInterval.collectAsStateWithLifecycle()
+    val isAuthenticated by AuthStateManager.isAuthenticated.collectAsStateWithLifecycle()
 
     val defaultPadding = 16.dp
     var showBottomSheet by rememberSaveable { mutableStateOf(false) }
@@ -205,6 +208,16 @@ fun LocationScreen(viewModel: LocationViewModel, modifier: Modifier = Modifier) 
     fun openNavigationApp(location: Location) {
         val uri = "geo:${location.latitude},${location.longitude}?q=${location.latitude},${location.longitude}".toUri()
         context.startActivity(Intent(Intent.ACTION_VIEW, uri))
+    }
+
+    LaunchedEffect(isAuthenticated) {
+        if (!isAuthenticated) {
+            context.startActivity(
+                Intent(context, MainActivity::class.java).apply {
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                }
+            )
+        }
     }
 
     LaunchedEffect(cameraState.isCameraMoving, cameraState.moveReason) {
@@ -432,29 +445,32 @@ fun LocationScreen(viewModel: LocationViewModel, modifier: Modifier = Modifier) 
             // Display the location of shared devices
             sharedDevices.forEach { device ->
                 device.latestLocation?.let { location ->
-                    SharedLocationPuck(
-                        id = location.id,
-                        location = location,
-                        device = device,
-                        metersPerDp = cameraState.metersPerDpAtTarget,
-                        onClick = {
-                            coroutineScope.launch {
-                                cameraState.animateTo(
-                                    CameraPosition(
-                                        target = Position(
-                                            location.longitude,
-                                            location.latitude,
-                                        ),
-                                        zoom = 16.0,
+                    sharedDeviceUsers[device.userId]?.let { user ->
+                        SharedLocationPuck(
+                            id = location.id,
+                            location = location,
+                            device = device,
+                            user = user,
+                            metersPerDp = cameraState.metersPerDpAtTarget,
+                            onClick = {
+                                coroutineScope.launch {
+                                    cameraState.animateTo(
+                                        CameraPosition(
+                                            target = Position(
+                                                location.longitude,
+                                                location.latitude,
+                                            ),
+                                            zoom = 16.0,
+                                        )
                                     )
-                                )
-                            }
-                            focusedDevice = device
-                        },
-                        onLongClick = {
-                            openNavigationApp(location)
-                        },
-                    )
+                                }
+                                focusedDevice = device
+                            },
+                            onLongClick = {
+                                openNavigationApp(location)
+                            },
+                        )
+                    }
                 }
             }
 

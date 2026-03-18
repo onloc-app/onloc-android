@@ -29,10 +29,12 @@ fun getAccessToken(deviceEncryptedPreferences: SharedPreferences): String? {
     return deviceEncryptedPreferences.getString(ACCESS_TOKEN_KEY, null)
 }
 
-fun getSelectedDeviceId(deviceEncryptedPreferences: SharedPreferences): Int {
-    return deviceEncryptedPreferences.getInt(DEVICE_ID_KEY, -1)
+fun getSelectedDeviceId(deviceEncryptedPreferences: SharedPreferences): Int? {
+    val id = deviceEncryptedPreferences.getInt(DEVICE_ID_KEY, -1)
+    return if (id != -1) id else null
 }
 
-fun getInterval(deviceEncryptedPreferences: SharedPreferences): Int {
-    return deviceEncryptedPreferences.getInt(LOCATION_UPDATES_INTERVAL_KEY, -1)
+fun getInterval(deviceEncryptedPreferences: SharedPreferences): Int? {
+    val interval = deviceEncryptedPreferences.getInt(LOCATION_UPDATES_INTERVAL_KEY, -1)
+    return if (interval != -1) interval else null
 }

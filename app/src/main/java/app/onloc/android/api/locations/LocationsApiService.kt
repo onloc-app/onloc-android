@@ -13,19 +13,26 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-package app.onloc.android.models
+package app.onloc.android.api.locations
 
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
+import android.content.Context
+import app.onloc.android.api.ApiClient
+import app.onloc.android.models.Location
+import io.ktor.client.call.body
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
+import io.ktor.http.ContentType
+import io.ktor.http.contentType
 
-@Serializable
-data class User(
-    val id: Int,
-    val username: String,
+private const val ENDPOINT = "locations"
 
-    @SerialName("created_at")
-    val createdAt: String?,
+class LocationsApiService(context: Context, ip: String) {
+    private val api = ApiClient(context, ip)
 
-    @SerialName("updated_at")
-    val updatedAt: String?
-)
+    suspend fun postLocation(location: Location) {
+        api.client.post(ENDPOINT) {
+            contentType(ContentType.Application.Json)
+            setBody(location)
+        }
+    }
+}

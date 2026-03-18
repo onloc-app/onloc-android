@@ -121,7 +121,7 @@ fun Avatar(
                             )
 
                             Text(
-                                text = username ?: "",
+                                text = username.orEmpty(),
                                 style = MaterialTheme.typography.titleLarge
                             )
                         }

@@ -15,30 +15,30 @@
 
 package app.onloc.android.models
 
-import androidx.annotation.Keep
-import com.google.gson.annotations.SerializedName
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
-@Keep
+@Serializable
 data class Location(
     val id: Int,
 
-    @SerializedName("device_id")
+    @SerialName("device_id")
     val deviceId: Int,
 
     val accuracy: Float,
     val altitude: Double,
 
-    @SerializedName("altitude_accuracy")
+    @SerialName("altitude_accuracy")
     val altitudeAccuracy: Float,
 
     val latitude: Double,
     val longitude: Double,
     var battery: Int?,
 
-    @SerializedName("created_at")
+    @SerialName("created_at")
     val createdAt: String?,
 
-    @SerializedName("updated_at")
+    @SerialName("updated_at")
     val updatedAt: String?
 ) {
     companion object {

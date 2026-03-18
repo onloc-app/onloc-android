@@ -13,19 +13,15 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-package app.onloc.android.models
+@file:Suppress("MatchingDeclarationName")
+
+package app.onloc.android.models.api
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class User(
-    val id: Int,
-    val username: String,
-
-    @SerialName("created_at")
-    val createdAt: String?,
-
-    @SerialName("updated_at")
-    val updatedAt: String?
+data class DeleteTokenRequest(
+    @SerialName("refresh_token")
+    val refreshToken: String,
 )

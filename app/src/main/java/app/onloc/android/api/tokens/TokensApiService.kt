@@ -13,19 +13,25 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-package app.onloc.android.models
+package app.onloc.android.api.tokens
 
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
+import android.content.Context
+import app.onloc.android.api.ApiClient
+import app.onloc.android.models.api.DeleteTokenRequest
+import io.ktor.client.request.delete
+import io.ktor.client.request.setBody
+import io.ktor.http.ContentType
+import io.ktor.http.contentType
 
-@Serializable
-data class User(
-    val id: Int,
-    val username: String,
+private const val ENDPOINT = "/api/tokens"
 
-    @SerialName("created_at")
-    val createdAt: String?,
+class TokensApiService(context: Context, ip: String) {
+    private val api = ApiClient(context, ip)
 
-    @SerialName("updated_at")
-    val updatedAt: String?
-)
+    suspend fun deleteToken(request: DeleteTokenRequest) {
+        api.client.delete(ENDPOINT) {
+            contentType(ContentType.Application.Json)
+            setBody(request)
+        }
+    }
+}

@@ -15,37 +15,31 @@
 
 package app.onloc.android.models
 
-import androidx.annotation.Keep
-import com.google.gson.annotations.SerializedName
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
-@Keep
+@Serializable
 data class DeviceShare(
     val id: Int,
 
-    @SerializedName("user_id")
+    @SerialName("user_id")
     val userId: Int,
 
-    @SerializedName("connection_id")
+    @SerialName("connection_id")
     val connectionId: Int,
 
-    @SerializedName("device_id")
+    @SerialName("device_id")
     val deviceId: Int,
 
-    @SerializedName("can_ring")
+    @SerialName("can_ring")
     val canRing: Boolean,
 
-    @SerializedName("can_lock")
+    @SerialName("can_lock")
     val canLock: Boolean,
 
-    @SerializedName("created_at")
+    @SerialName("created_at")
     val createdAt: String,
 
-    @SerializedName("updated_at")
+    @SerialName("updated_at")
     val updatedAt: String,
-)
-
-@Keep
-data class DeviceShareResponse(
-    @SerializedName("device_shares")
-    val deviceShares: List<DeviceShare>
 )

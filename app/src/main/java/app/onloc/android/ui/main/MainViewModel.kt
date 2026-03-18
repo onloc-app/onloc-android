@@ -16,11 +16,13 @@
 package app.onloc.android.ui.main
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import app.onloc.android.AppPreferences
 import app.onloc.android.UserPreferences
-import app.onloc.android.api.AuthApiService
+import app.onloc.android.api.auth.AuthApiService
+import app.onloc.android.api.users.UsersApiService
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -48,9 +50,13 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 return@launch
             }
 
-            AuthApiService(context, ip).userInfo(accessToken) { fetchedUser, _ ->
-                _authState.value = if (fetchedUser == null) AuthState.Unauthenticated else AuthState.Authenticated
-            }
+            UsersApiService(context, ip).getUserInfo()
+                .onSuccess {
+                    _authState.value = AuthState.Authenticated
+                }
+                .onFailure {
+                    _authState.value = AuthState.Unauthenticated
+                }
         }
     }
 }

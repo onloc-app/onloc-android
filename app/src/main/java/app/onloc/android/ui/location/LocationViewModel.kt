@@ -17,22 +17,23 @@ package app.onloc.android.ui.location
 
 import android.annotation.SuppressLint
 import android.app.Application
-import android.content.Context
 import android.content.Context.LOCATION_SERVICE
 import android.location.LocationManager
 import android.util.Log
-import androidx.core.content.ContextCompat.getSystemService
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import app.onloc.android.AppPreferences
 import app.onloc.android.ServicePreferences
 import app.onloc.android.SocketManager
 import app.onloc.android.UserPreferences
-import app.onloc.android.api.AuthApiService
-import app.onloc.android.api.DevicesApiService
+import app.onloc.android.api.AuthStateManager
+import app.onloc.android.api.devices.DevicesApiService
+import app.onloc.android.api.tokens.TokensApiService
+import app.onloc.android.api.users.UsersApiService
 import app.onloc.android.models.Device
 import app.onloc.android.models.Location
 import app.onloc.android.models.User
+import app.onloc.android.models.api.DeleteTokenRequest
 import app.onloc.android.services.LocationCallbackManager
 import app.onloc.android.services.ServiceManager
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -46,6 +47,7 @@ import org.json.JSONObject
 
 const val TIMEOUT = 5000L
 
+@Suppress("TooManyFunctions")
 class LocationViewModel(application: Application) : AndroidViewModel(application) {
     private val context = getApplication<Application>()
     private val appPreferences = AppPreferences(context)
@@ -58,10 +60,13 @@ class LocationViewModel(application: Application) : AndroidViewModel(application
     private val _sharedDevices = MutableStateFlow<List<Device>>(emptyList())
     val sharedDevices: StateFlow<List<Device>> = _sharedDevices.asStateFlow()
 
+    private val _sharedDeviceUsers = MutableStateFlow<Map<Int, User>>(emptyMap())
+    val sharedDeviceUsers: StateFlow<Map<Int, User>> = _sharedDeviceUsers.asStateFlow()
+
     private val _currentLocation = MutableStateFlow<Location?>(null)
     val currentLocation: StateFlow<Location?> = _currentLocation.asStateFlow()
 
-    private val _selectedDeviceId = MutableStateFlow<Int?>(appPreferences.getDeviceId())
+    private val _selectedDeviceId = MutableStateFlow(appPreferences.getDeviceId())
     val selectedDevice: StateFlow<Device?> = combine(_selectedDeviceId, _devices) { id, devices ->
         id?.let { devices.find { d -> d.id == id } }
     }.stateIn(
@@ -81,7 +86,6 @@ class LocationViewModel(application: Application) : AndroidViewModel(application
     }
 
     val storedIp: String? get() = appPreferences.getIP()
-    val accessToken: String? get() = userPreferences.getUserCredentials().accessToken
     val user: User? get() = userPreferences.getUserCredentials().user
 
     init {
@@ -90,31 +94,37 @@ class LocationViewModel(application: Application) : AndroidViewModel(application
     }
 
     fun fetchDevices() {
-        val ip = storedIp
-        val token = accessToken
-        if (ip == null || token == null) return
-
+        val ip = storedIp ?: return
         viewModelScope.launch {
-            val api = DevicesApiService(context, ip, token)
-            api.getDevices { found, _ ->
-                found?.let { _devices.value = found }
-            }
-            api.getSharedDevices { found, _ ->
-                found?.let { _sharedDevices.value = found }
-            }
+            val api = DevicesApiService(context, ip)
+            _devices.value = api.getDevices()
+            _sharedDevices.value = api.getSharedDevices()
+            fetchUsersForSharedDevices(_sharedDevices.value)
         }
+    }
+
+    suspend fun fetchUsersForSharedDevices(devices: List<Device>) {
+        val ip = storedIp ?: return
+        val users = mutableMapOf<Int, User>()
+        devices.forEach { device ->
+            val user = UsersApiService(context, ip).getUser(device.userId)
+            users[device.userId] = user
+        }
+        _sharedDeviceUsers.value = users
     }
 
     fun ringDevice(id: Int) {
         val ip = storedIp ?: return
-        val token = accessToken ?: return
-        DevicesApiService(context, ip, token).ringDevice(id)
+        viewModelScope.launch {
+            DevicesApiService(context, ip).ringDevice(id)
+        }
     }
 
     fun lockDevice(id: Int) {
         val ip = storedIp ?: return
-        val token = accessToken ?: return
-        DevicesApiService(context, ip, token).lockDevice(id)
+        viewModelScope.launch {
+            DevicesApiService(context, ip).lockDevice(id)
+        }
     }
 
     fun selectDevice(id: Int?) {
@@ -151,9 +161,10 @@ class LocationViewModel(application: Application) : AndroidViewModel(application
     @SuppressLint("MissingPermission")
     fun grabCurrentLocation() {
         val locationManager = context.getSystemService(LOCATION_SERVICE) as LocationManager
-        val location = locationManager.getLastKnownLocation(LocationManager.FUSED_PROVIDER)
-        if (location != null) {
-            _currentLocation.value = Location.fromAndroidLocation(0, 0, location)
+        val location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
+            ?: locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
+        location?.let {
+            _currentLocation.value = Location.fromAndroidLocation(0, 0, it)
         }
     }
 
@@ -164,12 +175,15 @@ class LocationViewModel(application: Application) : AndroidViewModel(application
 
             val credentials = userPreferences.getUserCredentials()
             val ip = storedIp
-            if (ip != null && credentials.accessToken != null && credentials.refreshToken != null) {
-                AuthApiService(context, ip).logout(credentials.accessToken, credentials.refreshToken)
+            if (ip != null && credentials.refreshToken != null) {
+                val api = TokensApiService(context, ip)
+                api.deleteToken(DeleteTokenRequest(credentials.refreshToken))
             }
 
             userPreferences.deleteUserCredentials()
             appPreferences.deleteDeviceId()
+
+            AuthStateManager.onLoggedOut()
         }
     }
 

@@ -13,19 +13,21 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-package app.onloc.android.models
+package app.onloc.android.api
 
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
-@Serializable
-data class User(
-    val id: Int,
-    val username: String,
+object AuthStateManager {
+    private val _isAuthenticated = MutableStateFlow(true)
+    val isAuthenticated: StateFlow<Boolean> = _isAuthenticated.asStateFlow()
 
-    @SerialName("created_at")
-    val createdAt: String?,
+    fun onLoggedOut() {
+        _isAuthenticated.value = false
+    }
 
-    @SerialName("updated_at")
-    val updatedAt: String?
-)
+    fun onLoggedIn() {
+        _isAuthenticated.value = true
+    }
+}

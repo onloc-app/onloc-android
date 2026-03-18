@@ -20,11 +20,14 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import app.onloc.android.AppPreferences
 import app.onloc.android.UserPreferences
-import app.onloc.android.api.AuthApiService
+import app.onloc.android.api.AuthStateManager
+import app.onloc.android.api.auth.AuthApiService
+import app.onloc.android.models.api.LoginRequest
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.io.IOException
 
 class LoginViewModel(application: Application) : AndroidViewModel(application) {
     private val _loginState = MutableStateFlow<LoginState>(LoginState.Idle)
@@ -33,21 +36,24 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
     private val appPreferences = AppPreferences(application)
     private val userPreferences = UserPreferences(application)
 
-    val storedIp: String get() = appPreferences.getIP() ?: ""
+    val storedIp: String get() = appPreferences.getIP().orEmpty()
 
     fun login(ip: String, username: String, password: String) {
         viewModelScope.launch {
+            val context = getApplication<Application>()
             _loginState.value = LoginState.Loading
 
-            val authApiService = AuthApiService(getApplication(), ip)
-            authApiService.login(username, password) { tokens, user, errorMessage ->
-                if (tokens != null && user != null) {
-                    appPreferences.createIP(ip)
-                    userPreferences.createUserCredentials(tokens, user)
-                    _loginState.value = LoginState.Success
-                } else {
-                    _loginState.value = LoginState.Error(errorMessage ?: "Unknown error")
-                }
+            try {
+                val loginResponse = AuthApiService(context, ip).login(LoginRequest(username, password))
+
+                val (accessToken, refreshToken, user) = loginResponse
+                appPreferences.createIP(ip)
+                userPreferences.createUserCredentials(accessToken to refreshToken, user)
+
+                AuthStateManager.onLoggedIn()
+                _loginState.value = LoginState.Success
+            } catch (e: IOException) {
+                _loginState.value = LoginState.Error(e.localizedMessage.orEmpty())
             }
         }
     }

@@ -15,39 +15,34 @@
 
 package app.onloc.android.models
 
-import androidx.annotation.Keep
-import com.google.gson.annotations.SerializedName
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
-@Keep
+@Serializable
 data class Device(
     val id: Int,
 
-    @SerializedName("user_id")
+    @SerialName("user_id")
     val userId: Int,
 
     val name: String,
 
     val color: String?,
 
-    @SerializedName("can_ring")
+    @SerialName("can_ring")
     val canRing: Boolean?,
 
-    @SerializedName("can_lock")
+    @SerialName("can_lock")
     val canLock: Boolean?,
 
     val icon: String?,
 
-    @SerializedName("latest_location")
+    @SerialName("latest_location")
     val latestLocation: Location?,
 
-    @SerializedName("created_at")
+    @SerialName("created_at")
     val createdAt: String?,
 
-    @SerializedName("updated_at")
+    @SerialName("updated_at")
     val updatedAt: String?
-)
-
-@Keep
-data class DeviceResponse(
-    val devices: List<Device>
 )

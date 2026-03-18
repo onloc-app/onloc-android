@@ -31,7 +31,6 @@ import androidx.core.graphics.toColorInt
 import app.onloc.android.AppPreferences
 import app.onloc.android.R
 import app.onloc.android.UserPreferences
-import app.onloc.android.api.UsersApiService
 import app.onloc.android.helpers.stringToColor
 import app.onloc.android.models.Device
 import app.onloc.android.models.Location
@@ -57,32 +56,11 @@ fun SharedLocationPuck(
     id: Int,
     location: Location,
     device: Device,
+    user: User,
     metersPerDp: Double,
     onClick: () -> Unit = {},
     onLongClick: () -> Unit = {},
 ) {
-    val context = LocalContext.current
-    val appPreferences = AppPreferences(context)
-    val userPreferences = UserPreferences(context)
-    val credentials = userPreferences.getUserCredentials()
-    val accessToken = credentials.accessToken
-    val ip = appPreferences.getIP()
-
-    var user by remember { mutableStateOf<User?>(null) }
-
-    fun fetchUser() {
-        if (accessToken != null && ip != null) {
-            val usersApiService = UsersApiService(context, ip, accessToken)
-            usersApiService.getUser(device.userId) { fetchedUser, _ ->
-                user = fetchedUser
-            }
-        }
-    }
-
-    LaunchedEffect(Unit) {
-        fetchUser()
-    }
-
     val accuracy = location.accuracy.toDouble()
     val name = device.name
     val color = device.color?.let { Color(it.toColorInt()) } ?: stringToColor(device.name)
@@ -95,52 +73,50 @@ fun SharedLocationPuck(
         )
     )
 
-    if (user != null) {
-        CircleLayer(
-            id = "location-accuracy-$id",
-            source = markerSource,
-            radius = const((accuracy / metersPerDp).dp),
-            opacity = const(ACCURACY_OPACITY),
-            color = const(color),
-        )
-        SymbolLayer(
-            id = "location-puck-border-$id",
-            source = markerSource,
-            iconImage = image(painterResource(R.drawable.triangle), drawAsSdf = true),
-            iconSize = const(BACKGROUND_LAYER_SIZE),
-            iconColor = const(Color.White),
-            iconAllowOverlap = const(true),
-            onClick = { onClick(); ClickResult.Consume },
-            onLongClick = { onLongClick(); ClickResult.Consume },
-        )
-        SymbolLayer(
-            id = "location-puck-$id",
-            source = markerSource,
-            iconImage = image(painterResource(R.drawable.triangle), drawAsSdf = true),
-            iconOffset = offset(0f.dp, 1f.dp),
-            iconColor = const(color),
-            iconAllowOverlap = const(true),
-            onClick = { onClick(); ClickResult.Consume },
-            onLongClick = { onLongClick(); ClickResult.Consume },
-        )
-        val textColor = if (isSystemInDarkTheme()) Color.White else Color.Black
-        SymbolLayer(
-            id = "location-device-name-$id",
-            source = markerSource,
-            textField = format(
-                span(const("${user!!.username}'s $name"), textSize = const(1.2f.em))
-            ),
-            textFont = const(listOf("Noto Sans Regular")),
-            textColor = const(textColor),
-            textOffset = offset(0f.em, 2f.em),
-            onClick = {
-                onClick()
-                ClickResult.Consume
-            },
-            onLongClick = {
-                onLongClick()
-                ClickResult.Consume
-            },
-        )
-    }
+    CircleLayer(
+        id = "location-accuracy-$id",
+        source = markerSource,
+        radius = const((accuracy / metersPerDp).dp),
+        opacity = const(ACCURACY_OPACITY),
+        color = const(color),
+    )
+    SymbolLayer(
+        id = "location-puck-border-$id",
+        source = markerSource,
+        iconImage = image(painterResource(R.drawable.triangle), drawAsSdf = true),
+        iconSize = const(BACKGROUND_LAYER_SIZE),
+        iconColor = const(Color.White),
+        iconAllowOverlap = const(true),
+        onClick = { onClick(); ClickResult.Consume },
+        onLongClick = { onLongClick(); ClickResult.Consume },
+    )
+    SymbolLayer(
+        id = "location-puck-$id",
+        source = markerSource,
+        iconImage = image(painterResource(R.drawable.triangle), drawAsSdf = true),
+        iconOffset = offset(0f.dp, 1f.dp),
+        iconColor = const(color),
+        iconAllowOverlap = const(true),
+        onClick = { onClick(); ClickResult.Consume },
+        onLongClick = { onLongClick(); ClickResult.Consume },
+    )
+    val textColor = if (isSystemInDarkTheme()) Color.White else Color.Black
+    SymbolLayer(
+        id = "location-device-name-$id",
+        source = markerSource,
+        textField = format(
+            span(const("${user!!.username}'s $name"), textSize = const(1.2f.em))
+        ),
+        textFont = const(listOf("Noto Sans Regular")),
+        textColor = const(textColor),
+        textOffset = offset(0f.em, 2f.em),
+        onClick = {
+            onClick()
+            ClickResult.Consume
+        },
+        onLongClick = {
+            onLongClick()
+            ClickResult.Consume
+        },
+    )
 }
