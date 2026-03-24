@@ -16,24 +16,40 @@
 package app.onloc.android.api.auth
 
 import android.content.Context
+import app.onloc.android.R
 import app.onloc.android.api.ApiClient
+import app.onloc.android.api.ApiException
+import app.onloc.android.api.safeApiCall
 import app.onloc.android.models.api.LoginRequest
 import app.onloc.android.models.api.LoginResponse
 import io.ktor.client.call.body
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
+import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 
 private const val ENDPOINT = "/api/auth"
 
-class AuthApiService(context: Context, ip: String) {
+class AuthApiService(private val context: Context, ip: String) {
     private val api = ApiClient(context, ip)
 
-    suspend fun login(request: LoginRequest): LoginResponse {
-        return api.client.post("$ENDPOINT/login") {
+    suspend fun login(request: LoginRequest): Result<LoginResponse> = safeApiCall {
+        val response = api.client.post("$ENDPOINT/login") {
             contentType(ContentType.Application.Json)
             setBody(request)
-        }.body()
+        }
+
+        when (response.status) {
+            HttpStatusCode.OK -> response.body<LoginResponse>()
+
+            HttpStatusCode.Unauthorized -> throw ApiException(
+                context.getString(R.string.login_error_invalid_credentials)
+            )
+
+            else -> throw ApiException(
+                context.getString(R.string.login_error_server, response.status.value)
+            )
+        }
     }
 }

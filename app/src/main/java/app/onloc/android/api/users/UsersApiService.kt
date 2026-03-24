@@ -24,6 +24,7 @@ import app.onloc.android.models.api.GetUserResponse
 import app.onloc.android.models.api.GetUsersResponse
 import io.ktor.client.call.body
 import io.ktor.client.request.get
+import okio.IOException
 
 private const val ENDPOINT = "/api/users"
 
@@ -44,7 +45,7 @@ class UsersApiService(context: Context, ip: String) {
         try {
             val response: GetUserInfoResponse = api.client.get("$ENDPOINT/info").body()
             return Result.success(response.user)
-        } catch (e: HttpException) {
+        } catch (e: IOException) {
             return Result.failure(e)
         }
     }

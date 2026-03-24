@@ -23,18 +23,17 @@ import io.ktor.client.call.body
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.HttpRequestRetry
 import io.ktor.client.plugins.auth.Auth
-import io.ktor.client.plugins.auth.providers.BearerAuthProvider
 import io.ktor.client.plugins.auth.providers.BearerTokens
 import io.ktor.client.plugins.auth.providers.bearer
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.defaultRequest
-import io.ktor.client.plugins.plugin
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
+import java.util.concurrent.TimeUnit
 
 class ApiClient(
     context: Context,
@@ -43,6 +42,14 @@ class ApiClient(
     private val userPreferences = UserPreferences(context.applicationContext)
 
     val client = HttpClient(OkHttp) {
+        engine {
+            config {
+                connectTimeout(timeout = 5, TimeUnit.SECONDS)
+                readTimeout(timeout = 10, TimeUnit.SECONDS)
+                writeTimeout(timeout = 10, TimeUnit.SECONDS)
+            }
+        }
+
         defaultRequest {
             url(baseUrl)
         }
@@ -77,14 +84,18 @@ class ApiClient(
                 refreshTokens {
                     val refresh = oldTokens?.refreshToken ?: return@refreshTokens null
 
-                    val tokens: RefreshResponse = client.post("/api/auth/refresh") {
-                        contentType(ContentType.Application.Json)
-                        setBody(mapOf("refresh_token" to refresh))
-                    }.body()
+                    try {
+                        val tokens: RefreshResponse = client.post("/api/auth/refresh") {
+                            contentType(ContentType.Application.Json)
+                            setBody(mapOf("refresh_token" to refresh))
+                        }.body()
 
-                    userPreferences.updateAccessToken(tokens.accessToken)
-
-                    BearerTokens(tokens.accessToken, refresh)
+                        userPreferences.updateAccessToken(tokens.accessToken)
+                        BearerTokens(tokens.accessToken, refresh)
+                    } catch (_: Exception) {
+                        userPreferences.deleteUserCredentials()
+                        null
+                    }
                 }
             }
         }

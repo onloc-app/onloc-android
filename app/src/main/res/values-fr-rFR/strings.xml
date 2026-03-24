@@ -6,12 +6,14 @@
     <string name="title_activity_ringer">Activité de sonnerie</string>
     <string name="login_username_field_label">Nom d\'utilisateur</string>
     <string name="login_password_field_label">Mot de passe</string>
-    <string name="login_ip_field_label">Adresse IP du serveur</string>
+    <string name="login_ip_field_label">URL du serveur</string>
     <string name="login_found_servers_button">Afficher les serveurs trouvés</string>
     <string name="login_found_servers_dialog_title">Serveurs trouvés</string>
     <string name="login_title">Onloc</string>
     <string name="login_description">Connectez-vous à une instance</string>
     <string name="login_submit_button_label">Se connecter</string>
+    <string name="login_error_invalid_credentials">Identifiants invalides</string>
+    <string name="login_error_server">Erreur serveur (%1$d)</string>
     <string name="main_title">Onloc</string>
     <string name="main_service_status_no_selection">Aucun appareil sélectionné</string>
     <string name="main_service_status_missing_permissions">Autorisations obligatoires manquantes</string>

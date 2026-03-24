@@ -6,12 +6,14 @@
     <string name="title_activity_ringer">Ringer Activity</string>
     <string name="login_username_field_label">Username</string>
     <string name="login_password_field_label">Password</string>
-    <string name="login_ip_field_label">Server\'s IP</string>
+    <string name="login_ip_field_label">Server\'s URL</string>
     <string name="login_found_servers_button">Show found servers</string>
     <string name="login_found_servers_dialog_title">Found servers</string>
     <string name="login_title">Onloc</string>
     <string name="login_description">Log into an instance</string>
     <string name="login_submit_button_label">Login</string>
+    <string name="login_error_invalid_credentials">Invalid credentials</string>
+    <string name="login_error_server">Server error (%1$d)</string>
     <string name="main_title">Onloc</string>
     <string name="main_service_status_no_selection">No device selected</string>
     <string name="main_service_status_missing_permissions">Required permissions missing</string>

@@ -33,9 +33,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
@@ -231,7 +233,11 @@ fun LoginForm(viewModel: LoginViewModel, modifier: Modifier = Modifier) {
                 enabled = loginState !is LoginState.Loading,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text(stringResource(R.string.login_submit_button_label))
+                if (loginState !is LoginState.Loading) {
+                    Text(stringResource(R.string.login_submit_button_label))
+                } else {
+                    CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                }
             }
         }
     }

@@ -43,18 +43,17 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
             val context = getApplication<Application>()
             _loginState.value = LoginState.Loading
 
-            try {
-                val loginResponse = AuthApiService(context, ip).login(LoginRequest(username, password))
-
-                val (accessToken, refreshToken, user) = loginResponse
-                appPreferences.createIP(ip)
-                userPreferences.createUserCredentials(accessToken to refreshToken, user)
-
-                AuthStateManager.onLoggedIn()
-                _loginState.value = LoginState.Success
-            } catch (e: IOException) {
-                _loginState.value = LoginState.Error(e.localizedMessage.orEmpty())
-            }
+            AuthApiService(context, ip).login(LoginRequest(username, password))
+                .onSuccess { loginResponse ->
+                    val (accessToken, refreshToken, user) = loginResponse
+                    appPreferences.createIP(ip)
+                    userPreferences.createUserCredentials(accessToken to refreshToken, user)
+                    AuthStateManager.onLoggedIn()
+                    _loginState.value = LoginState.Success
+                }
+                .onFailure { e ->
+                    _loginState.value = LoginState.Error(e.localizedMessage.orEmpty())
+                }
         }
     }
 }
