@@ -16,7 +16,6 @@
 package app.onloc.android.api.users
 
 import android.content.Context
-import android.net.http.HttpException
 import app.onloc.android.api.ApiClient
 import app.onloc.android.models.User
 import app.onloc.android.models.api.GetUserInfoResponse

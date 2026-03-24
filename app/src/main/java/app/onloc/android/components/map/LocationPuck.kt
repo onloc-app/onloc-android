@@ -29,7 +29,6 @@ import dev.sargunv.maplibrecompose.compose.layer.CircleLayer
 import dev.sargunv.maplibrecompose.compose.layer.SymbolLayer
 import dev.sargunv.maplibrecompose.compose.source.rememberGeoJsonSource
 import dev.sargunv.maplibrecompose.core.source.GeoJsonData
-import dev.sargunv.maplibrecompose.core.source.Source
 import dev.sargunv.maplibrecompose.expressions.dsl.const
 import dev.sargunv.maplibrecompose.expressions.dsl.format
 import dev.sargunv.maplibrecompose.expressions.dsl.offset

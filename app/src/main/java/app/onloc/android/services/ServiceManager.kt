@@ -19,9 +19,7 @@ import android.content.Context
 import android.content.Intent
 import androidx.core.content.ContextCompat
 import app.onloc.android.ServicePreferences
-import app.onloc.android.permissions.DoNotDisturbPermission
 import app.onloc.android.permissions.LocationPermission
-import app.onloc.android.permissions.OverlayPermission
 import app.onloc.android.permissions.PostNotificationPermission
 
 object ServiceManager {

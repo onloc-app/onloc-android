@@ -16,7 +16,6 @@
 package app.onloc.android.api.devices
 
 import android.content.Context
-import android.util.Log
 import app.onloc.android.api.ApiClient
 import app.onloc.android.models.Device
 import app.onloc.android.models.api.GetDevicesResponse

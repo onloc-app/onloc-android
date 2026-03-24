@@ -17,20 +17,12 @@ package app.onloc.android.components.map
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.core.graphics.toColorInt
-import app.onloc.android.AppPreferences
 import app.onloc.android.R
-import app.onloc.android.UserPreferences
 import app.onloc.android.helpers.stringToColor
 import app.onloc.android.models.Device
 import app.onloc.android.models.Location
@@ -105,7 +97,7 @@ fun SharedLocationPuck(
         id = "location-device-name-$id",
         source = markerSource,
         textField = format(
-            span(const("${user!!.username}'s $name"), textSize = const(1.2f.em))
+            span(const("${user.username}'s $name"), textSize = const(1.2f.em))
         ),
         textFont = const(listOf("Noto Sans Regular")),
         textColor = const(textColor),

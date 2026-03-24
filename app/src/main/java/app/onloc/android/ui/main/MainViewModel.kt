@@ -16,12 +16,10 @@
 package app.onloc.android.ui.main
 
 import android.app.Application
-import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import app.onloc.android.AppPreferences
 import app.onloc.android.UserPreferences
-import app.onloc.android.api.auth.AuthApiService
 import app.onloc.android.api.users.UsersApiService
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
