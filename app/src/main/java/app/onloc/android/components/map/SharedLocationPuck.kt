@@ -15,9 +15,13 @@
 
 package app.onloc.android.components.map
 
+import android.graphics.Bitmap
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
@@ -27,6 +31,12 @@ import app.onloc.android.helpers.stringToColor
 import app.onloc.android.models.Device
 import app.onloc.android.models.Location
 import app.onloc.android.models.User
+import coil3.compose.AsyncImagePainter
+import coil3.compose.rememberAsyncImagePainter
+import coil3.request.ImageRequest
+import coil3.request.bitmapConfig
+import coil3.request.transformations
+import coil3.transform.CircleCropTransformation
 import dev.sargunv.maplibrecompose.compose.ClickResult
 import dev.sargunv.maplibrecompose.compose.layer.CircleLayer
 import dev.sargunv.maplibrecompose.compose.layer.SymbolLayer
@@ -50,6 +60,8 @@ fun SharedLocationPuck(
     device: Device,
     user: User,
     metersPerDp: Double,
+    ip: String? = null,
+    showProfilePicture: Boolean = false,
     onClick: () -> Unit = {},
     onLongClick: () -> Unit = {},
 ) {
@@ -72,26 +84,51 @@ fun SharedLocationPuck(
         opacity = const(ACCURACY_OPACITY),
         color = const(color),
     )
-    SymbolLayer(
-        id = "location-puck-border-$id",
-        source = markerSource,
-        iconImage = image(painterResource(R.drawable.triangle), drawAsSdf = true),
-        iconSize = const(BACKGROUND_LAYER_SIZE),
-        iconColor = const(Color.White),
-        iconAllowOverlap = const(true),
-        onClick = { onClick(); ClickResult.Consume },
-        onLongClick = { onLongClick(); ClickResult.Consume },
-    )
-    SymbolLayer(
-        id = "location-puck-$id",
-        source = markerSource,
-        iconImage = image(painterResource(R.drawable.triangle), drawAsSdf = true),
-        iconOffset = offset(0f.dp, 1f.dp),
-        iconColor = const(color),
-        iconAllowOverlap = const(true),
-        onClick = { onClick(); ClickResult.Consume },
-        onLongClick = { onLongClick(); ClickResult.Consume },
-    )
+    if (showProfilePicture && ip != null && user.avatar?.url != null) {
+        val painter = rememberAsyncImagePainter(
+            model = ImageRequest.Builder(LocalContext.current)
+                .data("$ip/${user.avatar.url}")
+                .bitmapConfig(Bitmap.Config.ARGB_8888)
+                .size(width = 192, height = 192)
+                .transformations(CircleCropTransformation())
+                .build(),
+        )
+        val state by painter.state.collectAsState()
+        val ready = state is AsyncImagePainter.State.Success
+
+        if (ready) {
+            SymbolLayer(
+                id = "location-puck-${user.id}",
+                source = markerSource,
+                iconImage = image(painter),
+                iconAllowOverlap = const(true),
+                onClick = { onClick(); ClickResult.Consume },
+                onLongClick = { onLongClick(); ClickResult.Consume },
+            )
+        }
+    } else {
+        SymbolLayer(
+            id = "location-puck-border-$id",
+            source = markerSource,
+            iconImage = image(painterResource(R.drawable.triangle), drawAsSdf = true),
+            iconSize = const(BACKGROUND_LAYER_SIZE),
+            iconColor = const(Color.White),
+            iconAllowOverlap = const(true),
+            onClick = { onClick(); ClickResult.Consume },
+            onLongClick = { onLongClick(); ClickResult.Consume },
+        )
+        SymbolLayer(
+            id = "location-puck-$id",
+            source = markerSource,
+            iconImage = image(painterResource(R.drawable.triangle), drawAsSdf = true),
+            iconOffset = offset(0f.dp, 1f.dp),
+            iconColor = const(color),
+            iconAllowOverlap = const(true),
+            onClick = { onClick(); ClickResult.Consume },
+            onLongClick = { onLongClick(); ClickResult.Consume },
+        )
+    }
+
     val textColor = if (isSystemInDarkTheme()) Color.White else Color.Black
     SymbolLayer(
         id = "location-device-name-$id",

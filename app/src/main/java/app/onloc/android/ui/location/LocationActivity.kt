@@ -454,6 +454,8 @@ fun LocationScreen(viewModel: LocationViewModel, modifier: Modifier = Modifier) 
                             device = device,
                             user = user,
                             metersPerDp = cameraState.metersPerDpAtTarget,
+                            ip = ip,
+                            showProfilePicture = true,
                             onClick = {
                                 coroutineScope.launch {
                                     cameraState.animateTo(
