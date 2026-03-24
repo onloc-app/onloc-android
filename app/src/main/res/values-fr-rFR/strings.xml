@@ -4,6 +4,7 @@
     <string name="title_activity_location">Activité de localisation</string>
     <string name="title_activity_login">Activité de connexion</string>
     <string name="title_activity_ringer">Activité de sonnerie</string>
+    <string name="title_activity_offline">Activité hors ligne</string>
     <string name="login_username_field_label">Nom d\'utilisateur</string>
     <string name="login_password_field_label">Mot de passe</string>
     <string name="login_ip_field_label">URL du serveur</string>
@@ -47,6 +48,8 @@
     </plurals>
 
     <!-- Permissions -->
+    <string name="offline_retry_button_label">Réessayer</string>
+    <string name="offline_logout_button_label">Se déconnecter</string>
     <string name="permissions_background_location_header">Localisation en arrière-plan</string>
     <string name="permissions_background_location_description">
         Permet à l\'application de partager l\'emplacement de votre appareil avec le serveur même lorsque l\'application
@@ -86,4 +89,5 @@
         en cas de perte ou de vol.
     </string>
     <string name="service_websocket_lock_screen_notification_title">Information</string>
+    <string name="offline_title">La connexion au serveur a été perdue</string>
 </resources>

@@ -58,6 +58,11 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        <activity
+                android:name=".ui.offline.OfflineActivity"
+                android:exported="false"
+                android:label="@string/title_activity_offline"
+                android:theme="@style/Theme.OnlocAndroid"/>
 
         <service
                 android:name=".services.LocationForegroundService"

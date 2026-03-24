@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Onloc</string>
+
     <string name="title_activity_location">Location Activity</string>
     <string name="title_activity_login">Login Activity</string>
     <string name="title_activity_ringer">Ringer Activity</string>
+    <string name="title_activity_offline">Offline Activity</string>
+
     <string name="login_username_field_label">Username</string>
     <string name="login_password_field_label">Password</string>
     <string name="login_ip_field_label">Server\'s URL</string>
@@ -45,6 +48,11 @@
         <item quantity="many">Days</item>
         <item quantity="other">Days</item>
     </plurals>
+
+    <!-- Offline -->
+    <string name="offline_title">Connection to the server was lost</string>
+    <string name="offline_retry_button_label">Retry</string>
+    <string name="offline_logout_button_label">Logout</string>
 
     <!-- Permissions -->
     <string name="permissions_background_location_header">Background Location</string>

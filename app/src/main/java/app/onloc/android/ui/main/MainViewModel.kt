@@ -53,7 +53,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     _authState.value = AuthState.Authenticated
                 }
                 .onFailure {
-                    _authState.value = AuthState.Unauthenticated
+                    _authState.value = AuthState.Offline
                 }
         }
     }
@@ -63,4 +63,5 @@ sealed class AuthState {
     object Loading : AuthState()
     object Authenticated : AuthState()
     object Unauthenticated : AuthState()
+    object Offline : AuthState()
 }
