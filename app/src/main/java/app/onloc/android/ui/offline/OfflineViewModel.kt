@@ -21,9 +21,7 @@ import androidx.lifecycle.viewModelScope
 import app.onloc.android.AppPreferences
 import app.onloc.android.UserPreferences
 import app.onloc.android.api.AuthStateManager
-import app.onloc.android.api.tokens.TokensApiService
 import app.onloc.android.api.users.UsersApiService
-import app.onloc.android.models.api.DeleteTokenRequest
 import app.onloc.android.services.ServiceManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
