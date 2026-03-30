@@ -30,21 +30,29 @@ private const val ENDPOINT = "/api/users"
 class UsersApiService(context: Context, ip: String) {
     private val api = ApiClient(context, ip)
 
-    suspend fun getUsers(): List<User> {
-        val response: GetUsersResponse = api.client.get(ENDPOINT).body()
-        return response.users
+    suspend fun getUsers(): Result<List<User>> {
+        try {
+            val response: GetUsersResponse = api.client.get(ENDPOINT).body()
+            return Result.success(response.users)
+        } catch (e: Exception) {
+            return Result.failure(e)
+        }
     }
 
-    suspend fun getUser(id: Int): User {
-        val response: GetUserResponse = api.client.get("$ENDPOINT/$id").body()
-        return response.user
+    suspend fun getUser(id: Int): Result<User> {
+        try {
+            val response: GetUserResponse = api.client.get("$ENDPOINT/$id").body()
+            return Result.success(response.user)
+        } catch (e: Exception) {
+            return Result.failure(e)
+        }
     }
 
     suspend fun getUserInfo(): Result<User> {
         try {
             val response: GetUserInfoResponse = api.client.get("$ENDPOINT/info").body()
             return Result.success(response.user)
-        } catch (e: IOException) {
+        } catch (e: Exception) {
             return Result.failure(e)
         }
     }

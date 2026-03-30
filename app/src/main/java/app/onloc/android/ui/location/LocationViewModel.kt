@@ -96,8 +96,14 @@ class LocationViewModel(application: Application) : AndroidViewModel(application
         val ip = storedIp ?: return
         viewModelScope.launch {
             val api = DevicesApiService(context, ip)
-            _devices.value = api.getDevices()
-            _sharedDevices.value = api.getSharedDevices()
+            api.getDevices()
+                .onSuccess { devices ->
+                    _devices.value = devices
+                }
+            api.getSharedDevices()
+                .onSuccess { sharedDevices ->
+                    _sharedDevices.value = sharedDevices
+                }
             fetchUsersForSharedDevices(_sharedDevices.value)
         }
     }
@@ -106,8 +112,10 @@ class LocationViewModel(application: Application) : AndroidViewModel(application
         val ip = storedIp ?: return
         val users = mutableMapOf<Int, User>()
         devices.forEach { device ->
-            val user = UsersApiService(context, ip).getUser(device.userId)
-            users[device.userId] = user
+            UsersApiService(context, ip).getUser(device.userId)
+                .onSuccess { user ->
+                    users[device.userId] = user
+                }
         }
         _sharedDeviceUsers.value = users
     }

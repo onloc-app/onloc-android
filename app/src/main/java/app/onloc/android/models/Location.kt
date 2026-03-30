@@ -33,6 +33,13 @@ data class Location(
 
     val latitude: Double,
     val longitude: Double,
+    val bearing: Float,
+
+    @SerialName("bearing_accuracy_degrees")
+    val bearingAccuracyDegrees: Float,
+
+    val speed: Float,
+
     var battery: Int?,
 
     @SerialName("created_at")
@@ -51,6 +58,9 @@ data class Location(
                 location.verticalAccuracyMeters,
                 location.latitude,
                 location.longitude,
+                location.bearing,
+                location.bearingAccuracyDegrees,
+                location.speed,
                 null,
                 null,
                 null,

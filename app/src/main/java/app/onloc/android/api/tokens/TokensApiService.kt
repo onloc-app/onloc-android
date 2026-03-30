@@ -28,10 +28,15 @@ private const val ENDPOINT = "/api/tokens"
 class TokensApiService(context: Context, ip: String) {
     private val api = ApiClient(context, ip)
 
-    suspend fun deleteToken(request: DeleteTokenRequest) {
-        api.client.delete(ENDPOINT) {
-            contentType(ContentType.Application.Json)
-            setBody(request)
+    suspend fun deleteToken(request: DeleteTokenRequest): Result<Unit> {
+        try {
+            api.client.delete(ENDPOINT) {
+                contentType(ContentType.Application.Json)
+                setBody(request)
+            }
+            return Result.success(Unit)
+        } catch (e: Exception) {
+            return Result.failure(e)
         }
     }
 }

@@ -23,15 +23,20 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 
-private const val ENDPOINT = "locations"
+private const val ENDPOINT = "/api/locations"
 
 class LocationsApiService(context: Context, ip: String) {
     private val api = ApiClient(context, ip)
 
-    suspend fun postLocation(location: Location) {
-        api.client.post(ENDPOINT) {
-            contentType(ContentType.Application.Json)
-            setBody(location)
+    suspend fun postLocation(location: Location): Result<Unit> {
+        try {
+            api.client.post(ENDPOINT) {
+                contentType(ContentType.Application.Json)
+                setBody(location)
+            }
+            return Result.success(Unit)
+        } catch (e: Exception) {
+            return Result.failure(e)
         }
     }
 }

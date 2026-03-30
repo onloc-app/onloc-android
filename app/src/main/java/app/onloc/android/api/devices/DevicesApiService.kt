@@ -28,21 +28,39 @@ private const val ENDPOINT = "/api/devices"
 class DevicesApiService(context: Context, ip: String) {
     private val api = ApiClient(context, ip)
 
-    suspend fun getDevices(): List<Device> {
-        val response: GetDevicesResponse = api.client.get(ENDPOINT).body()
-        return response.devices
+    suspend fun getDevices(): Result<List<Device>> {
+        try {
+            val response: GetDevicesResponse = api.client.get(ENDPOINT).body()
+            return Result.success(response.devices)
+        } catch (e: Exception) {
+            return Result.failure(e)
+        }
     }
 
-    suspend fun getSharedDevices(): List<Device> {
-        val response: GetDevicesResponse = api.client.get("$ENDPOINT/shared").body()
-        return response.devices
+    suspend fun getSharedDevices(): Result<List<Device>> {
+        try {
+            val response: GetDevicesResponse = api.client.get("$ENDPOINT/shared").body()
+            return Result.success(response.devices)
+        } catch (e: Exception) {
+            return Result.failure(e)
+        }
     }
 
-    suspend fun ringDevice(id: Int) {
-        api.client.post("$ENDPOINT/${id}/ring")
+    suspend fun ringDevice(id: Int): Result<Unit> {
+        try {
+            api.client.post("$ENDPOINT/${id}/ring")
+            return Result.success(Unit)
+        } catch (e: Exception) {
+            return Result.failure(e)
+        }
     }
 
-    suspend fun lockDevice(id: Int) {
-        api.client.post("$ENDPOINT/${id}/lock")
+    suspend fun lockDevice(id: Int): Result<Unit> {
+        try {
+            api.client.post("$ENDPOINT/${id}/lock")
+            return Result.success(Unit)
+        } catch (e: Exception) {
+            return Result.failure(e)
+        }
     }
 }
