@@ -33,6 +33,7 @@ import app.onloc.android.R
 import app.onloc.android.api.locations.LocationsApiService
 import app.onloc.android.helpers.getIP
 import app.onloc.android.helpers.getInterval
+import app.onloc.android.helpers.getRealTime
 import app.onloc.android.helpers.getSelectedDeviceId
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -90,13 +91,14 @@ class LocationForegroundService : Service() {
         }
 
         val interval = getInterval(deviceEncryptedPreferences) ?: return
-        val finalInterval = interval * SECOND
+        val realTime = getRealTime(deviceEncryptedPreferences)
+        val finalInterval = if (!realTime) interval * SECOND else 0
 
         if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
             locationManager.requestLocationUpdates(
                 LocationManager.GPS_PROVIDER,
                 finalInterval,
-                0f,
+                1f,
                 locationListener,
             )
         }
@@ -105,7 +107,7 @@ class LocationForegroundService : Service() {
             locationManager.requestLocationUpdates(
                 LocationManager.NETWORK_PROVIDER,
                 finalInterval,
-                0f,
+                1f,
                 locationListener,
             )
         }

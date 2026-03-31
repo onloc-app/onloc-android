@@ -26,6 +26,7 @@
     <string name="main_settings_header">Paramètres</string>
     <string name="permissions_header">Fonctionnalités et autorisations</string>
     <string name="main_interval_slider_label">Intervalle entre les téléversements</string>
+    <string name="main_interval_slider_realtime_label">Utilisez les mises à jour en temps réel</string>
     <plurals name="interval_picker_seconds">
         <item quantity="one" tools:ignore="ImpliedQuantity">Seconde</item>
         <item quantity="many">Secondes</item>

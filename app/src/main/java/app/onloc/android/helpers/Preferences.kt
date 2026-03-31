@@ -20,6 +20,7 @@ import app.onloc.android.ACCESS_TOKEN_KEY
 import app.onloc.android.DEVICE_ID_KEY
 import app.onloc.android.IP_KEY
 import app.onloc.android.LOCATION_UPDATES_INTERVAL_KEY
+import app.onloc.android.REALTIME_KEY
 
 fun getIP(deviceEncryptedPreferences: SharedPreferences): String? {
     return deviceEncryptedPreferences.getString(IP_KEY, null)
@@ -37,4 +38,8 @@ fun getSelectedDeviceId(deviceEncryptedPreferences: SharedPreferences): Int? {
 fun getInterval(deviceEncryptedPreferences: SharedPreferences): Int? {
     val interval = deviceEncryptedPreferences.getInt(LOCATION_UPDATES_INTERVAL_KEY, -1)
     return if (interval != -1) interval else null
+}
+
+fun getRealTime(deviceEncryptedPreferences: SharedPreferences): Boolean {
+    return deviceEncryptedPreferences.getBoolean(REALTIME_KEY, false)
 }

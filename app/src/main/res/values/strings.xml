@@ -28,6 +28,7 @@
     <string name="main_settings_header">Settings</string>
     <string name="permissions_header">Features and Permissions</string>
     <string name="main_interval_slider_label">Interval between uploads</string>
+    <string name="main_interval_slider_realtime_label">Use real-time updates</string>
     <plurals name="interval_picker_seconds">
         <item quantity="one">Second</item>
         <item quantity="many">Seconds</item>

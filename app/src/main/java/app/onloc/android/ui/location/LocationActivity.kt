@@ -137,6 +137,7 @@ fun LocationScreen(viewModel: LocationViewModel, modifier: Modifier = Modifier) 
     val selectedDevice by viewModel.selectedDevice.collectAsStateWithLifecycle()
     val isLocationServiceRunning by viewModel.isLocationServiceRunning.collectAsStateWithLifecycle()
     val locationUpdateInterval by viewModel.locationUpdateInterval.collectAsStateWithLifecycle()
+    val realTime by viewModel.realTime.collectAsStateWithLifecycle()
     val isAuthenticated by AuthStateManager.isAuthenticated.collectAsStateWithLifecycle()
 
     val defaultPadding = 16.dp
@@ -357,6 +358,8 @@ fun LocationScreen(viewModel: LocationViewModel, modifier: Modifier = Modifier) 
                             Spacer(modifier = Modifier.height(8.dp))
                             IntervalPicker(
                                 value = locationUpdateInterval ?: DEFAULT_SLIDER_POSITION,
+                                realTime = realTime,
+                                onToggleRealTime = { viewModel.setRealTime(it) },
                                 enabled = !isLocationServiceRunning,
                                 onChange = { viewModel.setLocationUpdateInterval(it) },
                             )

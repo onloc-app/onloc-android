@@ -30,6 +30,7 @@ const val REFRESH_TOKEN_KEY = "refresh_token"
 const val USER_KEY = "user"
 const val LOCATION_SERVICE_KEY = "location"
 const val LOCATION_UPDATES_INTERVAL_KEY = "interval"
+const val REALTIME_KEY = "realtime"
 
 private const val USER_CREDENTIALS_FILENAME = "user_credentials"
 
@@ -114,6 +115,15 @@ class ServicePreferences(private val context: Context) {
     fun createLocationUpdatesInterval(interval: Int?) {
         preferences.edit { putInt(LOCATION_UPDATES_INTERVAL_KEY, interval ?: -1) }
         protectedPreferences.saveToDeviceEncryptedStorage(LOCATION_UPDATES_INTERVAL_KEY, interval ?: -1)
+    }
+
+    fun getRealTime(): Boolean {
+        return preferences.getBoolean(REALTIME_KEY, false)
+    }
+
+    fun createRealTime(realTime: Boolean) {
+        preferences.edit { putBoolean(REALTIME_KEY, realTime) }
+        protectedPreferences.saveToDeviceEncryptedStorage(REALTIME_KEY, realTime)
     }
 }
 

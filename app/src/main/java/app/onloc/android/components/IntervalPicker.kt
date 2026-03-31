@@ -15,21 +15,29 @@
 
 package app.onloc.android.components
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MultiChoiceSegmentedButtonRow
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import app.onloc.android.R
 import kotlin.math.roundToInt
 
@@ -75,8 +83,11 @@ private val timeSteps = arrayOf(
 @Composable
 fun IntervalPicker(
     value: Int,
+    realTime: Boolean,
+    onToggleRealTime: (value: Boolean) -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
+    defaultPadding: Dp = 8.dp,
     onChange: (value: Int) -> Unit = {},
 ) {
     val bestOptionIndex = remember(value) {
@@ -102,7 +113,7 @@ fun IntervalPicker(
                     label = {
                         Text(pluralStringResource(timeStep.pluralResId, value / selectedOption.multiplier))
                     },
-                    enabled = enabled,
+                    enabled = enabled && !realTime,
                 )
             }
         }
@@ -120,12 +131,27 @@ fun IntervalPicker(
             ),
             steps = selectedOption.steps.coerceAtLeast(0),
             valueRange = selectedOption.bounds.first.toFloat()..selectedOption.bounds.last.toFloat(),
-            enabled = enabled,
+            enabled = enabled && !realTime,
         )
         Text(
             text = "${(value / selectedOption.multiplier)} ${
                 pluralStringResource(selectedOption.pluralResId, value / selectedOption.multiplier)
             }"
         )
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(defaultPadding)
+        ) {
+            Text(
+                text = stringResource(R.string.main_interval_slider_realtime_label),
+                style = MaterialTheme.typography.titleMedium,
+            )
+            Switch(
+                checked = realTime,
+                onCheckedChange = { onToggleRealTime(!realTime) },
+                enabled = enabled,
+            )
+        }
     }
 }

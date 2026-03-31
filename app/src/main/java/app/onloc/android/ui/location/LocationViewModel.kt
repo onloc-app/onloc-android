@@ -84,6 +84,13 @@ class LocationViewModel(application: Application) : AndroidViewModel(application
         servicePreferences.createLocationUpdatesInterval(interval)
     }
 
+    private val _realTime = MutableStateFlow(servicePreferences.getRealTime())
+    val realTime: StateFlow<Boolean> = _realTime.asStateFlow()
+    fun setRealTime(realTime: Boolean) {
+        _realTime.value = realTime
+        servicePreferences.createRealTime(realTime)
+    }
+
     val storedIp: String? get() = appPreferences.getIP()
     val user: User? get() = userPreferences.getUserCredentials().user
 
