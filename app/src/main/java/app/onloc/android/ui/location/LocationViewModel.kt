@@ -89,7 +89,14 @@ class LocationViewModel(application: Application) : AndroidViewModel(application
 
     init {
         fetchDevices()
+        fetchSelectedDevice()
         observeLocationCallback()
+    }
+
+    fun fetchSelectedDevice() {
+        appPreferences.getDeviceId()?.let { deviceId ->
+            _selectedDeviceId.value = deviceId
+        }
     }
 
     fun fetchDevices() {
