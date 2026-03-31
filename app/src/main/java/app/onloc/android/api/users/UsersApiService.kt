@@ -23,7 +23,6 @@ import app.onloc.android.models.api.GetUserResponse
 import app.onloc.android.models.api.GetUsersResponse
 import io.ktor.client.call.body
 import io.ktor.client.request.get
-import okio.IOException
 
 private const val ENDPOINT = "/api/users"
 
