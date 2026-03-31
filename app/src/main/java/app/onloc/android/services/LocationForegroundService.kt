@@ -92,13 +92,14 @@ class LocationForegroundService : Service() {
 
         val interval = getInterval(deviceEncryptedPreferences) ?: return
         val realTime = getRealTime(deviceEncryptedPreferences)
-        val finalInterval = if (!realTime) interval * SECOND else 0
+        val finalInterval = if (!realTime) interval * SECOND else 1 * SECOND
+        val minDistance = if (!realTime) 0f else 2f
 
         if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
             locationManager.requestLocationUpdates(
                 LocationManager.GPS_PROVIDER,
                 finalInterval,
-                1f,
+                minDistance,
                 locationListener,
             )
         }
@@ -107,11 +108,10 @@ class LocationForegroundService : Service() {
             locationManager.requestLocationUpdates(
                 LocationManager.NETWORK_PROVIDER,
                 finalInterval,
-                1f,
+                minDistance,
                 locationListener,
             )
         }
-
     }
 
     private fun startForegroundService() {
