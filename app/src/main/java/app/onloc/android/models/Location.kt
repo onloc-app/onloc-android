@@ -40,6 +40,9 @@ data class Location(
 
     val speed: Float,
 
+    @SerialName("speed_accuracy")
+    val speedAccuracy: Float,
+
     var battery: Int?,
 
     @SerialName("created_at")
@@ -61,6 +64,7 @@ data class Location(
                 location.bearing,
                 location.bearingAccuracyDegrees,
                 location.speed,
+                location.speedAccuracyMetersPerSecond,
                 null,
                 null,
                 null,
