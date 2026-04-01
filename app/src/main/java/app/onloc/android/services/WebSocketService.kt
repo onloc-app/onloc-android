@@ -30,7 +30,6 @@ import android.os.IBinder
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import app.onloc.android.R
-import app.onloc.android.SocketManager
 import app.onloc.android.helpers.getAccessToken
 import app.onloc.android.helpers.getIP
 import app.onloc.android.helpers.getSelectedDeviceId
@@ -41,6 +40,9 @@ import app.onloc.android.permissions.PostNotificationPermission
 import app.onloc.android.services.ServiceStatus.isWebSocketServiceRunning
 import app.onloc.android.singletons.RingerState
 import app.onloc.android.ui.ringer.RingerActivity
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.json.JSONObject
 
 private const val CHANNEL_ID = "ringer_websocket_channel"
@@ -61,6 +63,7 @@ class WebSocketService : Service() {
     private val lockCommandEvent = "lock-command"
     private val disconnectEvent = "disconnect"
     private val registerDeviceEvent = "register-device"
+    private val locationsChangeEvent = "locations-change"
 
     private val deviceEncryptedPreferences by lazy {
         createDeviceProtectedStorageContext()
@@ -111,6 +114,7 @@ class WebSocketService : Service() {
         SocketManager.off(ringCommandEvent)
         SocketManager.off(lockCommandEvent)
         SocketManager.off(disconnectEvent)
+        SocketManager.off(locationsChangeEvent)
 
         SocketManager.disconnect()
         SocketManager.initialize(ip, token)
@@ -182,6 +186,12 @@ class WebSocketService : Service() {
                 val devicePolicyManager = getSystemService(DEVICE_POLICY_SERVICE) as DevicePolicyManager
 
                 devicePolicyManager.lockNow()
+            }
+        }
+
+        SocketManager.on(locationsChangeEvent) {
+            CoroutineScope(Dispatchers.Default).launch {
+                SocketEventBus.emitLocationsChanged()
             }
         }
 

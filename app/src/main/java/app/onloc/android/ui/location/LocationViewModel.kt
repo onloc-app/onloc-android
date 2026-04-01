@@ -23,7 +23,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import app.onloc.android.AppPreferences
 import app.onloc.android.ServicePreferences
-import app.onloc.android.SocketManager
+import app.onloc.android.services.SocketManager
 import app.onloc.android.UserPreferences
 import app.onloc.android.api.AuthStateManager
 import app.onloc.android.api.devices.DevicesApiService
@@ -35,6 +35,7 @@ import app.onloc.android.models.User
 import app.onloc.android.models.api.DeleteTokenRequest
 import app.onloc.android.services.LocationCallbackManager
 import app.onloc.android.services.ServiceManager
+import app.onloc.android.services.SocketEventBus
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -98,6 +99,7 @@ class LocationViewModel(application: Application) : AndroidViewModel(application
         fetchDevices()
         fetchSelectedDevice()
         observeLocationCallback()
+        observeLocationsChange()
     }
 
     fun fetchSelectedDevice() {
@@ -216,6 +218,14 @@ class LocationViewModel(application: Application) : AndroidViewModel(application
                     _selectedDeviceId.value!!,
                     location,
                 )
+            }
+        }
+    }
+
+    private fun observeLocationsChange() {
+        viewModelScope.launch {
+            SocketEventBus.locationsChanged.collect {
+                fetchDevices()
             }
         }
     }

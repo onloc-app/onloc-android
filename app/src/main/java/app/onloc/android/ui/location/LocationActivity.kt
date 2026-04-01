@@ -426,6 +426,7 @@ fun LocationScreen(viewModel: LocationViewModel, modifier: Modifier = Modifier) 
                             location = location,
                             device = device,
                             metersPerDp = cameraState.metersPerDpAtTarget,
+                            showCone = cameraState.position.zoom > 9,
                             onClick = {
                                 coroutineScope.launch {
                                     cameraState.animateTo(

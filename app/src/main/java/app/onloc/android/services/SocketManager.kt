@@ -13,7 +13,7 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-package app.onloc.android
+package app.onloc.android.services
 
 import io.socket.client.IO
 import io.socket.client.Socket
