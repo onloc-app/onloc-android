@@ -19,8 +19,9 @@ import io.socket.client.IO
 import io.socket.client.Socket
 import org.json.JSONObject
 
-const val RECONNECTION_DELAY = 2000L
-const val RECONNECTION_DELAY_MAX = 60000L
+private const val RECONNECTION_DELAY = 2000L
+private const val RECONNECTION_DELAY_MAX = 60000L
+private const val TIMEOUT = 20000L
 
 object SocketManager {
     private var socket: Socket? = null
@@ -34,6 +35,7 @@ object SocketManager {
             reconnectionAttempts = Int.MAX_VALUE
             reconnectionDelay = RECONNECTION_DELAY
             reconnectionDelayMax = RECONNECTION_DELAY_MAX
+            timeout = TIMEOUT
         }
         socket = IO.socket(url, options)
     }

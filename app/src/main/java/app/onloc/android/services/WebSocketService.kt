@@ -42,6 +42,7 @@ import app.onloc.android.singletons.RingerState
 import app.onloc.android.ui.ringer.RingerActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.json.JSONObject
 
@@ -50,6 +51,8 @@ const val START_RINGER_WEBSOCKET_SERVICE_NOTIFICATION_ID = 2001
 
 private const val LOCK_SCREEN_CHANNEL_ID = "lock_screen_channel"
 const val LOCK_SCREEN_NOTIFICATION_ID = 9999
+
+private const val WATCHDOG_DELAY = 30000L
 
 object ServiceStatus {
     var isWebSocketServiceRunning = false
@@ -99,6 +102,9 @@ class WebSocketService : Service() {
         networkCallback?.let {
             connectivityManager.registerNetworkCallback(request, it)
         }
+
+        // Makes sure the socket is always connected
+        startWatchdog()
     }
 
     private fun connectSocket() {
@@ -197,6 +203,18 @@ class WebSocketService : Service() {
 
         SocketManager.on(disconnectEvent) {
             connectSocket()
+        }
+    }
+
+    private val watchdogScope = CoroutineScope(Dispatchers.IO)
+    private fun startWatchdog() {
+        watchdogScope.launch {
+            while (true) {
+                delay(WATCHDOG_DELAY)
+                if (!SocketManager.isConnected()) {
+                    connectSocket()
+                }
+            }
         }
     }
 
