@@ -16,7 +16,6 @@
 package app.onloc.android.components.map
 
 import android.graphics.Bitmap
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -24,7 +23,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.em
 import androidx.core.graphics.toColorInt
 import app.onloc.android.R
 import app.onloc.android.helpers.stringToColor
@@ -43,9 +41,7 @@ import dev.sargunv.maplibrecompose.compose.layer.SymbolLayer
 import dev.sargunv.maplibrecompose.compose.source.rememberGeoJsonSource
 import dev.sargunv.maplibrecompose.core.source.GeoJsonData
 import dev.sargunv.maplibrecompose.expressions.dsl.const
-import dev.sargunv.maplibrecompose.expressions.dsl.format
 import dev.sargunv.maplibrecompose.expressions.dsl.offset
-import dev.sargunv.maplibrecompose.expressions.dsl.span
 import io.github.dellisd.spatialk.geojson.Point
 import io.github.dellisd.spatialk.geojson.Position
 import dev.sargunv.maplibrecompose.expressions.dsl.image
@@ -62,12 +58,25 @@ fun SharedLocationPuck(
     metersPerDp: Double,
     ip: String? = null,
     showProfilePicture: Boolean = false,
+    showCone: Boolean = false,
     onClick: () -> Unit = {},
     onLongClick: () -> Unit = {},
 ) {
     val accuracy = location.accuracy.toDouble()
     val name = device.name
     val color = device.color?.let { Color(it.toColorInt()) } ?: stringToColor(device.name)
+
+    // Bearing cone first so it's layered under the rest
+    BearingConeLayer(
+        id = id,
+        longitude = location.longitude,
+        latitude = location.latitude,
+        bearing = location.bearing,
+        bearingAccuracyDegrees = location.bearingAccuracyDegrees,
+        metersPerDp = metersPerDp,
+        color = color,
+        visible = showCone,
+    )
 
     val markerSource = rememberGeoJsonSource(
         data = GeoJsonData.Features(
@@ -129,23 +138,12 @@ fun SharedLocationPuck(
         )
     }
 
-    val textColor = if (isSystemInDarkTheme()) Color.White else Color.Black
-    SymbolLayer(
-        id = "location-device-name-$id",
-        source = markerSource,
-        textField = format(
-            span(const("${user.username}'s $name"), textSize = const(1.2f.em))
-        ),
-        textFont = const(listOf("Noto Sans Regular")),
-        textColor = const(textColor),
-        textOffset = offset(0f.em, 2f.em),
-        onClick = {
-            onClick()
-            ClickResult.Consume
-        },
-        onLongClick = {
-            onLongClick()
-            ClickResult.Consume
-        },
+    DeviceNameLayer(
+        id = id,
+        longitude = location.longitude,
+        latitude = location.latitude,
+        name = name,
+        onClick = onClick,
+        onLongClick = onLongClick,
     )
 }

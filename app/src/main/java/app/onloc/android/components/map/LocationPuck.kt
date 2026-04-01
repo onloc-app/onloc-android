@@ -15,40 +15,22 @@
 
 package app.onloc.android.components.map
 
-import android.R.attr.visible
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.em
 import androidx.core.graphics.toColorInt
 import app.onloc.android.helpers.stringToColor
 import app.onloc.android.models.Device
 import app.onloc.android.models.Location
 import dev.sargunv.maplibrecompose.compose.ClickResult
 import dev.sargunv.maplibrecompose.compose.layer.CircleLayer
-import dev.sargunv.maplibrecompose.compose.layer.FillLayer
-import dev.sargunv.maplibrecompose.compose.layer.SymbolLayer
 import dev.sargunv.maplibrecompose.compose.source.rememberGeoJsonSource
 import dev.sargunv.maplibrecompose.core.source.GeoJsonData
 import dev.sargunv.maplibrecompose.expressions.dsl.const
-import dev.sargunv.maplibrecompose.expressions.dsl.format
-import dev.sargunv.maplibrecompose.expressions.dsl.offset
-import dev.sargunv.maplibrecompose.expressions.dsl.span
 import io.github.dellisd.spatialk.geojson.Point
-import io.github.dellisd.spatialk.geojson.Polygon
 import io.github.dellisd.spatialk.geojson.Position
-import kotlin.math.asin
-import kotlin.math.atan2
-import kotlin.math.cos
-import kotlin.math.sin
 
 private const val ACCURACY_OPACITY = 0.5f
-private const val EARTH_RADIUS = 6371000.0
-private const val OPACITY_DURATION = 300
 
 @Composable
 fun LocationPuck(
@@ -108,17 +90,7 @@ fun LocationPuck(
     val name = device.name
     val color = device.color?.let { Color(it.toColorInt()) } ?: stringToColor(device.name)
 
-    LocationPuck(
-        id = id,
-        longitude = location.longitude,
-        latitude = location.latitude,
-        accuracy = accuracy,
-        color = color,
-        metersPerDp = metersPerDp,
-        onClick = onClick,
-        onLongClick = onLongClick,
-    )
-
+    // Bearing cone first so it's layered under the rest
     BearingConeLayer(
         id = id,
         longitude = location.longitude,
@@ -130,6 +102,17 @@ fun LocationPuck(
         visible = showCone,
     )
 
+    LocationPuck(
+        id = id,
+        longitude = location.longitude,
+        latitude = location.latitude,
+        accuracy = accuracy,
+        color = color,
+        metersPerDp = metersPerDp,
+        onClick = onClick,
+        onLongClick = onLongClick,
+    )
+
     DeviceNameLayer(
         id = id,
         longitude = location.longitude,
@@ -137,109 +120,5 @@ fun LocationPuck(
         name = name,
         onClick = onClick,
         onLongClick = onLongClick,
-    )
-}
-
-@Composable
-private fun BearingConeLayer(
-    id: Int,
-    longitude: Double,
-    latitude: Double,
-    bearing: Float,
-    bearingAccuracyDegrees: Float,
-    metersPerDp: Double,
-    color: Color,
-    visible: Boolean,
-) {
-    val animatedOpacity by animateFloatAsState(
-        targetValue = if (visible) 0.3f else 0f,
-        animationSpec = tween(OPACITY_DURATION),
-    )
-
-    val coneSource = rememberGeoJsonSource(
-        data = GeoJsonData.Features(
-            generateBearingCone(
-                longitude,
-                latitude,
-                bearing,
-                bearingAccuracyDegrees,
-                metersPerDp
-            )
-        )
-    )
-
-    FillLayer(
-        id = "bearing-cone-$id",
-        source = coneSource,
-        color = const(color),
-        opacity = const(animatedOpacity),
-    )
-}
-
-private fun generateBearingCone(
-    longitude: Double,
-    latitude: Double,
-    bearing: Float,
-    bearingAccuracyDegrees: Float,
-    metersPerDp: Double,
-    radius: Float = 50f,
-): Polygon {
-    val coneRadiusMeters = (radius * metersPerDp).toFloat()
-
-    fun offset(lat: Double, lon: Double, distance: Float, angle: Double): Position {
-        val bearingRad = Math.toRadians(angle)
-        val latRad = Math.toRadians(lat)
-        val lonRad = Math.toRadians(lon)
-        val newLat = asin(
-            sin(latRad) * cos(distance / EARTH_RADIUS) +
-                    cos(latRad) * sin(distance / EARTH_RADIUS) * cos(bearingRad)
-        )
-        val newLon = lonRad + atan2(
-            sin(bearingRad) * sin(distance / EARTH_RADIUS) * cos(latRad),
-            cos(distance / EARTH_RADIUS) - sin(latRad) * sin(newLat)
-        )
-        return Position(Math.toDegrees(newLon), Math.toDegrees(newLat))
-    }
-
-    val left = offset(latitude, longitude, coneRadiusMeters, (bearing - bearingAccuracyDegrees / 2).toDouble())
-    val right = offset(latitude, longitude, coneRadiusMeters, (bearing + bearingAccuracyDegrees / 2).toDouble())
-    val center = Position(longitude, latitude)
-
-    return Polygon(listOf(listOf(center, left, right, center)))
-}
-
-@Composable
-fun DeviceNameLayer(
-    id: Int,
-    longitude: Double,
-    latitude: Double,
-    name: String,
-    onClick: () -> Unit = {},
-    onLongClick: () -> Unit = {},
-) {
-    val markerSource = rememberGeoJsonSource(
-        data = GeoJsonData.Features(Point(Position(longitude, latitude)))
-    )
-
-    val textColor = if (isSystemInDarkTheme()) Color.White else Color.Black
-
-    SymbolLayer(
-        id = "location-device-name-$id",
-        source = markerSource,
-        textField = format(
-            span(const(name), textSize = const(1.2f.em))
-        ),
-        textFont = const(listOf("Noto Sans Regular")),
-        textSize = const(1.2f.em),
-        textColor = const(textColor),
-        textOffset = offset(0f.em, 1.5f.em),
-        onClick = {
-            onClick()
-            ClickResult.Consume
-        },
-        onLongClick = {
-            onLongClick()
-            ClickResult.Consume
-        },
     )
 }

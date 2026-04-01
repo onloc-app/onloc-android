@@ -27,3 +27,8 @@ data class GetDevicesResponse(
 data class GetDeviceResponse(
     val device: Device
 )
+
+@Serializable
+data class GetSharedDevicesResponse(
+    val devices: List<Device>
+)

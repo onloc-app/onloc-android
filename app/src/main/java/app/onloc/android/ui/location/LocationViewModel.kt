@@ -119,8 +119,8 @@ class LocationViewModel(application: Application) : AndroidViewModel(application
             api.getSharedDevices()
                 .onSuccess { sharedDevices ->
                     _sharedDevices.value = sharedDevices
+                    fetchUsersForSharedDevices(sharedDevices)
                 }
-            fetchUsersForSharedDevices(_sharedDevices.value)
         }
     }
 

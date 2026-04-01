@@ -44,5 +44,11 @@ data class Device(
     val createdAt: String?,
 
     @SerialName("updated_at")
-    val updatedAt: String?
+    val updatedAt: String?,
+
+    @SerialName("device_share")
+    val deviceShare: DeviceShare? = null,
+
+    @SerialName("is_connected")
+    val isConnected: Boolean? = null,
 )

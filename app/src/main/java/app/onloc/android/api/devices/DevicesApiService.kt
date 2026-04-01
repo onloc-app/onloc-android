@@ -19,6 +19,7 @@ import android.content.Context
 import app.onloc.android.api.ApiClient
 import app.onloc.android.models.Device
 import app.onloc.android.models.api.GetDevicesResponse
+import app.onloc.android.models.api.GetSharedDevicesResponse
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.post
@@ -39,7 +40,7 @@ class DevicesApiService(context: Context, ip: String) {
 
     suspend fun getSharedDevices(): Result<List<Device>> {
         try {
-            val response: GetDevicesResponse = api.client.get("$ENDPOINT/shared").body()
+            val response: GetSharedDevicesResponse = api.client.get("$ENDPOINT/shared").body()
             return Result.success(response.devices)
         } catch (e: Exception) {
             return Result.failure(e)

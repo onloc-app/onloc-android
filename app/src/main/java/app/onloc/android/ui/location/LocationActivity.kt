@@ -242,13 +242,16 @@ fun LocationScreen(viewModel: LocationViewModel, modifier: Modifier = Modifier) 
         !notificationGranted -> stringResource(R.string.main_service_status_missing_permissions)
         else -> ""
     }
-    val allPositions = remember(devices, currentLocation, selectedDevice) {
+    val allPositions = remember(devices, sharedDevices, currentLocation, selectedDevice) {
         buildList {
             currentLocation?.let {
                 if (selectedDevice != null) add(Position(it.longitude, it.latitude))
             }
             devices.forEach { device ->
                 if (isLocationServiceRunning && selectedDevice?.id == device.id) return@forEach
+                device.latestLocation?.let { add(Position(it.longitude, it.latitude)) }
+            }
+            sharedDevices.forEach { device ->
                 device.latestLocation?.let { add(Position(it.longitude, it.latitude)) }
             }
         }
@@ -460,6 +463,7 @@ fun LocationScreen(viewModel: LocationViewModel, modifier: Modifier = Modifier) 
                             metersPerDp = cameraState.metersPerDpAtTarget,
                             ip = ip,
                             showProfilePicture = true,
+                            showCone = true,
                             onClick = {
                                 coroutineScope.launch {
                                     cameraState.animateTo(
