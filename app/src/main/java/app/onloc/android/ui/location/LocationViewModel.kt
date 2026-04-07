@@ -116,6 +116,9 @@ class LocationViewModel(application: Application) : AndroidViewModel(application
                 .onSuccess { devices ->
                     _devices.value = devices
                 }
+                .onFailure {
+                    it.printStackTrace()
+                }
             api.getSharedDevices()
                 .onSuccess { sharedDevices ->
                     _sharedDevices.value = sharedDevices

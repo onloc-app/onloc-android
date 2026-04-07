@@ -91,16 +91,18 @@ fun LocationPuck(
     val color = device.color?.let { Color(it.toColorInt()) } ?: stringToColor(device.name)
 
     // Bearing cone first so it's layered under the rest
-    BearingConeLayer(
-        id = id,
-        longitude = location.longitude,
-        latitude = location.latitude,
-        bearing = location.bearing,
-        bearingAccuracyDegrees = location.bearingAccuracyDegrees,
-        metersPerDp = metersPerDp,
-        color = color,
-        visible = showCone,
-    )
+    if (location.bearing != null && location.bearingAccuracyDegrees != null) {
+        BearingConeLayer(
+            id = id,
+            longitude = location.longitude,
+            latitude = location.latitude,
+            bearing = location.bearing,
+            bearingAccuracyDegrees = location.bearingAccuracyDegrees,
+            metersPerDp = metersPerDp,
+            color = color,
+            visible = showCone,
+        )
+    }
 
     LocationPuck(
         id = id,
