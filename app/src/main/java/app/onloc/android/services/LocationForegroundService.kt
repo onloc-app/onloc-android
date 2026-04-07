@@ -142,6 +142,7 @@ class LocationForegroundService : Service() {
 
         val request = LocationRequest.Builder(finalInterval)
             .setPriority(if (realTime) Priority.PRIORITY_HIGH_ACCURACY else Priority.PRIORITY_BALANCED_POWER_ACCURACY)
+            .setMinUpdateDistanceMeters(minDistance)
             .build()
 
         fusedClient.requestLocationUpdates(request, locationCallback, mainLooper)
