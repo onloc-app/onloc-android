@@ -23,8 +23,6 @@ import android.app.Service
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
-import android.location.LocationListener
-import android.location.LocationManager
 import android.os.BatteryManager
 import android.os.IBinder
 import androidx.core.app.ActivityCompat
@@ -35,6 +33,11 @@ import app.onloc.android.helpers.getIP
 import app.onloc.android.helpers.getInterval
 import app.onloc.android.helpers.getRealTime
 import app.onloc.android.helpers.getSelectedDeviceId
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationResult
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.Priority
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
@@ -48,8 +51,8 @@ const val STOP_LOCATION_SERVICE_NOTIFICATION_ID = 1002
 class LocationForegroundService : Service() {
     private val serviceScope = CoroutineScope(Dispatchers.IO)
 
-    private val locationManager: LocationManager by lazy {
-        getSystemService(LOCATION_SERVICE) as LocationManager
+    private val fusedClient by lazy {
+        LocationServices.getFusedLocationProviderClient(applicationContext)
     }
 
     private val deviceEncryptedPreferences by lazy {
@@ -57,10 +60,16 @@ class LocationForegroundService : Service() {
             .getSharedPreferences("device_protected_preferences", MODE_PRIVATE)
     }
 
+    private val locationCallback = object : LocationCallback() {
+        override fun onLocationResult(res: LocationResult) {
+            res.lastLocation?.let { location -> handleLocation(location) }
+        }
+    }
+
     /**
      * Launched when a location update arrives.
      */
-    private val locationListener = LocationListener { location ->
+    private fun handleLocation(location: Location) {
         val ip = getIP(deviceEncryptedPreferences)
         val selectedDeviceId = getSelectedDeviceId(deviceEncryptedPreferences)
 
@@ -95,7 +104,6 @@ class LocationForegroundService : Service() {
     }
 
     private fun stopForegroundService() {
-        locationManager.removeUpdates(locationListener)
         stopForeground(STOP_FOREGROUND_DETACH)
         stopSelf()
     }
@@ -132,31 +140,11 @@ class LocationForegroundService : Service() {
         val finalInterval = if (!realTime) interval!! * SECOND else 2L * SECOND
         val minDistance = if (!realTime) 0f else 2f
 
-        if (locationManager.isProviderEnabled(LocationManager.FUSED_PROVIDER)) {
-            locationManager.requestLocationUpdates(
-                LocationManager.FUSED_PROVIDER,
-                finalInterval,
-                minDistance,
-                locationListener,
-            )
-        } else {
-            if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-                locationManager.requestLocationUpdates(
-                    LocationManager.GPS_PROVIDER,
-                    finalInterval,
-                    minDistance,
-                    locationListener,
-                )
-            }
-            if (locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
-                locationManager.requestLocationUpdates(
-                    LocationManager.NETWORK_PROVIDER,
-                    finalInterval,
-                    minDistance,
-                    locationListener,
-                )
-            }
-        }
+        val request = LocationRequest.Builder(finalInterval)
+            .setPriority(if (realTime) Priority.PRIORITY_HIGH_ACCURACY else Priority.PRIORITY_BALANCED_POWER_ACCURACY)
+            .build()
+
+        fusedClient.requestLocationUpdates(request, locationCallback, mainLooper)
     }
 
     override fun onBind(intent: Intent?): IBinder? = null
@@ -165,7 +153,7 @@ class LocationForegroundService : Service() {
         super.onDestroy()
 
         stopForegroundService()
-        locationManager.removeUpdates(locationListener)
+        fusedClient.removeLocationUpdates(locationCallback)
         serviceScope.cancel()
 
         // Send a notification

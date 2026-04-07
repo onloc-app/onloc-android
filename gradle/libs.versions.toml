@@ -18,6 +18,7 @@ appcompat = "1.7.1"
 material = "1.13.0"
 activity = "1.13.0"
 constraintlayout = "2.2.1"
+playServicesLocation = "21.3.0"
 securityCrypto = "1.1.0"
 socketIoClient = "2.1.2"
 workRuntimeKtx = "2.11.2"
@@ -56,6 +57,7 @@ maplibre-composeMaterial3 = { module = "dev.sargunv.maplibre-compose:maplibre-co
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 androidx-activity = { group = "androidx.activity", name = "activity", version.ref = "activity" }
 androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
+play-services-location = { module = "com.google.android.gms:play-services-location", version.ref = "playServicesLocation" }
 socket-io-client = { module = "io.socket:socket.io-client", version.ref = "socketIoClient" }
 material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "material3" }
 ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }

@@ -36,6 +36,8 @@ import app.onloc.android.models.api.DeleteTokenRequest
 import app.onloc.android.services.LocationCallbackManager
 import app.onloc.android.services.ServiceManager
 import app.onloc.android.services.SocketEventBus
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.Priority
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -186,12 +188,13 @@ class LocationViewModel(application: Application) : AndroidViewModel(application
 
     @SuppressLint("MissingPermission")
     fun grabCurrentLocation() {
-        val locationManager = context.getSystemService(LOCATION_SERVICE) as LocationManager
-        val location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
-            ?: locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
-        location?.let {
-            _currentLocation.value = Location.fromAndroidLocation(0, 0, it)
-        }
+        LocationServices.getFusedLocationProviderClient(context)
+            .getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, null)
+            .addOnSuccessListener { location ->
+                location?.let {
+                    _currentLocation.value = Location.fromAndroidLocation(0, 0, it)
+                }
+            }
     }
 
     fun logout() {
