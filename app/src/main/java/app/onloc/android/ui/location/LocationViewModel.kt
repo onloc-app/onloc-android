@@ -17,8 +17,6 @@ package app.onloc.android.ui.location
 
 import android.annotation.SuppressLint
 import android.app.Application
-import android.content.Context.LOCATION_SERVICE
-import android.location.LocationManager
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import app.onloc.android.AppPreferences
