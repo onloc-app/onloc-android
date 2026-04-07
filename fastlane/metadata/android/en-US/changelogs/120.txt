@@ -1,0 +1,7 @@
+Big update!
+
+The whole Android app as been refactored to ensure it is easily and well maintained in the future. With this update
+also comes a new option to track your phone: real-time tracking!
+
+Real-time tracking costs a little more battery life but sends feedback instantly when your device is on the move.
+Combined with the new front end update on the server side, you now get slick animations of your device's movement.
