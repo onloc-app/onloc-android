@@ -42,6 +42,7 @@ import app.onloc.android.singletons.RingerState
 import app.onloc.android.ui.ringer.RingerActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.json.JSONObject
@@ -67,6 +68,8 @@ class WebSocketService : Service() {
     private val disconnectEvent = "disconnect"
     private val registerDeviceEvent = "register-device"
     private val locationsChangeEvent = "locations-change"
+
+    private val watchdogScope = CoroutineScope(Dispatchers.IO)
 
     private val deviceEncryptedPreferences by lazy {
         createDeviceProtectedStorageContext()
@@ -196,7 +199,7 @@ class WebSocketService : Service() {
         }
 
         SocketManager.on(locationsChangeEvent) {
-            CoroutineScope(Dispatchers.Default).launch {
+            watchdogScope.launch {
                 SocketEventBus.emitLocationsChanged()
             }
         }
@@ -206,7 +209,6 @@ class WebSocketService : Service() {
         }
     }
 
-    private val watchdogScope = CoroutineScope(Dispatchers.IO)
     private fun startWatchdog() {
         watchdogScope.launch {
             while (true) {
@@ -221,7 +223,7 @@ class WebSocketService : Service() {
     private fun createNotification(): Notification {
         val channelId = CHANNEL_ID
         val channelName = getString(R.string.service_websocket_channel_name)
-        val channel = NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_HIGH)
+        val channel = NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_LOW)
 
         val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.createNotificationChannel(channel)
@@ -236,9 +238,6 @@ class WebSocketService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         isWebSocketServiceRunning = true
-
-        connectSocket()
-
         return START_STICKY
     }
 
@@ -252,6 +251,7 @@ class WebSocketService : Service() {
         }
 
         SocketManager.disconnect()
+        watchdogScope.cancel()
     }
 
     override fun onBind(intent: Intent?): IBinder? = null

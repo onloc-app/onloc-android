@@ -37,14 +37,17 @@ import app.onloc.android.helpers.getRealTime
 import app.onloc.android.helpers.getSelectedDeviceId
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 
 private const val CHANNEL_ID = "location_channel"
-const val SECOND = 1000L
+private const val SECOND = 1000L
 const val START_LOCATION_SERVICE_NOTIFICATION_ID = 1001
 const val STOP_LOCATION_SERVICE_NOTIFICATION_ID = 1002
 
 class LocationForegroundService : Service() {
+    private val serviceScope = CoroutineScope(Dispatchers.IO)
+
     private val locationManager: LocationManager by lazy {
         getSystemService(LOCATION_SERVICE) as LocationManager
     }
@@ -54,6 +57,9 @@ class LocationForegroundService : Service() {
             .getSharedPreferences("device_protected_preferences", MODE_PRIVATE)
     }
 
+    /**
+     * Launched when a location update arrives.
+     */
     private val locationListener = LocationListener { location ->
         val ip = getIP(deviceEncryptedPreferences)
         val selectedDeviceId = getSelectedDeviceId(deviceEncryptedPreferences)
@@ -69,49 +75,11 @@ class LocationForegroundService : Service() {
         parsedLocation.battery = batteryLevel
 
         if (ip != null && selectedDeviceId != null) {
-            CoroutineScope(Dispatchers.IO).launch {
+            serviceScope.launch {
                 LocationsApiService(applicationContext, ip).postLocation(parsedLocation)
             }
         }
         LocationCallbackManager.callback?.invoke(location)
-    }
-
-    private fun requestLocationUpdates() {
-        if (
-            ActivityCompat.checkSelfPermission(
-                applicationContext,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED ||
-            ActivityCompat.checkSelfPermission(
-                applicationContext,
-                Manifest.permission.ACCESS_BACKGROUND_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            return
-        }
-
-        val interval = getInterval(deviceEncryptedPreferences) ?: return
-        val realTime = getRealTime(deviceEncryptedPreferences)
-        val finalInterval = if (!realTime) interval * SECOND else 1 * SECOND
-        val minDistance = if (!realTime) 0f else 2f
-
-        if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-            locationManager.requestLocationUpdates(
-                LocationManager.GPS_PROVIDER,
-                finalInterval,
-                minDistance,
-                locationListener,
-            )
-        }
-
-        if (locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
-            locationManager.requestLocationUpdates(
-                LocationManager.NETWORK_PROVIDER,
-                finalInterval,
-                minDistance,
-                locationListener,
-            )
-        }
     }
 
     private fun startForegroundService() {
@@ -126,11 +94,97 @@ class LocationForegroundService : Service() {
         startForeground(START_LOCATION_SERVICE_NOTIFICATION_ID, createStartForegroundNotification())
     }
 
+    private fun stopForegroundService() {
+        locationManager.removeUpdates(locationListener)
+        stopForeground(STOP_FOREGROUND_DETACH)
+        stopSelf()
+    }
+
+    override fun onCreate() {
+        super.onCreate()
+        requestLocation()
+        startForegroundService()
+    }
+
+    /**
+     * Starts the location updates. Makes sure to always get the location from the best, if available, service.
+     * Will restart the updates if the current provider becomes unavailable or a better one becomes available.
+     */
+    private fun requestLocation() {
+        if (
+            ActivityCompat.checkSelfPermission(
+                applicationContext,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED ||
+            ActivityCompat.checkSelfPermission(
+                applicationContext,
+                Manifest.permission.ACCESS_BACKGROUND_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            return
+        }
+
+        val interval = getInterval(deviceEncryptedPreferences)
+        val realTime = getRealTime(deviceEncryptedPreferences)
+
+        if (!realTime && interval == null) return
+
+        val finalInterval = if (!realTime) interval!! * SECOND else 2L * SECOND
+        val minDistance = if (!realTime) 0f else 2f
+
+        if (locationManager.isProviderEnabled(LocationManager.FUSED_PROVIDER)) {
+            locationManager.requestLocationUpdates(
+                LocationManager.FUSED_PROVIDER,
+                finalInterval,
+                minDistance,
+                locationListener,
+            )
+        } else {
+            if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+                locationManager.requestLocationUpdates(
+                    LocationManager.GPS_PROVIDER,
+                    finalInterval,
+                    minDistance,
+                    locationListener,
+                )
+            }
+            if (locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
+                locationManager.requestLocationUpdates(
+                    LocationManager.NETWORK_PROVIDER,
+                    finalInterval,
+                    minDistance,
+                    locationListener,
+                )
+            }
+        }
+    }
+
+    override fun onBind(intent: Intent?): IBinder? = null
+
+    override fun onDestroy() {
+        super.onDestroy()
+
+        stopForegroundService()
+        locationManager.removeUpdates(locationListener)
+        serviceScope.cancel()
+
+        // Send a notification
+        val notificationManager =
+            getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.notify(
+            STOP_LOCATION_SERVICE_NOTIFICATION_ID,
+            createStopForegroundNotification()
+        )
+    }
+
+    /**
+     * Creates the notification sent when the service starts.
+     */
     private fun createStartForegroundNotification(): Notification {
         val channelId = CHANNEL_ID
         val channelName = getString(R.string.service_location_channel_name)
         val channel =
-            NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_DEFAULT)
+            NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_LOW)
 
         val notificationManager =
             getSystemService(NOTIFICATION_SERVICE) as NotificationManager
@@ -143,32 +197,9 @@ class LocationForegroundService : Service() {
             .build()
     }
 
-    private fun stopForegroundService() {
-        locationManager.removeUpdates(locationListener)
-        stopForeground(STOP_FOREGROUND_DETACH)
-        stopSelf()
-    }
-
-    override fun onCreate() {
-        super.onCreate()
-        startForegroundService()
-        requestLocationUpdates()
-    }
-
-    override fun onBind(intent: Intent?): IBinder? = null
-
-    override fun onDestroy() {
-        super.onDestroy()
-        stopForegroundService()
-
-        val notificationManager =
-            getSystemService(NOTIFICATION_SERVICE) as NotificationManager
-        notificationManager.notify(
-            STOP_LOCATION_SERVICE_NOTIFICATION_ID,
-            createStopForegroundNotification()
-        )
-    }
-
+    /**
+     * Creates the notification sent when the service stops.
+     */
     private fun createStopForegroundNotification(): Notification {
         val channelId = CHANNEL_ID
         val channelName = getString(R.string.service_location_channel_name)
