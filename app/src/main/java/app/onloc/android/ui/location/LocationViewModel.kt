@@ -17,6 +17,9 @@ package app.onloc.android.ui.location
 
 import android.annotation.SuppressLint
 import android.app.Application
+import android.content.Context
+import android.location.LocationManager
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import app.onloc.android.AppPreferences
@@ -34,6 +37,8 @@ import app.onloc.android.models.api.DeleteTokenRequest
 import app.onloc.android.services.LocationCallbackManager
 import app.onloc.android.services.ServiceManager
 import app.onloc.android.services.SocketEventBus
+import com.google.android.gms.common.ConnectionResult
+import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -186,13 +191,30 @@ class LocationViewModel(application: Application) : AndroidViewModel(application
 
     @SuppressLint("MissingPermission")
     fun grabCurrentLocation() {
-        LocationServices.getFusedLocationProviderClient(context)
-            .getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, null)
-            .addOnSuccessListener { location ->
-                location?.let {
-                    _currentLocation.value = Location.fromAndroidLocation(0, 0, it)
+        val isGmsAvailable =
+            GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(context) == ConnectionResult.SUCCESS
+
+        if (isGmsAvailable) {
+            LocationServices.getFusedLocationProviderClient(context)
+                .getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, null)
+                .addOnSuccessListener { location ->
+                    location?.let {
+                        _currentLocation.value = Location.fromAndroidLocation(0, 0, it)
+                    }
+                }
+        } else {
+            val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+
+            val executor = ContextCompat.getMainExecutor(context)
+
+            if (locationManager.isProviderEnabled(LocationManager.FUSED_PROVIDER)) {
+                locationManager.getCurrentLocation(
+                    LocationManager.FUSED_PROVIDER, null, executor
+                ) {
+                    it?.let { _currentLocation.value = Location.fromAndroidLocation(0, 0, it) }
                 }
             }
+        }
     }
 
     fun logout() {

@@ -23,6 +23,8 @@ import android.app.Service
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
+import android.location.LocationListener
+import android.location.LocationManager
 import android.os.BatteryManager
 import android.os.IBinder
 import androidx.core.app.ActivityCompat
@@ -33,6 +35,8 @@ import app.onloc.android.helpers.getIP
 import app.onloc.android.helpers.getInterval
 import app.onloc.android.helpers.getRealTime
 import app.onloc.android.helpers.getSelectedDeviceId
+import com.google.android.gms.common.ConnectionResult
+import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
@@ -51,6 +55,10 @@ const val STOP_LOCATION_SERVICE_NOTIFICATION_ID = 1002
 class LocationForegroundService : Service() {
     private val serviceScope = CoroutineScope(Dispatchers.IO)
 
+    private val locationManager by lazy {
+        getSystemService(LOCATION_SERVICE) as LocationManager
+    }
+
     private val fusedClient by lazy {
         LocationServices.getFusedLocationProviderClient(applicationContext)
     }
@@ -60,6 +68,9 @@ class LocationForegroundService : Service() {
             .getSharedPreferences("device_protected_preferences", MODE_PRIVATE)
     }
 
+    /**
+     * Callback for fused location updates.
+     */
     private val locationCallback = object : LocationCallback() {
         override fun onLocationResult(res: LocationResult) {
             res.lastLocation?.let { location -> handleLocation(location) }
@@ -67,7 +78,7 @@ class LocationForegroundService : Service() {
     }
 
     /**
-     * Launched when a location update arrives.
+     * Launched when a location update arrives from fused client.
      */
     private fun handleLocation(location: Location) {
         val ip = getIP(deviceEncryptedPreferences)
@@ -89,29 +100,6 @@ class LocationForegroundService : Service() {
             }
         }
         LocationCallbackManager.callback?.invoke(location)
-    }
-
-    private fun startForegroundService() {
-        if (
-            ActivityCompat.checkSelfPermission(
-                applicationContext,
-                Manifest.permission.POST_NOTIFICATIONS
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            return
-        }
-        startForeground(START_LOCATION_SERVICE_NOTIFICATION_ID, createStartForegroundNotification())
-    }
-
-    private fun stopForegroundService() {
-        stopForeground(STOP_FOREGROUND_DETACH)
-        stopSelf()
-    }
-
-    override fun onCreate() {
-        super.onCreate()
-        requestLocation()
-        startForegroundService()
     }
 
     /**
@@ -140,15 +128,87 @@ class LocationForegroundService : Service() {
         val finalInterval = if (!realTime) interval!! * SECOND else 2L * SECOND
         val minDistance = if (!realTime) 0f else 2f
 
-        val request = LocationRequest.Builder(finalInterval)
-            .setPriority(if (realTime) Priority.PRIORITY_HIGH_ACCURACY else Priority.PRIORITY_BALANCED_POWER_ACCURACY)
-            .setMinUpdateDistanceMeters(minDistance)
-            .build()
+        val isGmsAvailable =
+            GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(this) == ConnectionResult.SUCCESS
 
-        fusedClient.requestLocationUpdates(request, locationCallback, mainLooper)
+        if (isGmsAvailable) {
+            val request = LocationRequest.Builder(finalInterval)
+                .setPriority(
+                    if (realTime) Priority.PRIORITY_HIGH_ACCURACY else Priority.PRIORITY_BALANCED_POWER_ACCURACY
+                )
+                .setMinUpdateDistanceMeters(minDistance)
+                .build()
+
+            fusedClient.requestLocationUpdates(request, locationCallback, mainLooper)
+        } else {
+            if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+                locationManager.requestLocationUpdates(
+                    LocationManager.GPS_PROVIDER,
+                    finalInterval,
+                    minDistance,
+                    locationListener,
+                )
+            }
+            if (locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
+                locationManager.requestLocationUpdates(
+                    LocationManager.NETWORK_PROVIDER,
+                    finalInterval,
+                    minDistance,
+                    locationListener,
+                )
+            }
+        }
     }
 
-    override fun onBind(intent: Intent?): IBinder? = null
+    private var lastGpsLocation: Location? = null
+    private var lastNetworkLocation: Location? = null
+
+    /**
+     * Callback for location updates that don't use Google's fused client.
+     */
+    private val locationListener = LocationListener { location ->
+        when (location.provider) {
+            LocationManager.GPS_PROVIDER -> lastGpsLocation = location
+            LocationManager.NETWORK_PROVIDER -> lastNetworkLocation = location
+        }
+
+        val best = chooseBestLocation(lastGpsLocation, lastNetworkLocation)
+        best?.let { handleLocation(it) }
+    }
+
+    /**
+     * Chooses the best location between GPS and network.
+     */
+    @Suppress("ReturnCount")
+    private fun chooseBestLocation(gpsLocation: Location?, networkLocation: Location?): Location? {
+        if (gpsLocation == null) return networkLocation
+        if (networkLocation == null) return gpsLocation
+
+        return if (gpsLocation.accuracy <= networkLocation.accuracy) gpsLocation else networkLocation
+    }
+
+    private fun startForegroundService() {
+        if (
+            ActivityCompat.checkSelfPermission(
+                applicationContext,
+                Manifest.permission.POST_NOTIFICATIONS
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            return
+        }
+        startForeground(START_LOCATION_SERVICE_NOTIFICATION_ID, createStartForegroundNotification())
+    }
+
+    private fun stopForegroundService() {
+        stopForeground(STOP_FOREGROUND_DETACH)
+        stopSelf()
+    }
+
+    override fun onCreate() {
+        super.onCreate()
+        requestLocation()
+        startForegroundService()
+    }
 
     override fun onDestroy() {
         super.onDestroy()
@@ -206,6 +266,8 @@ class LocationForegroundService : Service() {
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .build()
     }
+
+    override fun onBind(intent: Intent?): IBinder? = null
 }
 
 object LocationCallbackManager {
