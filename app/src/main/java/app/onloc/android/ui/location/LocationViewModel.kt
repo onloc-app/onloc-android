@@ -17,9 +17,7 @@ package app.onloc.android.ui.location
 
 import android.annotation.SuppressLint
 import android.app.Application
-import android.content.Context
-import android.location.LocationManager
-import androidx.core.content.ContextCompat
+import android.os.Bundle
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import app.onloc.android.AppPreferences
@@ -37,10 +35,9 @@ import app.onloc.android.models.api.DeleteTokenRequest
 import app.onloc.android.services.LocationCallbackManager
 import app.onloc.android.services.ServiceManager
 import app.onloc.android.services.SocketEventBus
-import com.google.android.gms.common.ConnectionResult
-import com.google.android.gms.common.GoogleApiAvailability
-import com.google.android.gms.location.LocationServices
-import com.google.android.gms.location.Priority
+import com.yayandroid.locationmanager.LocationManager
+import com.yayandroid.locationmanager.configuration.DefaultProviderConfiguration
+import com.yayandroid.locationmanager.configuration.LocationConfiguration
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -49,6 +46,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import org.json.JSONObject
+import android.location.Location as AndroidLocation
 
 const val TIMEOUT = 5000L
 
@@ -191,30 +189,52 @@ class LocationViewModel(application: Application) : AndroidViewModel(application
 
     @SuppressLint("MissingPermission")
     fun grabCurrentLocation() {
-        val isGmsAvailable =
-            GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(context) == ConnectionResult.SUCCESS
+        val config = LocationConfiguration.Builder()
+            .useDefaultProviders(
+                DefaultProviderConfiguration.Builder()
+                    .requiredTimeInterval(0)
+                    .requiredDistanceInterval(0)
+                    .build()
+            )
+            .build()
 
-        if (isGmsAvailable) {
-            LocationServices.getFusedLocationProviderClient(context)
-                .getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, null)
-                .addOnSuccessListener { location ->
+        val locationManager = LocationManager.Builder(context)
+            .configuration(config)
+            .notify(object : com.yayandroid.locationmanager.listener.LocationListener {
+                override fun onLocationChanged(location: AndroidLocation?) {
                     location?.let {
-                        _currentLocation.value = Location.fromAndroidLocation(0, 0, it)
+                        if (_selectedDeviceId.value != null) {
+                            _currentLocation.value = Location.fromAndroidLocation(
+                                0,
+                                _selectedDeviceId.value!!,
+                                it
+                            )
+                        }
                     }
                 }
-        } else {
-            val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
 
-            val executor = ContextCompat.getMainExecutor(context)
-
-            if (locationManager.isProviderEnabled(LocationManager.FUSED_PROVIDER)) {
-                locationManager.getCurrentLocation(
-                    LocationManager.FUSED_PROVIDER, null, executor
-                ) {
-                    it?.let { _currentLocation.value = Location.fromAndroidLocation(0, 0, it) }
+                override fun onLocationFailed(type: Int) {
+                    // Ignored
                 }
-            }
-        }
+                override fun onProcessTypeChanged(processType: Int) {
+                    // Ignored
+                }
+                override fun onPermissionGranted(alreadyHadPermission: Boolean) {
+                    // Ignored
+                }
+                override fun onStatusChanged(provider: String, status: Int, extras: Bundle) {
+                    // Ignored
+                }
+                override fun onProviderEnabled(provider: String?) {
+                    // Ignored
+                }
+                override fun onProviderDisabled(provider: String?) {
+                    // Ignored
+                }
+            })
+            .build()
+
+        locationManager.get()
     }
 
     fun logout() {

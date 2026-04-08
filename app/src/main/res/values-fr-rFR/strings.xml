@@ -77,6 +77,7 @@
         Le service de suivi de localisation a été arrêté
     </string>
 
+    <string name="service_location_enable_gps">Le GPS doit être activé</string>
     <string name="service_websocket_channel_name">Service de sonnerie à distance</string>
     <string name="service_websocket_start_notification_title">À l\'écoute des commandes</string>
     <string name="service_websocket_start_notification_description">L’appareil répondra aux commandes</string>

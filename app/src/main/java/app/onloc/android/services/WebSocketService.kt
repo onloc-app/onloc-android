@@ -23,6 +23,7 @@ import android.app.Service
 import android.app.admin.DevicePolicyManager
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.hardware.camera2.CameraManager
 import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkRequest
@@ -55,6 +56,10 @@ const val LOCK_SCREEN_NOTIFICATION_ID = 9999
 
 private const val WATCHDOG_DELAY = 30000L
 
+// Flash
+private const val FLASH_REPEAT_COUNT = 10
+private const val FLASH_DELAY = 500L
+
 object ServiceStatus {
     var isWebSocketServiceRunning = false
 }
@@ -65,6 +70,7 @@ class WebSocketService : Service() {
 
     private val ringCommandEvent = "ring-command"
     private val lockCommandEvent = "lock-command"
+    private val flashCommandEvent = "flash-command"
     private val disconnectEvent = "disconnect"
     private val registerDeviceEvent = "register-device"
     private val locationsChangeEvent = "locations-change"
@@ -122,6 +128,7 @@ class WebSocketService : Service() {
         // Disconnect old listeners
         SocketManager.off(ringCommandEvent)
         SocketManager.off(lockCommandEvent)
+        SocketManager.off(flashCommandEvent)
         SocketManager.off(disconnectEvent)
         SocketManager.off(locationsChangeEvent)
 
@@ -195,6 +202,19 @@ class WebSocketService : Service() {
                 val devicePolicyManager = getSystemService(DEVICE_POLICY_SERVICE) as DevicePolicyManager
 
                 devicePolicyManager.lockNow()
+            }
+        }
+
+        SocketManager.on(flashCommandEvent) { _ ->
+            val cameraManager = getSystemService(CAMERA_SERVICE) as CameraManager
+            val cameraId = cameraManager.cameraIdList[0]
+            watchdogScope.launch {
+                repeat(FLASH_REPEAT_COUNT) {
+                    cameraManager.setTorchMode(cameraId, true)
+                    delay(FLASH_DELAY)
+                    cameraManager.setTorchMode(cameraId, false)
+                    delay(FLASH_DELAY)
+                }
             }
         }
 

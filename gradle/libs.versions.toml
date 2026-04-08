@@ -1,7 +1,7 @@
 [versions]
 agp = "8.12.3"
 coil = "3.4.0"
-detekt = "0.5.6"
+detekt = "0.5.7"
 detektPlugin = "1.23.8"
 kotlin = "2.3.20"
 coreKtx = "1.18.0"
@@ -12,13 +12,13 @@ ktorClientLogging = "3.4.2"
 lifecycleRuntimeKtx = "2.10.0"
 activityCompose = "1.13.0"
 composeBom = "2026.03.01"
+locationmanager = "2.4.1"
 materialIconsExtendedAndroid = "1.7.8"
 okhttp = "5.3.2"
 appcompat = "1.7.1"
 material = "1.13.0"
 activity = "1.13.0"
 constraintlayout = "2.2.1"
-playServicesLocation = "21.3.0"
 securityCrypto = "1.1.0"
 socketIoClient = "2.1.2"
 workRuntimeKtx = "2.11.2"
@@ -50,6 +50,7 @@ androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-man
 androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
 ktor-client-logging = { module = "io.ktor:ktor-client-logging", version.ref = "ktorClientLogging" }
+locationmanager = { module = "com.yayandroid:LocationManager", version.ref = "locationmanager" }
 okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 maplibre-compose = { module = "dev.sargunv.maplibre-compose:maplibre-compose", version = "0.10.4" }
@@ -57,7 +58,6 @@ maplibre-composeMaterial3 = { module = "dev.sargunv.maplibre-compose:maplibre-co
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 androidx-activity = { group = "androidx.activity", name = "activity", version.ref = "activity" }
 androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
-play-services-location = { module = "com.google.android.gms:play-services-location", version.ref = "playServicesLocation" }
 socket-io-client = { module = "io.socket:socket.io-client", version.ref = "socketIoClient" }
 material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "material3" }
 ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }

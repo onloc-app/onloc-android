@@ -83,6 +83,7 @@
     <string name="service_location_stop_notification_description">
         The location tracking service has been stopped
     </string>
+    <string name="service_location_enable_gps">GPS needs to be enabled</string>
 
     <string name="service_websocket_channel_name">Ringer WebSocket Service</string>
     <string name="service_websocket_start_notification_title">Listening for commands</string>
