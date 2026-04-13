@@ -24,7 +24,6 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
 import android.os.BatteryManager
-import android.os.Bundle
 import android.os.IBinder
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
@@ -34,10 +33,8 @@ import app.onloc.android.helpers.getIP
 import app.onloc.android.helpers.getInterval
 import app.onloc.android.helpers.getRealTime
 import app.onloc.android.helpers.getSelectedDeviceId
-import com.yayandroid.locationmanager.LocationManager
-import com.yayandroid.locationmanager.configuration.DefaultProviderConfiguration
-import com.yayandroid.locationmanager.configuration.LocationConfiguration
-import com.yayandroid.locationmanager.listener.LocationListener
+import app.onloc.locationclient.LocationClient
+import app.onloc.locationclient.locationClientConfig
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
@@ -54,7 +51,7 @@ private const val ACCEPTABLE_ACCURACY = 20f
 class LocationForegroundService : Service() {
     private val serviceScope = CoroutineScope(Dispatchers.IO)
 
-    private var locationManager: LocationManager? = null
+    private var locationClient: LocationClient? = null
 
     private val deviceEncryptedPreferences by lazy {
         createDeviceProtectedStorageContext()
@@ -112,52 +109,20 @@ class LocationForegroundService : Service() {
         val finalInterval = if (!realTime) interval!! * SECOND else 2L * SECOND
         val minDistance = if (!realTime) 0f else REAL_TIME_MIN_DISTANCE
 
-        val config = LocationConfiguration.Builder()
-            .keepTracking(true)
-            .useDefaultProviders(
-                DefaultProviderConfiguration.Builder()
-                    .requiredTimeInterval(finalInterval)
-                    .requiredDistanceInterval(minDistance.toLong())
-                    .acceptableAccuracy(ACCEPTABLE_ACCURACY)
-                    .gpsMessage(getString(R.string.service_location_enable_gps))
-                    .build()
-            )
-            .build()
-        val locationManager = LocationManager.Builder(applicationContext)
-            .configuration(config)
-            .notify(locationListener)
-            .build()
+        val config = locationClientConfig {
+            requiredTimeInterval = finalInterval
+            requiredDistanceInterval = minDistance
+            acceptableAccuracy = ACCEPTABLE_ACCURACY
+            gpsMessage = getString(R.string.service_location_enable_gps)
+        }
 
-        locationManager?.get()
-    }
-
-    /**
-     * Callback for location updates that don't use Google's fused client.
-     */
-    private val locationListener = object : LocationListener {
-        override fun onLocationChanged(location: Location?) {
-            location?.let { location ->
-                handleLocation(location)
+        val locationClient = LocationClient(applicationContext, config)
+        serviceScope.launch {
+            locationClient.locationFlow().collect { result ->
+                result.onSuccess { location ->
+                    handleLocation(location)
+                }
             }
-        }
-
-        override fun onProcessTypeChanged(processType: Int) {
-            // Ignored
-        }
-        override fun onLocationFailed(type: Int) {
-            // Ignored
-        }
-        override fun onPermissionGranted(alreadyHadPermission: Boolean) {
-            // Ignored
-        }
-        override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {
-            // Ignored
-        }
-        override fun onProviderEnabled(provider: String?) {
-            // Ignored
-        }
-        override fun onProviderDisabled(provider: String?) {
-            // Ignored
         }
     }
 
@@ -188,8 +153,7 @@ class LocationForegroundService : Service() {
         super.onDestroy()
 
         stopForegroundService()
-        locationManager?.onDestroy()
-        locationManager = null
+        locationClient = null
         serviceScope.cancel()
 
         // Send a notification

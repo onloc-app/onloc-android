@@ -487,7 +487,11 @@ fun LocationScreen(viewModel: LocationViewModel, modifier: Modifier = Modifier) 
             }
 
             LaunchedEffect(allPositions) {
-                fitMapBounds(allPositions)
+                if (onCurrentLocation) {
+                    goToCurrentLocation()
+                } else {
+                    fitMapBounds(allPositions)
+                }
             }
         }
 

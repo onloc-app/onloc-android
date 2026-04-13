@@ -17,7 +17,6 @@ package app.onloc.android.ui.location
 
 import android.annotation.SuppressLint
 import android.app.Application
-import android.os.Bundle
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import app.onloc.android.AppPreferences
@@ -35,18 +34,18 @@ import app.onloc.android.models.api.DeleteTokenRequest
 import app.onloc.android.services.LocationCallbackManager
 import app.onloc.android.services.ServiceManager
 import app.onloc.android.services.SocketEventBus
-import com.yayandroid.locationmanager.LocationManager
-import com.yayandroid.locationmanager.configuration.DefaultProviderConfiguration
-import com.yayandroid.locationmanager.configuration.LocationConfiguration
+import app.onloc.locationclient.LocationClient
+import app.onloc.locationclient.locationClientConfig
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
 import org.json.JSONObject
-import android.location.Location as AndroidLocation
 
 const val TIMEOUT = 5000L
 
@@ -189,52 +188,25 @@ class LocationViewModel(application: Application) : AndroidViewModel(application
 
     @SuppressLint("MissingPermission")
     fun grabCurrentLocation() {
-        val config = LocationConfiguration.Builder()
-            .useDefaultProviders(
-                DefaultProviderConfiguration.Builder()
-                    .requiredTimeInterval(0)
-                    .requiredDistanceInterval(0)
-                    .build()
-            )
-            .build()
+        val config = locationClientConfig {
+            requiredTimeInterval = 0L
+            requiredDistanceInterval = 0f
+        }
 
-        val locationManager = LocationManager.Builder(context)
-            .configuration(config)
-            .notify(object : com.yayandroid.locationmanager.listener.LocationListener {
-                override fun onLocationChanged(location: AndroidLocation?) {
-                    location?.let {
-                        if (_selectedDeviceId.value != null) {
-                            _currentLocation.value = Location.fromAndroidLocation(
-                                0,
-                                _selectedDeviceId.value!!,
-                                it
-                            )
-                        }
+        viewModelScope.launch {
+            LocationClient(context, config)
+                .locationFlow()
+                .first()
+                .onSuccess { location ->
+                    if (_selectedDeviceId.value != null) {
+                        _currentLocation.value = Location.fromAndroidLocation(
+                            0,
+                            _selectedDeviceId.value!!,
+                            location
+                        )
                     }
                 }
-
-                override fun onLocationFailed(type: Int) {
-                    // Ignored
-                }
-                override fun onProcessTypeChanged(processType: Int) {
-                    // Ignored
-                }
-                override fun onPermissionGranted(alreadyHadPermission: Boolean) {
-                    // Ignored
-                }
-                override fun onStatusChanged(provider: String, status: Int, extras: Bundle) {
-                    // Ignored
-                }
-                override fun onProviderEnabled(provider: String?) {
-                    // Ignored
-                }
-                override fun onProviderDisabled(provider: String?) {
-                    // Ignored
-                }
-            })
-            .build()
-
-        locationManager.get()
+        }
     }
 
     fun logout() {
