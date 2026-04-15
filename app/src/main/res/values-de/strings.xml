@@ -1,3 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="app_name">Onloc</string>
+    <string name="login_username_field_label">Benutzername</string>
+    <string name="login_password_field_label">Passwort</string>
+    <string name="login_ip_field_label">URL des Servers</string>
 </resources>
