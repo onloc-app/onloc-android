@@ -46,7 +46,7 @@ const val START_LOCATION_SERVICE_NOTIFICATION_ID = 1001
 const val STOP_LOCATION_SERVICE_NOTIFICATION_ID = 1002
 
 private const val REAL_TIME_MIN_DISTANCE = 12f
-private const val ACCEPTABLE_ACCURACY = 20f
+private const val ACCEPTABLE_ACCURACY = 500f
 
 class LocationForegroundService : Service() {
     private val serviceScope = CoroutineScope(Dispatchers.IO)
