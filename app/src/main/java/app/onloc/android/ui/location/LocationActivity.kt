@@ -39,6 +39,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.FitScreen
+import androidx.compose.material.icons.outlined.FlashlightOn
 import androidx.compose.material.icons.outlined.GpsFixed
 import androidx.compose.material.icons.outlined.GpsNotFixed
 import androidx.compose.material.icons.outlined.GpsOff
@@ -668,6 +669,22 @@ fun LocationScreen(viewModel: LocationViewModel, modifier: Modifier = Modifier) 
                             Icon(
                                 imageVector = Icons.Outlined.Lock,
                                 contentDescription = "Lock device",
+                            )
+                        }
+                    }
+                    if (device.canFlash == true) {
+                        ElevatedButton(
+                            onClick = {
+                                viewModel.flashDevice(device.id)
+                            },
+                            modifier = Modifier
+                                .height(48.dp)
+                                .width(48.dp),
+                            contentPadding = PaddingValues(0.dp),
+                        ) {
+                            Icon(
+                                imageVector = Icons.Outlined.FlashlightOn,
+                                contentDescription = "Flash device",
                             )
                         }
                     }

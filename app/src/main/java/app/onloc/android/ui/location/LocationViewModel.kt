@@ -154,6 +154,13 @@ class LocationViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
+    fun flashDevice(id: Int) {
+        val ip = storedIp ?: return
+        viewModelScope.launch {
+            DevicesApiService(context, ip).flashDevice(id)
+        }
+    }
+
     fun selectDevice(id: Int?) {
         val previousId = _selectedDeviceId.value
 

@@ -35,6 +35,9 @@ data class Device(
     @SerialName("can_lock")
     val canLock: Boolean?,
 
+    @SerialName("can_flash")
+    val canFlash: Boolean?,
+
     val icon: String?,
 
     @SerialName("latest_location")

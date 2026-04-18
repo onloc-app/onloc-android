@@ -43,10 +43,12 @@ import app.onloc.android.singletons.RingerState
 import app.onloc.android.ui.ringer.RingerActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.json.JSONObject
+import kotlin.time.Duration.Companion.milliseconds
 
 private const val CHANNEL_ID = "ringer_websocket_channel"
 const val START_RINGER_WEBSOCKET_SERVICE_NOTIFICATION_ID = 2001
@@ -76,6 +78,8 @@ class WebSocketService : Service() {
     private val locationsChangeEvent = "locations-change"
 
     private val watchdogScope = CoroutineScope(Dispatchers.IO)
+    private val flashScope = CoroutineScope(Dispatchers.IO)
+    private var flashJob: Job? = null
 
     private val deviceEncryptedPreferences by lazy {
         createDeviceProtectedStorageContext()
@@ -208,12 +212,13 @@ class WebSocketService : Service() {
         SocketManager.on(flashCommandEvent) { _ ->
             val cameraManager = getSystemService(CAMERA_SERVICE) as CameraManager
             val cameraId = cameraManager.cameraIdList[0]
-            watchdogScope.launch {
+            flashJob?.cancel()
+            flashJob = flashScope.launch {
                 repeat(FLASH_REPEAT_COUNT) {
                     cameraManager.setTorchMode(cameraId, true)
-                    delay(FLASH_DELAY)
+                    delay(FLASH_DELAY.milliseconds)
                     cameraManager.setTorchMode(cameraId, false)
-                    delay(FLASH_DELAY)
+                    delay(FLASH_DELAY.milliseconds)
                 }
             }
         }
@@ -232,7 +237,7 @@ class WebSocketService : Service() {
     private fun startWatchdog() {
         watchdogScope.launch {
             while (true) {
-                delay(WATCHDOG_DELAY)
+                delay(WATCHDOG_DELAY.milliseconds)
                 if (!SocketManager.isConnected()) {
                     connectSocket()
                 }

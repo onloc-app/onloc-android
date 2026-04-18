@@ -64,4 +64,13 @@ class DevicesApiService(context: Context, ip: String) {
             return Result.failure(e)
         }
     }
+
+    suspend fun flashDevice(id: Int): Result<Unit> {
+        try {
+            api.client.post("$ENDPOINT/${id}/flash")
+            return Result.success(Unit)
+        } catch (e: Exception) {
+            return Result.failure(e)
+        }
+    }
 }
