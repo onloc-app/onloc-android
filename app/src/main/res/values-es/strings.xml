@@ -8,18 +8,22 @@
     <string name="main_interval_slider_realtime_label">Utilice actualizaciones en tiempo real</string>
     <plurals name="interval_picker_seconds">
         <item quantity="one">Segundo</item>
+        <item quantity="many">Segundos</item>
         <item quantity="other">Segundos</item>
     </plurals>
     <plurals name="interval_picker_minutes">
         <item quantity="one">Minuto</item>
+        <item quantity="many">Minutos</item>
         <item quantity="other">Minutos</item>
     </plurals>
     <plurals name="interval_picker_hours">
         <item quantity="one">Hora</item>
+        <item quantity="many">Horas</item>
         <item quantity="other">Horas</item>
     </plurals>
     <plurals name="interval_picker_days">
         <item quantity="one">Día</item>
+        <item quantity="many">Días</item>
         <item quantity="other">Días</item>
     </plurals>
     <string name="offline_title">Se perdió la conexión con el servidor</string>
