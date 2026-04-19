@@ -1,0 +1,4 @@
+New feature:
+
+- Flash: when the app receives a flash command from the server, your phone will flash its flashlight to help you
+find it in case it's lost.
