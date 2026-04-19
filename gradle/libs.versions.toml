@@ -24,7 +24,7 @@ workRuntimeKtx = "2.11.2"
 material3 = "1.4.0"
 ktor = "3.4.2"
 kotlinSerialization = "2.3.20"
-locationclient = "1.0.0"
+locationclient = "1.0.2"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
