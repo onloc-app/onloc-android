@@ -22,7 +22,7 @@ import android.content.pm.PackageManager.PERMISSION_GRANTED
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 
-const val LOCATION_REQUEST_CODE = 1
+private const val LOCATION_REQUEST_CODE = 1
 
 class LocationPermission : Permission {
     fun isForegroundGranted(context: Context): Boolean {

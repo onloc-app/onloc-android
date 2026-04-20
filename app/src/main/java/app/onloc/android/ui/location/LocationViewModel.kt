@@ -217,8 +217,7 @@ class LocationViewModel(application: Application) : AndroidViewModel(application
 
     fun logout() {
         viewModelScope.launch {
-            ServiceManager.stopLocationService(context)
-            ServiceManager.stopWebSocketService(context)
+            ServiceManager.stopAllServices(context)
 
             val credentials = userPreferences.getUserCredentials()
             val ip = storedIp

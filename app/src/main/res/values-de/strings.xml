@@ -60,7 +60,7 @@
     <string name="service_location_stop_notification_title">Standortdienst Gestoppt</string>
     <string name="service_location_stop_notification_description">Der Standortdienst wurde gestoppt</string>
     <string name="service_location_enable_gps">GPS muss aktiviert sein</string>
-    <string name="service_websocket_channel_name">Klingelton-WebSocket-Dienst</string>
+    <string name="service_websocket_channel_name"></string>
     <string name="service_websocket_start_notification_title">Auf Befehle warten</string>
     <string name="service_websocket_start_notification_description">Das Gerät reagiert auf Befehle</string>
     <string name="service_ringer_channel_name">Klingelton</string>

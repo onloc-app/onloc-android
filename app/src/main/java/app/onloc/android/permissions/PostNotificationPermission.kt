@@ -23,7 +23,7 @@ import android.os.Build
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 
-const val NOTIFICATION_REQUEST_CODE = 0
+private const val NOTIFICATION_REQUEST_CODE = 0
 
 class PostNotificationPermission : Permission {
     override fun isGranted(context: Context): Boolean {
@@ -34,7 +34,6 @@ class PostNotificationPermission : Permission {
         } else {
             true
         }
-
     }
 
     override fun request(activity: Activity) {

@@ -180,7 +180,6 @@ fun Permissions(
                 name = stringResource(R.string.permissions_admin_label),
                 isGranted = adminGranted,
                 onGrantClick = {
-                    println("testing adming")
                     AdminPermission().request(context)
                     adminGranted = AdminPermission().isGranted(context)
                     onPermissionsChange()

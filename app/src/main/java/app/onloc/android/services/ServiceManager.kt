@@ -52,4 +52,9 @@ object ServiceManager {
         val intent = Intent(context, WebSocketService::class.java)
         context.stopService(intent)
     }
+
+    fun stopAllServices(context: Context) {
+        stopLocationService(context)
+        stopWebSocketService(context)
+    }
 }

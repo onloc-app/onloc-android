@@ -85,7 +85,7 @@
     </string>
     <string name="service_location_enable_gps">GPS needs to be enabled</string>
 
-    <string name="service_websocket_channel_name">Ringer WebSocket Service</string>
+    <string name="service_websocket_channel_name">WebSocket Service</string>
     <string name="service_websocket_start_notification_title">Listening for commands</string>
     <string name="service_websocket_start_notification_description">The device will respond to commands</string>
 

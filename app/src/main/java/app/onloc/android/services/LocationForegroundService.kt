@@ -126,18 +126,6 @@ class LocationForegroundService : Service() {
         }
     }
 
-    private fun startForegroundService() {
-        if (
-            ActivityCompat.checkSelfPermission(
-                applicationContext,
-                Manifest.permission.POST_NOTIFICATIONS
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            return
-        }
-        startForeground(START_LOCATION_SERVICE_NOTIFICATION_ID, createStartForegroundNotification())
-    }
-
     private fun stopForegroundService() {
         stopForeground(STOP_FOREGROUND_DETACH)
         stopSelf()
@@ -146,7 +134,7 @@ class LocationForegroundService : Service() {
     override fun onCreate() {
         super.onCreate()
         requestLocation()
-        startForegroundService()
+        startForeground(START_LOCATION_SERVICE_NOTIFICATION_ID, createStartForegroundNotification())
     }
 
     override fun onDestroy() {

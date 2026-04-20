@@ -15,20 +15,17 @@
 
 package app.onloc.android.services
 
-import android.Manifest
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
 import android.app.admin.DevicePolicyManager
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.hardware.camera2.CameraManager
 import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkRequest
 import android.os.IBinder
-import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import app.onloc.android.R
 import app.onloc.android.helpers.getAccessToken
@@ -50,11 +47,12 @@ import kotlinx.coroutines.launch
 import org.json.JSONObject
 import kotlin.time.Duration.Companion.milliseconds
 
-private const val CHANNEL_ID = "ringer_websocket_channel"
-const val START_RINGER_WEBSOCKET_SERVICE_NOTIFICATION_ID = 2001
+
+private const val CHANNEL_ID = "websocket_channel"
+private const val START_WEBSOCKET_SERVICE_NOTIFICATION_ID = 2001
 
 private const val LOCK_SCREEN_CHANNEL_ID = "lock_screen_channel"
-const val LOCK_SCREEN_NOTIFICATION_ID = 9999
+private const val LOCK_SCREEN_NOTIFICATION_ID = 9999
 
 private const val WATCHDOG_DELAY = 30000L
 
@@ -89,15 +87,7 @@ class WebSocketService : Service() {
     override fun onCreate() {
         super.onCreate()
 
-        if (
-            ActivityCompat.checkSelfPermission(
-                applicationContext,
-                Manifest.permission.POST_NOTIFICATIONS
-            ) == PackageManager.PERMISSION_GRANTED
-        ) {
-            val notification = createNotification()
-            startForeground(START_RINGER_WEBSOCKET_SERVICE_NOTIFICATION_ID, notification)
-        }
+        startForeground(START_WEBSOCKET_SERVICE_NOTIFICATION_ID, createNotification())
 
         // Watches reconnection to the internet
         connectivityManager = getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager
@@ -248,7 +238,7 @@ class WebSocketService : Service() {
     private fun createNotification(): Notification {
         val channelId = CHANNEL_ID
         val channelName = getString(R.string.service_websocket_channel_name)
-        val channel = NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_LOW)
+        val channel = NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_MIN)
 
         val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.createNotificationChannel(channel)

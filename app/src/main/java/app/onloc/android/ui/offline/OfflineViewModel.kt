@@ -55,8 +55,7 @@ class OfflineViewModel(application: Application) : AndroidViewModel(application)
 
     fun logout() {
         viewModelScope.launch {
-            ServiceManager.stopLocationService(context)
-            ServiceManager.stopWebSocketService(context)
+            ServiceManager.stopAllServices(context)
 
             userPreferences.deleteUserCredentials()
             appPreferences.deleteDeviceId()
