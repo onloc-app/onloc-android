@@ -71,4 +71,5 @@
     <string name="permissions_overlay_label">Über anderen Apps anzeigen</string>
     <string name="permissions_ring_header">Klingeln</string>
     <string name="permissions_ring_description">Die App wartet auf Befehle durch den Server und klingelt, wenn sie darum gebeten wird.</string>
+    <string name="service_websocket_channel_name">WebSocket-Dienst</string>
 </resources>

@@ -87,4 +87,5 @@
     </string>
     <string name="service_websocket_lock_screen_notification_title">Information</string>
     <string name="offline_title">La connexion au serveur a été perdue</string>
+    <string name="service_websocket_channel_name">Service de WebSocket</string>
 </resources>

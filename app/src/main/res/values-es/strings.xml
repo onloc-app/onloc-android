@@ -75,4 +75,5 @@
     <string name="main_device_button_label">Seleccione un dispositivo</string>
     <string name="avatar_dialog_title">Cuenta</string>
     <string name="avatar_logout_button_label">Cerrar sesión</string>
+    <string name="service_websocket_channel_name">Servicio WebSocket</string>
 </resources>
