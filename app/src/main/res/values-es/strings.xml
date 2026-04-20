@@ -48,7 +48,6 @@
     <string name="service_location_stop_notification_title">Servicio de ubicación detenido</string>
     <string name="service_location_stop_notification_description">Se ha detenido el servicio de localización</string>
     <string name="service_location_enable_gps">Es necesario activar el GPS</string>
-    <string name="service_websocket_channel_name"></string>
     <string name="service_websocket_start_notification_title">Escuchando órdenes</string>
     <string name="service_websocket_start_notification_description">El dispositivo responderá a los comandos</string>
     <string name="service_ringer_channel_name">Anillo</string>

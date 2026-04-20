@@ -47,7 +47,6 @@
         <item quantity="many">Jours</item>
         <item quantity="other">Jours</item>
     </plurals>
-
     <!-- Permissions -->
     <string name="offline_retry_button_label">Réessayer</string>
     <string name="offline_logout_button_label">Se déconnecter</string>
@@ -67,7 +66,6 @@
     </string>
     <string name="permissions_grant_button_label">Accorder</string>
     <string name="permissions_granted_button_label">Accordé</string>
-
     <!-- Services -->
     <string name="service_location_channel_name">Service de localisation</string>
     <string name="service_location_start_notification_title">Service de localisation démarré</string>
@@ -76,12 +74,9 @@
     <string name="service_location_stop_notification_description">
         Le service de suivi de localisation a été arrêté
     </string>
-
     <string name="service_location_enable_gps">Le GPS doit être activé</string>
-    <string name="service_websocket_channel_name"></string>
     <string name="service_websocket_start_notification_title">À l\'écoute des commandes</string>
     <string name="service_websocket_start_notification_description">L’appareil répondra aux commandes</string>
-
     <string name="service_ringer_channel_name">Sonnerie</string>
     <string name="service_ringer_start_notification_title">Sonnerie en cours…</string>
     <string name="service_ringer_start_notification_description">L\'appareil est en train de sonner</string>
