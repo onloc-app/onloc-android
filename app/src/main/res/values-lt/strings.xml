@@ -1,3 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="app_name">Onloc</string>
+    <string name="login_username_field_label">Naudotojo vardas</string>
+    <string name="login_password_field_label">Slaptažodis</string>
+    <string name="login_ip_field_label">Serverio URL</string>
+    <string name="login_title">Onloc</string>
+    <string name="login_error_server">Serverio klaida (%1$d)</string>
+    <string name="main_title">Onloc</string>
+    <string name="avatar_dialog_title">Paskyra</string>
+    <string name="avatar_close_button_description">Užverti</string>
+    <string name="main_settings_header">Nustatymai</string>
+    <string name="offline_title">Ryšys su serveriu nutrūko</string>
+    <string name="offline_retry_button_label">Bandyti iš naujo</string>
+    <string name="offline_logout_button_label">Atsijungti</string>
+    <string name="service_websocket_lock_screen_notification_title">Informacija</string>
 </resources>
