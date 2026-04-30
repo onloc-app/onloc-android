@@ -33,23 +33,23 @@ data class Location(
 
     val latitude: Double,
     val longitude: Double,
-    val bearing: Float?,
+    val bearing: Float? = null,
 
     @SerialName("bearing_accuracy_degrees")
-    val bearingAccuracyDegrees: Float?,
+    val bearingAccuracyDegrees: Float? = null,
 
-    val speed: Float?,
+    val speed: Float? = null,
 
     @SerialName("speed_accuracy")
-    val speedAccuracy: Float?,
+    val speedAccuracy: Float? = null,
 
-    var battery: Int?,
+    var battery: Int? = null,
 
     @SerialName("created_at")
-    val createdAt: String?,
+    val createdAt: String? = null,
 
     @SerialName("updated_at")
-    val updatedAt: String?
+    val updatedAt: String? = null,
 ) {
     companion object {
         fun fromAndroidLocation(id: Int, deviceId: Int, location: android.location.Location): Location {
