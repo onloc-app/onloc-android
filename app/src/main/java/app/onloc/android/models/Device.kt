@@ -27,27 +27,27 @@ data class Device(
 
     val name: String,
 
-    val color: String?,
+    val color: String? = null,
 
     @SerialName("can_ring")
-    val canRing: Boolean?,
+    val canRing: Boolean? = null,
 
     @SerialName("can_lock")
-    val canLock: Boolean?,
+    val canLock: Boolean? = null,
 
     @SerialName("can_flash")
-    val canFlash: Boolean?,
+    val canFlash: Boolean? = null,
 
-    val icon: String?,
+    val icon: String? = null,
 
     @SerialName("latest_location")
-    val latestLocation: Location?,
+    val latestLocation: Location? = null,
 
     @SerialName("created_at")
-    val createdAt: String?,
+    val createdAt: String? = null,
 
     @SerialName("updated_at")
-    val updatedAt: String?,
+    val updatedAt: String? = null,
 
     @SerialName("device_share")
     val deviceShare: DeviceShare? = null,
