@@ -1,0 +1,1 @@
+Adds Lithuanian translation and a fix for devices not showing up in the selection sheet.
