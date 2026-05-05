@@ -113,6 +113,7 @@ fun IntervalPicker(
                         Text(pluralStringResource(timeStep.pluralResId, value / selectedOption.multiplier))
                     },
                     enabled = enabled && !realTime,
+                    icon = {},
                 )
             }
         }

@@ -150,7 +150,6 @@ fun LocationScreen(viewModel: LocationViewModel, modifier: Modifier = Modifier) 
     val realTime by viewModel.realTime.collectAsStateWithLifecycle()
     val isAuthenticated by AuthStateManager.isAuthenticated.collectAsStateWithLifecycle()
 
-    val defaultPadding = 16.dp
     val ip by rememberSaveable { mutableStateOf(viewModel.storedIp) }
     var deviceSelectorOpened by rememberSaveable { mutableStateOf(false) }
     var settingsDialogOpened by rememberSaveable { mutableStateOf(false) }
