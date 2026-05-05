@@ -16,8 +16,6 @@
 package app.onloc.android.services
 
 import android.Manifest
-import android.app.Notification
-import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
 import android.content.Intent
@@ -26,9 +24,12 @@ import android.location.Location
 import android.os.BatteryManager
 import android.os.IBinder
 import androidx.core.app.ActivityCompat
-import androidx.core.app.NotificationCompat
 import app.onloc.android.R
 import app.onloc.android.api.locations.LocationsApiService
+import app.onloc.android.helpers.NotificationFactory.createStartLocationServiceNotification
+import app.onloc.android.helpers.NotificationFactory.createStopLocationServiceNotification
+import app.onloc.android.helpers.START_LOCATION_SERVICE_NOTIFICATION_ID
+import app.onloc.android.helpers.STOP_LOCATION_SERVICE_NOTIFICATION_ID
 import app.onloc.android.helpers.getIP
 import app.onloc.android.helpers.getInterval
 import app.onloc.android.helpers.getRealTime
@@ -40,10 +41,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 
-private const val CHANNEL_ID = "location_channel"
 private const val SECOND = 1000L
-const val START_LOCATION_SERVICE_NOTIFICATION_ID = 1001
-const val STOP_LOCATION_SERVICE_NOTIFICATION_ID = 1002
 
 private const val REAL_TIME_MIN_DISTANCE = 12f
 private const val ACCEPTABLE_ACCURACY = 500f
@@ -134,7 +132,10 @@ class LocationForegroundService : Service() {
     override fun onCreate() {
         super.onCreate()
         requestLocation()
-        startForeground(START_LOCATION_SERVICE_NOTIFICATION_ID, createStartForegroundNotification())
+        startForeground(
+            START_LOCATION_SERVICE_NOTIFICATION_ID,
+            createStartLocationServiceNotification(this),
+        )
     }
 
     override fun onDestroy() {
@@ -149,49 +150,8 @@ class LocationForegroundService : Service() {
             getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.notify(
             STOP_LOCATION_SERVICE_NOTIFICATION_ID,
-            createStopForegroundNotification()
+            createStopLocationServiceNotification(this)
         )
-    }
-
-    /**
-     * Creates the notification sent when the service starts.
-     */
-    private fun createStartForegroundNotification(): Notification {
-        val channelId = CHANNEL_ID
-        val channelName = getString(R.string.service_location_channel_name)
-        val channel =
-            NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_LOW)
-
-        val notificationManager =
-            getSystemService(NOTIFICATION_SERVICE) as NotificationManager
-        notificationManager.createNotificationChannel(channel)
-
-        return NotificationCompat.Builder(this, channelId)
-            .setContentTitle(getString(R.string.service_location_start_notification_title))
-            .setContentText(getString(R.string.service_location_start_notification_description))
-            .setSmallIcon(android.R.drawable.ic_menu_mylocation)
-            .build()
-    }
-
-    /**
-     * Creates the notification sent when the service stops.
-     */
-    private fun createStopForegroundNotification(): Notification {
-        val channelId = CHANNEL_ID
-        val channelName = getString(R.string.service_location_channel_name)
-        val channel =
-            NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_HIGH)
-
-        val notificationManager =
-            getSystemService(NOTIFICATION_SERVICE) as NotificationManager
-        notificationManager.createNotificationChannel(channel)
-
-        return NotificationCompat.Builder(this, channelId)
-            .setSmallIcon(android.R.drawable.ic_dialog_alert)
-            .setContentTitle(getString(R.string.service_location_stop_notification_title))
-            .setContentText(getString(R.string.service_location_stop_notification_description))
-            .setPriority(NotificationCompat.PRIORITY_HIGH)
-            .build()
     }
 
     override fun onBind(intent: Intent?): IBinder? = null

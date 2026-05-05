@@ -15,7 +15,6 @@
 
 package app.onloc.android.services
 
-import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
@@ -26,8 +25,11 @@ import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkRequest
 import android.os.IBinder
-import androidx.core.app.NotificationCompat
-import app.onloc.android.R
+import app.onloc.android.helpers.LOCK_SCREEN_CHANNEL_ID
+import app.onloc.android.helpers.LOCK_SCREEN_NOTIFICATION_ID
+import app.onloc.android.helpers.NotificationFactory.createLockScreenNotification
+import app.onloc.android.helpers.NotificationFactory.createStartWebSocketServiceNotification
+import app.onloc.android.helpers.START_WEBSOCKET_SERVICE_NOTIFICATION_ID
 import app.onloc.android.helpers.getAccessToken
 import app.onloc.android.helpers.getIP
 import app.onloc.android.helpers.getSelectedDeviceId
@@ -46,13 +48,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.json.JSONObject
 import kotlin.time.Duration.Companion.milliseconds
-
-
-private const val CHANNEL_ID = "websocket_channel"
-private const val START_WEBSOCKET_SERVICE_NOTIFICATION_ID = 2001
-
-private const val LOCK_SCREEN_CHANNEL_ID = "lock_screen_channel"
-private const val LOCK_SCREEN_NOTIFICATION_ID = 9999
 
 private const val WATCHDOG_DELAY = 30000L
 
@@ -87,7 +82,10 @@ class WebSocketService : Service() {
     override fun onCreate() {
         super.onCreate()
 
-        startForeground(START_WEBSOCKET_SERVICE_NOTIFICATION_ID, createNotification())
+        startForeground(
+            START_WEBSOCKET_SERVICE_NOTIFICATION_ID,
+            createStartWebSocketServiceNotification(this),
+        )
 
         // Watches reconnection to the internet
         connectivityManager = getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager
@@ -110,6 +108,9 @@ class WebSocketService : Service() {
         startWatchdog()
     }
 
+    /**
+     * Connects to the server via WebSockets and attach listeners to react to commands.
+     */
     private fun connectSocket() {
         connectivityManager.activeNetwork ?: return
 
@@ -175,22 +176,13 @@ class WebSocketService : Service() {
                             "Lock Screen Info",
                             NotificationManager.IMPORTANCE_HIGH,
                         )
-
-                        val lockNotification = NotificationCompat.Builder(
-                            this,
-                            LOCK_SCREEN_CHANNEL_ID
-                        )
-                            .setSmallIcon(android.R.drawable.ic_menu_info_details)
-                            .setContentTitle(getString(R.string.service_websocket_lock_screen_notification_title))
-                            .setContentText(message)
-                            .setPriority(NotificationCompat.PRIORITY_HIGH)
-                            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-                            .setOngoing(true)
-                            .build()
                         val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
 
                         notificationManager.createNotificationChannel(lockChannel)
-                        notificationManager.notify(LOCK_SCREEN_NOTIFICATION_ID, lockNotification)
+                        notificationManager.notify(
+                            LOCK_SCREEN_NOTIFICATION_ID,
+                            createLockScreenNotification(this, message),
+                        )
                     }
                 }
                 val devicePolicyManager = getSystemService(DEVICE_POLICY_SERVICE) as DevicePolicyManager
@@ -204,11 +196,15 @@ class WebSocketService : Service() {
             val cameraId = cameraManager.cameraIdList[0]
             flashJob?.cancel()
             flashJob = flashScope.launch {
-                repeat(FLASH_REPEAT_COUNT) {
-                    cameraManager.setTorchMode(cameraId, true)
-                    delay(FLASH_DELAY.milliseconds)
-                    cameraManager.setTorchMode(cameraId, false)
-                    delay(FLASH_DELAY.milliseconds)
+                try {
+                    repeat(FLASH_REPEAT_COUNT) {
+                        cameraManager.setTorchMode(cameraId, true)
+                        delay(FLASH_DELAY.milliseconds)
+                        cameraManager.setTorchMode(cameraId, false)
+                        delay(FLASH_DELAY.milliseconds)
+                    }
+                } catch (e: IllegalArgumentException) {
+                    e.printStackTrace()
                 }
             }
         }
@@ -224,6 +220,9 @@ class WebSocketService : Service() {
         }
     }
 
+    /**
+     * Starts a loop that makes sure the socket is always alive and connected.
+     */
     private fun startWatchdog() {
         watchdogScope.launch {
             while (true) {
@@ -233,22 +232,6 @@ class WebSocketService : Service() {
                 }
             }
         }
-    }
-
-    private fun createNotification(): Notification {
-        val channelId = CHANNEL_ID
-        val channelName = getString(R.string.service_websocket_channel_name)
-        val channel = NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_MIN)
-
-        val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
-        notificationManager.createNotificationChannel(channel)
-
-        return NotificationCompat.Builder(this, channelId)
-            .setContentTitle(getString(R.string.service_websocket_start_notification_title))
-            .setContentText(getString(R.string.service_websocket_start_notification_description))
-            .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
-            .setPriority(NotificationCompat.PRIORITY_HIGH)
-            .build()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
