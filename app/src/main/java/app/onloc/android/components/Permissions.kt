@@ -15,7 +15,7 @@
 
 package app.onloc.android.components
 
-import android.app.Activity
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -62,7 +62,7 @@ fun Permissions(
     onPermissionsChange: () -> Unit = {},
 ) {
     val context = LocalContext.current
-    val activity = context as Activity
+    val activity = LocalActivity.current
     val lifecycleOwner = LocalLifecycleOwner.current
 
     var notificationsGranted by remember { mutableStateOf(PostNotificationPermission().isGranted(context)) }
@@ -92,99 +92,101 @@ fun Permissions(
         }
     }
 
-    Column(
-        modifier = modifier.fillMaxWidth(),
-    ) {
-        Text(
-            text = stringResource(R.string.permissions_header),
-            style = MaterialTheme.typography.titleLarge,
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-
-        FeatureCard(
-            name = stringResource(R.string.permissions_background_location_header),
-            description = stringResource(R.string.permissions_background_location_description),
-            isGranted = notificationsGranted && locationGranted,
+    if (activity != null) {
+        Column(
+            modifier = modifier.fillMaxWidth(),
         ) {
-            PermissionCard(
-                name = stringResource(R.string.permissions_notifications_label),
-                isGranted = notificationsGranted,
-                onGrantClick = {
-                    PostNotificationPermission().request(activity)
-                    notificationsGranted = PostNotificationPermission().isGranted(context)
-                    onPermissionsChange()
-                },
+            Text(
+                text = stringResource(R.string.permissions_header),
+                style = MaterialTheme.typography.titleLarge,
             )
-            PermissionCard(
-                name = stringResource(R.string.permissions_location_label),
-                isGranted = locationGranted,
-                onGrantClick = {
-                    LocationPermission().request(activity)
-                    locationGranted = LocationPermission().isGranted(context)
-                    onPermissionsChange()
-                },
-            )
-        }
+            Spacer(modifier = Modifier.height(16.dp))
 
-        FeatureCard(
-            name = stringResource(R.string.permissions_ring_header),
-            description = stringResource(R.string.permissions_ring_description),
-            isGranted = notificationsGranted && doNotDisturbGranted && overlayGranted,
-            onGrant = { ServiceManager.startWebSocketServiceIfAllowed(context) },
-        ) {
-            PermissionCard(
-                name = stringResource(R.string.permissions_notifications_label),
-                isGranted = notificationsGranted,
-                onGrantClick = {
-                    PostNotificationPermission().request(activity)
-                    notificationsGranted = PostNotificationPermission().isGranted(context)
-                    onPermissionsChange()
-                },
-            )
-            PermissionCard(
-                name = stringResource(R.string.permissions_do_not_disturb_label),
-                isGranted = doNotDisturbGranted,
-                onGrantClick = {
-                    DoNotDisturbPermission().request(context)
-                    doNotDisturbGranted = DoNotDisturbPermission().isGranted(context)
-                    onPermissionsChange()
-                },
-            )
-            PermissionCard(
-                name = stringResource(R.string.permissions_overlay_label),
-                isGranted = overlayGranted,
-                onGrantClick = {
-                    OverlayPermission().request(activity)
-                    overlayGranted = OverlayPermission().isGranted(context)
-                    onPermissionsChange()
-                },
-            )
-        }
+            FeatureCard(
+                name = stringResource(R.string.permissions_background_location_header),
+                description = stringResource(R.string.permissions_background_location_description),
+                isGranted = notificationsGranted && locationGranted,
+            ) {
+                PermissionCard(
+                    name = stringResource(R.string.permissions_notifications_label),
+                    isGranted = notificationsGranted,
+                    onGrantClick = {
+                        PostNotificationPermission().request(activity)
+                        notificationsGranted = PostNotificationPermission().isGranted(context)
+                        onPermissionsChange()
+                    },
+                )
+                PermissionCard(
+                    name = stringResource(R.string.permissions_location_label),
+                    isGranted = locationGranted,
+                    onGrantClick = {
+                        LocationPermission().request(activity)
+                        locationGranted = LocationPermission().isGranted(context)
+                        onPermissionsChange()
+                    },
+                )
+            }
 
-        FeatureCard(
-            name = stringResource(R.string.permissions_lock_header),
-            description = stringResource(R.string.permissions_lock_description),
-            isGranted = notificationsGranted && adminGranted,
-            onGrant = { ServiceManager.startWebSocketServiceIfAllowed(context) },
-        ) {
-            PermissionCard(
-            name = stringResource(R.string.permissions_notifications_label),
-            isGranted = notificationsGranted,
-            onGrantClick = {
-                PostNotificationPermission().request(activity)
-                notificationsGranted = PostNotificationPermission().isGranted(context)
-                onPermissionsChange()
-            },
-        )
-            PermissionCard(
-                name = stringResource(R.string.permissions_admin_label),
-                isGranted = adminGranted,
-                onGrantClick = {
-                    AdminPermission().request(context)
-                    adminGranted = AdminPermission().isGranted(context)
-                    onPermissionsChange()
-                },
-            )
+            FeatureCard(
+                name = stringResource(R.string.permissions_ring_header),
+                description = stringResource(R.string.permissions_ring_description),
+                isGranted = notificationsGranted && doNotDisturbGranted && overlayGranted,
+                onGrant = { ServiceManager.startWebSocketServiceIfAllowed(context) },
+            ) {
+                PermissionCard(
+                    name = stringResource(R.string.permissions_notifications_label),
+                    isGranted = notificationsGranted,
+                    onGrantClick = {
+                        PostNotificationPermission().request(activity)
+                        notificationsGranted = PostNotificationPermission().isGranted(context)
+                        onPermissionsChange()
+                    },
+                )
+                PermissionCard(
+                    name = stringResource(R.string.permissions_do_not_disturb_label),
+                    isGranted = doNotDisturbGranted,
+                    onGrantClick = {
+                        DoNotDisturbPermission().request(activity)
+                        doNotDisturbGranted = DoNotDisturbPermission().isGranted(context)
+                        onPermissionsChange()
+                    },
+                )
+                PermissionCard(
+                    name = stringResource(R.string.permissions_overlay_label),
+                    isGranted = overlayGranted,
+                    onGrantClick = {
+                        OverlayPermission().request(activity)
+                        overlayGranted = OverlayPermission().isGranted(context)
+                        onPermissionsChange()
+                    },
+                )
+            }
+
+            FeatureCard(
+                name = stringResource(R.string.permissions_lock_header),
+                description = stringResource(R.string.permissions_lock_description),
+                isGranted = notificationsGranted && adminGranted,
+                onGrant = { ServiceManager.startWebSocketServiceIfAllowed(context) },
+            ) {
+                PermissionCard(
+                    name = stringResource(R.string.permissions_notifications_label),
+                    isGranted = notificationsGranted,
+                    onGrantClick = {
+                        PostNotificationPermission().request(activity)
+                        notificationsGranted = PostNotificationPermission().isGranted(context)
+                        onPermissionsChange()
+                    },
+                )
+                PermissionCard(
+                    name = stringResource(R.string.permissions_admin_label),
+                    isGranted = adminGranted,
+                    onGrantClick = {
+                        AdminPermission().request(activity)
+                        adminGranted = AdminPermission().isGranted(context)
+                        onPermissionsChange()
+                    },
+                )
+            }
         }
     }
 }

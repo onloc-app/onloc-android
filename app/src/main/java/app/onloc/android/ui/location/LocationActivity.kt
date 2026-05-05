@@ -35,8 +35,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.FitScreen
 import androidx.compose.material.icons.outlined.FlashlightOn
@@ -47,13 +50,16 @@ import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.Remove
 import androidx.compose.material.icons.outlined.RingVolume
 import androidx.compose.material.icons.outlined.Route
-import androidx.compose.material3.BottomSheetScaffold
+import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -74,6 +80,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.zIndex
 import androidx.core.net.toUri
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.onloc.android.components.Avatar
@@ -143,7 +152,8 @@ fun LocationScreen(viewModel: LocationViewModel, modifier: Modifier = Modifier) 
 
     val defaultPadding = 16.dp
     val ip by rememberSaveable { mutableStateOf(viewModel.storedIp) }
-    var showBottomSheet by rememberSaveable { mutableStateOf(false) }
+    var deviceSelectorOpened by rememberSaveable { mutableStateOf(false) }
+    var settingsDialogOpened by rememberSaveable { mutableStateOf(false) }
     var onCurrentLocation by remember { mutableStateOf(false) }
     var focusedDevice by remember { mutableStateOf<Device?>(null) }
     var notificationGranted by remember { mutableStateOf(PostNotificationPermission().isGranted(context)) }
@@ -260,7 +270,7 @@ fun LocationScreen(viewModel: LocationViewModel, modifier: Modifier = Modifier) 
 
     val variant = if (isSystemInDarkTheme()) "dark" else "light"
 
-    BottomSheetScaffold(
+    Scaffold(
         modifier = modifier,
         topBar = {
             TopAppBar(
@@ -271,7 +281,7 @@ fun LocationScreen(viewModel: LocationViewModel, modifier: Modifier = Modifier) 
                 ),
                 actions = {
                     TextButton(
-                        onClick = { showBottomSheet = true },
+                        onClick = { deviceSelectorOpened = true },
                         enabled = !isLocationServiceRunning,
                     ) {
                         if (selectedDevice == null) {
@@ -279,6 +289,14 @@ fun LocationScreen(viewModel: LocationViewModel, modifier: Modifier = Modifier) 
                         } else {
                             Text(selectedDevice!!.name)
                         }
+                    }
+                    IconButton(
+                        onClick = { settingsDialogOpened = true },
+                    ) {
+                        Icon(
+                            imageVector = if (settingsDialogOpened) Icons.Filled.Settings else Icons.Outlined.Settings,
+                            contentDescription = "Open settings"
+                        )
                     }
                     Avatar(
                         user = viewModel.user,
@@ -295,339 +313,310 @@ fun LocationScreen(viewModel: LocationViewModel, modifier: Modifier = Modifier) 
                 }
             )
         },
-        sheetContent = {
-            val scrollState = rememberScrollState()
-            Column(
+    ) { defaultPadding ->
+        Box(Modifier.padding(defaultPadding)) {
+            // Settings dialog
+            if (settingsDialogOpened) {
+                Dialog(
+                    onDismissRequest = { settingsDialogOpened = false },
+                    properties = DialogProperties(usePlatformDefaultWidth = false),
+                ) {
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        shape = RoundedCornerShape(16.dp),
+                    ) {
+                        Box(modifier = Modifier.padding(16.dp)) {
+                            IconButton(
+                                onClick = { settingsDialogOpened = false },
+                                modifier = Modifier
+                                    .align(Alignment.TopEnd)
+                                    .zIndex(1f),
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Filled.Close,
+                                    contentDescription =
+                                        stringResource(R.string.settings_close_button_description),
+                                    tint = MaterialTheme.colorScheme.onSurface
+                                )
+                            }
+
+                            val scrollState = rememberScrollState()
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .verticalScroll(scrollState),
+                                verticalArrangement = Arrangement.spacedBy(16.dp),
+                            ) {
+                                Column {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                                    ) {
+                                        Text(
+                                            text = stringResource(R.string.main_location_service_switch_label),
+                                            style = MaterialTheme.typography.titleMedium,
+                                            color = if (!canStartLocationService)
+                                                MaterialTheme.colorScheme.onBackground else Color.Unspecified,
+                                        )
+                                        Switch(
+                                            checked = isLocationServiceRunning,
+                                            onCheckedChange = {
+                                                if (isLocationServiceRunning) {
+                                                    viewModel.stopLocationService()
+                                                } else {
+                                                    viewModel.startLocationService()
+                                                }
+                                            },
+                                            enabled = canStartLocationService
+                                        )
+                                    }
+
+                                    if (!canStartLocationService) {
+                                        Text(text = serviceStatus, color = MaterialTheme.colorScheme.error)
+                                    }
+                                }
+
+                                Text(
+                                    text = stringResource(R.string.main_settings_header),
+                                    style = MaterialTheme.typography.titleLarge,
+                                )
+
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                ) {
+                                    ElevatedCard(
+                                        elevation = CardDefaults.cardElevation(
+                                            defaultElevation = 6.dp
+                                        ),
+                                        modifier = Modifier.fillMaxWidth(),
+                                        colors = CardDefaults.cardColors(
+                                            MaterialTheme.colorScheme.surfaceContainer
+                                        )
+                                    ) {
+                                        Column(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(16.dp)
+                                        ) {
+                                            Text(
+                                                text = stringResource(R.string.main_interval_slider_label),
+                                            )
+                                            Spacer(modifier = Modifier.height(8.dp))
+                                            IntervalPicker(
+                                                value = locationUpdateInterval ?: DEFAULT_SLIDER_POSITION,
+                                                realTime = realTime,
+                                                onToggleRealTime = { viewModel.setRealTime(it) },
+                                                enabled = !isLocationServiceRunning,
+                                                onChange = { viewModel.setLocationUpdateInterval(it) },
+                                            )
+                                        }
+                                    }
+                                }
+
+                                Permissions(onPermissionsChange = {
+                                    notificationGranted = PostNotificationPermission().isGranted(context)
+                                    locationGranted = LocationPermission().isGranted(context)
+                                })
+                            }
+                        }
+                    }
+                }
+            }
+
+            DeviceSelector(
+                devices = devices,
+                selectedDeviceId = selectedDevice?.id,
+                showBottomSheet = deviceSelectorOpened,
+                onDismissBottomSheet = { deviceSelectorOpened = false }
+            ) { id ->
+                viewModel.selectDevice(id)
+                deviceSelectorOpened = false
+            }
+
+            MaplibreMap(
+                baseStyle = BaseStyle.Uri("asset://map_styles/$variant.json"),
+                modifier = Modifier.fillMaxSize(),
+                options = MapOptions(
+                    ornamentOptions = OrnamentOptions.AllDisabled,
+                    gestureOptions = GestureOptions(isTiltEnabled = false),
+                ),
+                cameraState = cameraState,
+                styleState = styleState,
+            ) {
+                // Display current location
+                currentLocation?.let { currentLocation ->
+                    val longitude = currentLocation.longitude
+                    val latitude = currentLocation.latitude
+                    val accuracy = currentLocation.accuracy.toDouble()
+                    val name = devices.find { it.id == selectedDevice?.id }?.name
+
+                    val canDisplayCurrentLocation = name != null
+
+                    if (canDisplayCurrentLocation) {
+                        LocationPuck(
+                            id = 0,
+                            longitude = longitude,
+                            latitude = latitude,
+                            accuracy = accuracy,
+                            color = MaterialTheme.colorScheme.secondary,
+                            metersPerDp = cameraState.metersPerDpAtTarget,
+                            useCurrentBearing = true,
+                            onClick = { goToCurrentLocation() },
+                        )
+                    }
+                }
+
+                // Display the location of every other device
+                devices
+                    .filter { it.latestLocation != null }
+                    .filterNot { isLocationServiceRunning && selectedDevice?.id == it.id }
+                    .forEach { device ->
+                        device.latestLocation?.let { location ->
+                            LocationPuck(
+                                id = location.id,
+                                location = location,
+                                device = device,
+                                metersPerDp = cameraState.metersPerDpAtTarget,
+                                showCone = cameraState.position.zoom > 9,
+                                onClick = {
+                                    coroutineScope.launch {
+                                        cameraState.animateTo(
+                                            CameraPosition(
+                                                target = Position(
+                                                    location.longitude,
+                                                    location.latitude,
+                                                ),
+                                                zoom = 16.0,
+                                            )
+                                        )
+                                    }
+                                    focusedDevice = device
+                                },
+                                onLongClick = {
+                                    openNavigationApp(location)
+                                },
+                            )
+                        }
+                    }
+
+                // Display the location of shared devices
+                sharedDevices.forEach { device ->
+                    device.latestLocation?.let { location ->
+                        sharedDeviceUsers[device.userId]?.let { user ->
+                            SharedLocationPuck(
+                                id = location.id,
+                                location = location,
+                                device = device,
+                                user = user,
+                                metersPerDp = cameraState.metersPerDpAtTarget,
+                                ip = ip,
+                                showProfilePicture = true,
+                                showCone = true,
+                                onClick = {
+                                    coroutineScope.launch {
+                                        cameraState.animateTo(
+                                            CameraPosition(
+                                                target = Position(
+                                                    location.longitude,
+                                                    location.latitude,
+                                                ),
+                                                zoom = 16.0,
+                                            )
+                                        )
+                                    }
+                                    focusedDevice = device
+                                },
+                                onLongClick = {
+                                    openNavigationApp(location)
+                                },
+                            )
+                        }
+                    }
+                }
+
+                LaunchedEffect(allPositions) {
+                    if (onCurrentLocation) {
+                        goToCurrentLocation()
+                    } else {
+                        fitMapBounds(allPositions)
+                    }
+                }
+            }
+
+            Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .verticalScroll(scrollState)
-                    .padding(defaultPadding),
-                verticalArrangement = Arrangement.spacedBy(defaultPadding),
+                    .padding(16.dp)
+                    .padding(bottom = 48.dp),
             ) {
-                Column {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(defaultPadding),
-                    ) {
-                        Text(
-                            text = stringResource(R.string.main_location_service_switch_label),
-                            style = MaterialTheme.typography.titleMedium,
-                            color = if (!canStartLocationService)
-                                MaterialTheme.colorScheme.onBackground else Color.Unspecified,
-                        )
-                        Switch(
-                            checked = isLocationServiceRunning,
-                            onCheckedChange = {
-                                if (isLocationServiceRunning) {
-                                    viewModel.stopLocationService()
-                                } else {
-                                    viewModel.startLocationService()
-                                }
-                            },
-                            enabled = canStartLocationService
-                        )
-                    }
-
-                    if (!canStartLocationService) {
-                        Text(text = serviceStatus, color = MaterialTheme.colorScheme.error)
-                    }
-                }
-
-                Text(
-                    text = stringResource(R.string.main_settings_header),
-                    style = MaterialTheme.typography.titleLarge,
+                ScaleBar(
+                    metersPerDp = cameraState.metersPerDpAtTarget,
+                    modifier = Modifier.align(Alignment.TopStart),
                 )
 
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                ) {
-                    ElevatedCard(
-                        elevation = CardDefaults.cardElevation(
-                            defaultElevation = 6.dp
-                        ),
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(
-                            MaterialTheme.colorScheme.surfaceContainer
-                        )
-                    ) {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(defaultPadding)
-                        ) {
-                            Text(
-                                text = stringResource(R.string.main_interval_slider_label),
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
-                            IntervalPicker(
-                                value = locationUpdateInterval ?: DEFAULT_SLIDER_POSITION,
-                                realTime = realTime,
-                                onToggleRealTime = { viewModel.setRealTime(it) },
-                                enabled = !isLocationServiceRunning,
-                                onChange = { viewModel.setLocationUpdateInterval(it) },
-                            )
-                        }
-                    }
-                }
-
-                Permissions(onPermissionsChange = {
-                    notificationGranted = PostNotificationPermission().isGranted(context)
-                    locationGranted = LocationPermission().isGranted(context)
-                })
-
-                DeviceSelector(
-                    devices = devices,
-                    selectedDeviceId = selectedDevice?.id,
-                    showBottomSheet = showBottomSheet,
-                    onDismissBottomSheet = { showBottomSheet = false }
-                ) { id ->
-                    viewModel.selectDevice(id)
-                    showBottomSheet = false
-                }
-            }
-        }) {
-        MaplibreMap(
-            baseStyle = BaseStyle.Uri("asset://map_styles/$variant.json"),
-            modifier = Modifier.fillMaxSize(),
-            options = MapOptions(
-                ornamentOptions = OrnamentOptions.AllDisabled,
-                gestureOptions = GestureOptions(isTiltEnabled = false),
-            ),
-            cameraState = cameraState,
-            styleState = styleState,
-        ) {
-            // Display current location
-            currentLocation?.let { currentLocation ->
-                val longitude = currentLocation.longitude
-                val latitude = currentLocation.latitude
-                val accuracy = currentLocation.accuracy.toDouble()
-                val name = devices.find { it.id == selectedDevice?.id }?.name
-
-                val canDisplayCurrentLocation = name != null
-
-                if (canDisplayCurrentLocation) {
-                    LocationPuck(
-                        id = 0,
-                        longitude = longitude,
-                        latitude = latitude,
-                        accuracy = accuracy,
-                        color = MaterialTheme.colorScheme.secondary,
-                        metersPerDp = cameraState.metersPerDpAtTarget,
-                        useCurrentBearing = true,
-                        onClick = { goToCurrentLocation() },
-                    )
-                }
-            }
-
-            // Display the location of every other device
-            devices
-                .filter { it.latestLocation != null }
-                .filterNot { isLocationServiceRunning && selectedDevice?.id == it.id }
-                .forEach { device ->
-                    device.latestLocation?.let { location ->
-                        LocationPuck(
-                            id = location.id,
-                            location = location,
-                            device = device,
-                            metersPerDp = cameraState.metersPerDpAtTarget,
-                            showCone = cameraState.position.zoom > 9,
-                            onClick = {
-                                coroutineScope.launch {
-                                    cameraState.animateTo(
-                                        CameraPosition(
-                                            target = Position(
-                                                location.longitude,
-                                                location.latitude,
-                                            ),
-                                            zoom = 16.0,
-                                        )
-                                    )
-                                }
-                                focusedDevice = device
-                            },
-                            onLongClick = {
-                                openNavigationApp(location)
-                            },
-                        )
-                    }
-                }
-
-            // Display the location of shared devices
-            sharedDevices.forEach { device ->
-                device.latestLocation?.let { location ->
-                    sharedDeviceUsers[device.userId]?.let { user ->
-                        SharedLocationPuck(
-                            id = location.id,
-                            location = location,
-                            device = device,
-                            user = user,
-                            metersPerDp = cameraState.metersPerDpAtTarget,
-                            ip = ip,
-                            showProfilePicture = true,
-                            showCone = true,
-                            onClick = {
-                                coroutineScope.launch {
-                                    cameraState.animateTo(
-                                        CameraPosition(
-                                            target = Position(
-                                                location.longitude,
-                                                location.latitude,
-                                            ),
-                                            zoom = 16.0,
-                                        )
-                                    )
-                                }
-                                focusedDevice = device
-                            },
-                            onLongClick = {
-                                openNavigationApp(location)
-                            },
-                        )
-                    }
-                }
-            }
-
-            LaunchedEffect(allPositions) {
-                if (onCurrentLocation) {
-                    goToCurrentLocation()
-                } else {
-                    fitMapBounds(allPositions)
-                }
-            }
-        }
-
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(defaultPadding)
-                .padding(bottom = 48.dp),
-        ) {
-            ScaleBar(
-                metersPerDp = cameraState.metersPerDpAtTarget,
-                modifier = Modifier.align(Alignment.TopStart),
-            )
-
-            ExpandingAttributionButton(
-                expanded = attributionExpanded,
-                onClick = { attributionExpanded = !attributionExpanded },
-                styleState = styleState,
-                modifier = Modifier
-                    .height(48.dp)
-                    .align(Alignment.BottomEnd),
-                expandedContent = { MapAttribution() },
-            )
-
-            // Top end controls
-            Column(
-                modifier = Modifier.align(Alignment.TopEnd),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                ElevatedButton(
-                    onClick = {
-                        viewModel.grabCurrentLocation()
-                        goToCurrentLocation()
-                    },
+                ExpandingAttributionButton(
+                    expanded = attributionExpanded,
+                    onClick = { attributionExpanded = !attributionExpanded },
+                    styleState = styleState,
                     modifier = Modifier
                         .height(48.dp)
-                        .width(48.dp),
-                    contentPadding = PaddingValues(0.dp),
-                    enabled = notificationGranted
-                ) {
-                    var icon = Icons.Outlined.GpsOff
-                    if (notificationGranted) {
-                        icon = if (onCurrentLocation) {
-                            Icons.Outlined.GpsFixed
-                        } else {
-                            Icons.Outlined.GpsNotFixed
-                        }
-                    }
-                    Icon(
-                        imageVector = icon,
-                        contentDescription = "Go to current location",
-                    )
-                }
-                DisappearingCompassButton(cameraState = cameraState)
-            }
+                        .align(Alignment.BottomEnd),
+                    expandedContent = { MapAttribution() },
+                )
 
-            // Center start controls
-            Column(
-                modifier = Modifier.align(Alignment.CenterStart),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                ElevatedButton(
-                    onClick = {
-                        val current = cameraState.position
-                        val newPosition = CameraPosition(
-                            target = current.target,
-                            zoom = current.zoom + 1.0,
-                            tilt = current.tilt,
-                            bearing = current.bearing,
-                        )
-
-                        coroutineScope.launch {
-                            cameraState.animateTo(newPosition)
-                        }
-                    },
-                    modifier = Modifier
-                        .height(48.dp)
-                        .width(48.dp),
-                    contentPadding = PaddingValues(0.dp),
+                // Top end controls
+                Column(
+                    modifier = Modifier.align(Alignment.TopEnd),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    Icon(
-                        imageVector = Icons.Outlined.Add,
-                        contentDescription = "Zoom in",
-                    )
-                }
-                ElevatedButton(
-                    onClick = {
-                        val current = cameraState.position
-                        val newPosition = CameraPosition(
-                            target = current.target,
-                            zoom = current.zoom - 1.0,
-                            tilt = current.tilt,
-                            bearing = current.bearing,
-                        )
-
-                        coroutineScope.launch {
-                            cameraState.animateTo(newPosition)
-                        }
-                    },
-                    modifier = Modifier
-                        .height(48.dp)
-                        .width(48.dp),
-                    contentPadding = PaddingValues(0.dp),
-                ) {
-                    Icon(
-                        imageVector = Icons.Outlined.Remove,
-                        contentDescription = "Zoom out",
-                    )
-                }
-                ElevatedButton(
-                    onClick = {
-                        fitMapBounds(allPositions)
-                    },
-                    modifier = Modifier
-                        .height(48.dp)
-                        .width(48.dp),
-                    contentPadding = PaddingValues(0.dp),
-                ) {
-                    Icon(
-                        imageVector = Icons.Outlined.FitScreen,
-                        contentDescription = "Fit map to bounds",
-                    )
-                }
-            }
-
-            // Center end controls
-            Column(
-                modifier = Modifier.align(Alignment.CenterEnd),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                focusedDevice?.latestLocation?.let {
                     ElevatedButton(
                         onClick = {
-                            openNavigationApp(it)
+                            viewModel.grabCurrentLocation()
+                            goToCurrentLocation()
+                        },
+                        modifier = Modifier
+                            .height(48.dp)
+                            .width(48.dp),
+                        contentPadding = PaddingValues(0.dp),
+                        enabled = notificationGranted
+                    ) {
+                        var icon = Icons.Outlined.GpsOff
+                        if (notificationGranted) {
+                            icon = if (onCurrentLocation) {
+                                Icons.Outlined.GpsFixed
+                            } else {
+                                Icons.Outlined.GpsNotFixed
+                            }
+                        }
+                        Icon(
+                            imageVector = icon,
+                            contentDescription = "Go to current location",
+                        )
+                    }
+                    DisappearingCompassButton(cameraState = cameraState)
+                }
+
+                // Center start controls
+                Column(
+                    modifier = Modifier.align(Alignment.CenterStart),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    ElevatedButton(
+                        onClick = {
+                            val current = cameraState.position
+                            val newPosition = CameraPosition(
+                                target = current.target,
+                                zoom = current.zoom + 1.0,
+                                tilt = current.tilt,
+                                bearing = current.bearing,
+                            )
+
+                            coroutineScope.launch {
+                                cameraState.animateTo(newPosition)
+                            }
                         },
                         modifier = Modifier
                             .height(48.dp)
@@ -635,16 +624,59 @@ fun LocationScreen(viewModel: LocationViewModel, modifier: Modifier = Modifier) 
                         contentPadding = PaddingValues(0.dp),
                     ) {
                         Icon(
-                            imageVector = Icons.Outlined.Route,
-                            contentDescription = "Open navigation app",
+                            imageVector = Icons.Outlined.Add,
+                            contentDescription = "Zoom in",
+                        )
+                    }
+                    ElevatedButton(
+                        onClick = {
+                            val current = cameraState.position
+                            val newPosition = CameraPosition(
+                                target = current.target,
+                                zoom = current.zoom - 1.0,
+                                tilt = current.tilt,
+                                bearing = current.bearing,
+                            )
+
+                            coroutineScope.launch {
+                                cameraState.animateTo(newPosition)
+                            }
+                        },
+                        modifier = Modifier
+                            .height(48.dp)
+                            .width(48.dp),
+                        contentPadding = PaddingValues(0.dp),
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.Remove,
+                            contentDescription = "Zoom out",
+                        )
+                    }
+                    ElevatedButton(
+                        onClick = {
+                            fitMapBounds(allPositions)
+                        },
+                        modifier = Modifier
+                            .height(48.dp)
+                            .width(48.dp),
+                        contentPadding = PaddingValues(0.dp),
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.FitScreen,
+                            contentDescription = "Fit map to bounds",
                         )
                     }
                 }
-                focusedDevice?.let { device ->
-                    if (device.canRing == true) {
+
+                // Center end controls
+                Column(
+                    modifier = Modifier.align(Alignment.CenterEnd),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    focusedDevice?.latestLocation?.let {
                         ElevatedButton(
                             onClick = {
-                                viewModel.ringDevice(device.id)
+                                openNavigationApp(it)
                             },
                             modifier = Modifier
                                 .height(48.dp)
@@ -652,45 +684,64 @@ fun LocationScreen(viewModel: LocationViewModel, modifier: Modifier = Modifier) 
                             contentPadding = PaddingValues(0.dp),
                         ) {
                             Icon(
-                                imageVector = Icons.Outlined.RingVolume,
-                                contentDescription = "Ring device",
+                                imageVector = Icons.Outlined.Route,
+                                contentDescription = "Open navigation app",
                             )
                         }
                     }
-                    if (device.canLock == true) {
-                        ElevatedButton(
-                            onClick = {
-                                viewModel.lockDevice(device.id)
-                            },
-                            modifier = Modifier
-                                .height(48.dp)
-                                .width(48.dp),
-                            contentPadding = PaddingValues(0.dp),
-                        ) {
-                            Icon(
-                                imageVector = Icons.Outlined.Lock,
-                                contentDescription = "Lock device",
-                            )
+                    focusedDevice?.let { device ->
+                        if (device.canRing == true) {
+                            ElevatedButton(
+                                onClick = {
+                                    viewModel.ringDevice(device.id)
+                                },
+                                modifier = Modifier
+                                    .height(48.dp)
+                                    .width(48.dp),
+                                contentPadding = PaddingValues(0.dp),
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Outlined.RingVolume,
+                                    contentDescription = "Ring device",
+                                )
+                            }
                         }
-                    }
-                    if (device.canFlash == true) {
-                        ElevatedButton(
-                            onClick = {
-                                viewModel.flashDevice(device.id)
-                            },
-                            modifier = Modifier
-                                .height(48.dp)
-                                .width(48.dp),
-                            contentPadding = PaddingValues(0.dp),
-                        ) {
-                            Icon(
-                                imageVector = Icons.Outlined.FlashlightOn,
-                                contentDescription = "Flash device",
-                            )
+                        if (device.canLock == true) {
+                            ElevatedButton(
+                                onClick = {
+                                    viewModel.lockDevice(device.id)
+                                },
+                                modifier = Modifier
+                                    .height(48.dp)
+                                    .width(48.dp),
+                                contentPadding = PaddingValues(0.dp),
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Outlined.Lock,
+                                    contentDescription = "Lock device",
+                                )
+                            }
+                        }
+                        if (device.canFlash == true) {
+                            ElevatedButton(
+                                onClick = {
+                                    viewModel.flashDevice(device.id)
+                                },
+                                modifier = Modifier
+                                    .height(48.dp)
+                                    .width(48.dp),
+                                contentPadding = PaddingValues(0.dp),
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Outlined.FlashlightOn,
+                                    contentDescription = "Flash device",
+                                )
+                            }
                         }
                     }
                 }
             }
         }
+
     }
 }
