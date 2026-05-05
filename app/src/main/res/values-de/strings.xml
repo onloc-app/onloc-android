@@ -17,7 +17,7 @@
     <string name="main_device_button_label">Gerät auswählen</string>
     <string name="avatar_dialog_title">Konto</string>
     <string name="avatar_logout_button_label">Abmelden</string>
-    <string name="avatar_close_button_description">Schließen</string>
+    <string name="generic_close_button">Schließen</string>
     <string name="main_location_service_switch_label">Standortdienst</string>
     <string name="main_settings_header">Einstellungen</string>
     <string name="permissions_header">Funktionen und Berechtigungen</string>

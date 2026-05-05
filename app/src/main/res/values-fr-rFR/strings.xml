@@ -21,7 +21,7 @@
     <string name="main_device_button_label">Sélectionner un appareil</string>
     <string name="avatar_dialog_title">Compte</string>
     <string name="avatar_logout_button_label">Se déconnecter</string>
-    <string name="avatar_close_button_description">Fermer</string>
+    <string name="generic_close_button">Fermer</string>
     <string name="main_location_service_switch_label">Service de localisation</string>
     <string name="main_settings_header">Paramètres</string>
     <string name="permissions_header">Fonctionnalités et autorisations</string>

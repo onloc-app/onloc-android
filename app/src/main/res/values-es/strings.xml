@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="avatar_close_button_description">Cerca</string>
+    <string name="generic_close_button">Cerca</string>
     <string name="main_location_service_switch_label">Servicio de localización</string>
     <string name="main_settings_header">Ajustes</string>
     <string name="permissions_header">Características y Permisos</string>

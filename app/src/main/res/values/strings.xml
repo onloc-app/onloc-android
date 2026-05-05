@@ -23,13 +23,16 @@
     <string name="main_device_button_label">Select a device</string>
     <string name="avatar_dialog_title">Account</string>
     <string name="avatar_logout_button_label">Logout</string>
-    <string name="avatar_close_button_description">Close</string>
+    <string name="device_actions_ring">Ring</string>
+    <string name="device_actions_lock">Lock</string>
+    <string name="device_actions_flash">Flash</string>
+    <string name="device_actions_navigate">Make route</string>
     <string name="main_location_service_switch_label">Location service</string>
     <string name="main_settings_header">Settings</string>
     <string name="permissions_header">Features and Permissions</string>
     <string name="main_interval_slider_label">Interval between uploads</string>
     <string name="main_interval_slider_realtime_label">Use real-time updates</string>
-    <string name="settings_close_button_description">Close</string>
+    <string name="generic_close_button">Close</string>
 
     <plurals name="interval_picker_seconds">
         <item quantity="one">Second</item>

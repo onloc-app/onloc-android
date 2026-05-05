@@ -8,7 +8,7 @@
     <string name="login_error_server">Serverio klaida (%1$d)</string>
     <string name="main_title">Onloc</string>
     <string name="avatar_dialog_title">Paskyra</string>
-    <string name="avatar_close_button_description">Užverti</string>
+    <string name="generic_close_button">Užverti</string>
     <string name="main_settings_header">Nustatymai</string>
     <string name="offline_title">Ryšys su serveriu nutrūko</string>
     <string name="offline_retry_button_label">Bandyti iš naujo</string>

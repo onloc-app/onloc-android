@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material3.Button
@@ -60,7 +61,7 @@ fun Avatar(
     var accountDialogOpened by rememberSaveable { mutableStateOf(false) }
 
     @Composable
-    fun AvatarIcon(modifier: Modifier = Modifier) {
+    fun AvatarIcon(filled: Boolean = false, modifier: Modifier = Modifier) {
         if (user?.avatar != null && ip != null) {
             AsyncImage(
                 model = "$ip/${user.avatar.url}",
@@ -70,7 +71,7 @@ fun Avatar(
             )
         } else {
             Icon(
-                Icons.Outlined.AccountCircle,
+                imageVector = if (filled) Icons.Filled.AccountCircle else Icons.Outlined.AccountCircle,
                 contentDescription = stringResource(R.string.avatar_dialog_title),
                 modifier = modifier,
             )
@@ -81,7 +82,7 @@ fun Avatar(
         onClick = { accountDialogOpened = true },
         modifier = modifier
     ) {
-        AvatarIcon()
+        AvatarIcon(filled = accountDialogOpened)
     }
 
     if (accountDialogOpened) {
@@ -109,7 +110,7 @@ fun Avatar(
                             Icon(
                                 imageVector = Icons.Outlined.Close,
                                 contentDescription =
-                                    stringResource(R.string.avatar_close_button_description),
+                                    stringResource(R.string.generic_close_button),
                                 tint = MaterialTheme.colorScheme.onSurface
                             )
                         }
@@ -134,7 +135,7 @@ fun Avatar(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            AvatarIcon(Modifier.size(48.dp))
+                            AvatarIcon(modifier = Modifier.size(48.dp))
 
                             Text(
                                 text = user?.username.orEmpty(),

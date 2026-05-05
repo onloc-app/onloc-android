@@ -42,15 +42,12 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.FitScreen
-import androidx.compose.material.icons.outlined.FlashlightOn
 import androidx.compose.material.icons.outlined.GpsFixed
 import androidx.compose.material.icons.outlined.GpsNotFixed
 import androidx.compose.material.icons.outlined.GpsOff
-import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.Remove
-import androidx.compose.material.icons.outlined.RingVolume
-import androidx.compose.material.icons.outlined.Route
 import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedButton
@@ -59,12 +56,14 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberBottomSheetScaffoldState
+import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -114,6 +113,7 @@ import kotlinx.coroutines.launch
 import java.lang.System.currentTimeMillis
 import app.onloc.android.R
 import app.onloc.android.api.AuthStateManager
+import app.onloc.android.components.devices.DeviceActions
 import app.onloc.android.components.map.SharedLocationPuck
 import app.onloc.android.ui.main.MainActivity
 
@@ -268,9 +268,35 @@ fun LocationScreen(viewModel: LocationViewModel, modifier: Modifier = Modifier) 
     }
 
     val variant = if (isSystemInDarkTheme()) "dark" else "light"
+    val sheetState = rememberStandardBottomSheetState(
+        initialValue = SheetValue.Hidden,
+        skipHiddenState = false,
+    )
+    val scaffoldState = rememberBottomSheetScaffoldState(
+        bottomSheetState = sheetState,
+    )
 
-    Scaffold(
+    // Change the bottom sheet's visibility based on the focus device
+    LaunchedEffect(focusedDevice) {
+        if (focusedDevice == null) {
+            sheetState.hide()
+        } else {
+            sheetState.show()
+        }
+    }
+
+    // Unfocus device when sheet is closed
+    LaunchedEffect(sheetState.currentValue) {
+        if (sheetState.currentValue == SheetValue.Hidden) {
+            focusedDevice = null
+        }
+    }
+
+    BottomSheetScaffold(
         modifier = modifier,
+        scaffoldState = scaffoldState,
+        sheetPeekHeight = 96.dp,
+        sheetDragHandle = {},
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(R.string.main_title)) },
@@ -312,8 +338,18 @@ fun LocationScreen(viewModel: LocationViewModel, modifier: Modifier = Modifier) 
                 }
             )
         },
-    ) { defaultPadding ->
-        Box(Modifier.padding(defaultPadding)) {
+        sheetContent = {
+            DeviceActions(
+                device = focusedDevice,
+                onRing = { viewModel.ringDevice(it.id) },
+                onLock = { viewModel.lockDevice(it.id) },
+                onFlash = { viewModel.flashDevice(it.id) },
+                onNavigate = { openNavigationApp(it) },
+                modifier = Modifier.padding(16.dp),
+            )
+        },
+    ) {
+        Box {
             // Settings dialog
             if (settingsDialogOpened) {
                 Dialog(
@@ -336,7 +372,7 @@ fun LocationScreen(viewModel: LocationViewModel, modifier: Modifier = Modifier) 
                                 Icon(
                                     imageVector = Icons.Filled.Close,
                                     contentDescription =
-                                        stringResource(R.string.settings_close_button_description),
+                                        stringResource(R.string.generic_close_button),
                                     tint = MaterialTheme.colorScheme.onSurface
                                 )
                             }
@@ -428,12 +464,13 @@ fun LocationScreen(viewModel: LocationViewModel, modifier: Modifier = Modifier) 
             DeviceSelector(
                 devices = devices,
                 selectedDeviceId = selectedDevice?.id,
-                showBottomSheet = deviceSelectorOpened,
-                onDismissBottomSheet = { deviceSelectorOpened = false }
-            ) { id ->
-                viewModel.selectDevice(id)
-                deviceSelectorOpened = false
-            }
+                opened = deviceSelectorOpened,
+                onClose = { deviceSelectorOpened = false },
+                onDeviceSelect = { id ->
+                    viewModel.selectDevice(id)
+                    deviceSelectorOpened = false
+                }
+            )
 
             MaplibreMap(
                 baseStyle = BaseStyle.Uri("asset://map_styles/$variant.json"),
@@ -666,81 +703,7 @@ fun LocationScreen(viewModel: LocationViewModel, modifier: Modifier = Modifier) 
                         )
                     }
                 }
-
-                // Center end controls
-                Column(
-                    modifier = Modifier.align(Alignment.CenterEnd),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    focusedDevice?.latestLocation?.let {
-                        ElevatedButton(
-                            onClick = {
-                                openNavigationApp(it)
-                            },
-                            modifier = Modifier
-                                .height(48.dp)
-                                .width(48.dp),
-                            contentPadding = PaddingValues(0.dp),
-                        ) {
-                            Icon(
-                                imageVector = Icons.Outlined.Route,
-                                contentDescription = "Open navigation app",
-                            )
-                        }
-                    }
-                    focusedDevice?.let { device ->
-                        if (device.canRing == true) {
-                            ElevatedButton(
-                                onClick = {
-                                    viewModel.ringDevice(device.id)
-                                },
-                                modifier = Modifier
-                                    .height(48.dp)
-                                    .width(48.dp),
-                                contentPadding = PaddingValues(0.dp),
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Outlined.RingVolume,
-                                    contentDescription = "Ring device",
-                                )
-                            }
-                        }
-                        if (device.canLock == true) {
-                            ElevatedButton(
-                                onClick = {
-                                    viewModel.lockDevice(device.id)
-                                },
-                                modifier = Modifier
-                                    .height(48.dp)
-                                    .width(48.dp),
-                                contentPadding = PaddingValues(0.dp),
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Outlined.Lock,
-                                    contentDescription = "Lock device",
-                                )
-                            }
-                        }
-                        if (device.canFlash == true) {
-                            ElevatedButton(
-                                onClick = {
-                                    viewModel.flashDevice(device.id)
-                                },
-                                modifier = Modifier
-                                    .height(48.dp)
-                                    .width(48.dp),
-                                contentPadding = PaddingValues(0.dp),
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Outlined.FlashlightOn,
-                                    contentDescription = "Flash device",
-                                )
-                            }
-                        }
-                    }
-                }
             }
         }
-
     }
 }

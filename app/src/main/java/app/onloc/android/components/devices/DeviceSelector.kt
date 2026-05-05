@@ -30,16 +30,17 @@ import app.onloc.android.models.Device
 fun DeviceSelector(
     devices: List<Device>,
     selectedDeviceId: Int?,
-    showBottomSheet: Boolean,
-    onDismissBottomSheet: () -> Unit,
-    onDeviceSelect: (id: Int) -> Unit
+    opened: Boolean,
+    onClose: () -> Unit,
+    onDeviceSelect: (id: Int) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
-    if (showBottomSheet) {
+    if (opened) {
         ModalBottomSheet(
-            modifier = Modifier.fillMaxHeight(),
+            modifier = modifier.fillMaxHeight(),
             sheetState = sheetState,
-            onDismissRequest = onDismissBottomSheet
+            onDismissRequest = onClose
         ) {
             if (devices.isNotEmpty()) {
                 LazyColumn {
@@ -49,7 +50,7 @@ fun DeviceSelector(
                             selected = device.id == selectedDeviceId,
                             onSelect = {
                                 onDeviceSelect(device.id)
-                                onDismissBottomSheet()
+                                onClose()
                             },
                         )
                     }
