@@ -16,12 +16,14 @@
 package app.onloc.android.components.map
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.toColorInt
 import app.onloc.android.helpers.stringToColor
 import app.onloc.android.models.Device
 import app.onloc.android.models.Location
+import app.onloc.android.services.rememberCompass
 import dev.sargunv.maplibrecompose.compose.ClickResult
 import dev.sargunv.maplibrecompose.compose.layer.CircleLayer
 import dev.sargunv.maplibrecompose.compose.source.rememberGeoJsonSource
@@ -40,6 +42,7 @@ fun LocationPuck(
     accuracy: Double,
     color: Color,
     metersPerDp: Double,
+    useCurrentBearing: Boolean = false,
     onClick: () -> Unit = {},
     onLongClick: () -> Unit = {},
 ) {
@@ -50,6 +53,21 @@ fun LocationPuck(
             )
         )
     )
+
+    if (useCurrentBearing) {
+        val bearing by rememberCompass()
+
+        BearingConeLayer(
+            id = id,
+            longitude = longitude,
+            latitude = latitude,
+            bearing = bearing,
+            bearingAccuracyDegrees = 30f,
+            metersPerDp = metersPerDp,
+            color = color,
+            visible = true,
+        )
+    }
 
     CircleLayer(
         id = "location-accuracy-$id",

@@ -414,6 +414,7 @@ fun LocationScreen(viewModel: LocationViewModel, modifier: Modifier = Modifier) 
                         accuracy = accuracy,
                         color = MaterialTheme.colorScheme.secondary,
                         metersPerDp = cameraState.metersPerDpAtTarget,
+                        useCurrentBearing = true,
                         onClick = { goToCurrentLocation() },
                     )
                 }

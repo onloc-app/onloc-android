@@ -77,6 +77,7 @@ private fun generateBearingCone(
     bearingAccuracyDegrees: Float,
     metersPerDp: Double,
     radius: Float = 50f,
+    segments: Int = 30, // controls smoothness
 ): Polygon {
     val coneRadiusMeters = (radius * metersPerDp).toFloat()
 
@@ -84,20 +85,38 @@ private fun generateBearingCone(
         val bearingRad = Math.toRadians(angle)
         val latRad = Math.toRadians(lat)
         val lonRad = Math.toRadians(lon)
+
         val newLat = asin(
             sin(latRad) * cos(distance / EARTH_RADIUS) +
                     cos(latRad) * sin(distance / EARTH_RADIUS) * cos(bearingRad)
         )
+
         val newLon = lonRad + atan2(
             sin(bearingRad) * sin(distance / EARTH_RADIUS) * cos(latRad),
             cos(distance / EARTH_RADIUS) - sin(latRad) * sin(newLat)
         )
+
         return Position(Math.toDegrees(newLon), Math.toDegrees(newLat))
     }
 
-    val left = offset(latitude, longitude, coneRadiusMeters, (bearing - bearingAccuracyDegrees / 2).toDouble())
-    val right = offset(latitude, longitude, coneRadiusMeters, (bearing + bearingAccuracyDegrees / 2).toDouble())
-    val center = Position(longitude, latitude)
+    val startAngle = bearing - bearingAccuracyDegrees / 2
+    val endAngle = bearing + bearingAccuracyDegrees / 2
 
-    return Polygon(listOf(listOf(center, left, right, center)))
+    val center = Position(longitude, latitude)
+    val points = mutableListOf<Position>()
+
+    // Start at center
+    points.add(center)
+
+    // Generate arc
+    for (i in 0..segments) {
+        val t = i.toFloat() / segments
+        val angle = startAngle + (endAngle - startAngle) * t
+        points.add(offset(latitude, longitude, coneRadiusMeters, angle.toDouble()))
+    }
+
+    // Close back to center
+    points.add(center)
+
+    return Polygon(listOf(points))
 }
