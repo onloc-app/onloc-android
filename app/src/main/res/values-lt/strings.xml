@@ -14,4 +14,43 @@
     <string name="offline_retry_button_label">Bandyti iš naujo</string>
     <string name="offline_logout_button_label">Atsijungti</string>
     <string name="service_websocket_lock_screen_notification_title">Informacija</string>
+    <string name="login_description">Prisijunkite į egzempliorių</string>
+    <string name="login_submit_button_label">Prisijungti</string>
+    <string name="login_error_invalid_credentials">Neteisingi prisijungimo duomenys</string>
+    <string name="main_service_status_no_selection">Nepasirinktas įrenginys</string>
+    <string name="main_service_status_missing_permissions">Trūksta reikalingų leidimų</string>
+    <string name="avatar_logout_button_label">Atsijungti</string>
+    <string name="permissions_header">Ypatybės ir leidimai</string>
+    <string name="main_interval_slider_label">Intervalas tarp išsiuntimų</string>
+    <string name="main_interval_slider_realtime_label">Naudoti tikralaikius atnaujinimus</string>
+    <plurals name="interval_picker_seconds">
+        <item quantity="one">Sekundė</item>
+        <item quantity="few">Sekundės</item>
+        <item quantity="many">Sekundžių</item>
+        <item quantity="other">Sekundžių</item>
+    </plurals>
+    <plurals name="interval_picker_minutes">
+        <item quantity="one">Minutė</item>
+        <item quantity="few">Minutės</item>
+        <item quantity="many">Minučių</item>
+        <item quantity="other">Minučių</item>
+    </plurals>
+    <plurals name="interval_picker_hours">
+        <item quantity="one">Valanda</item>
+        <item quantity="few">Valandos</item>
+        <item quantity="many">Valandų</item>
+        <item quantity="other">Valandų</item>
+    </plurals>
+    <plurals name="interval_picker_days">
+        <item quantity="one">Diena</item>
+        <item quantity="few">Dienos</item>
+        <item quantity="many">Dienų</item>
+        <item quantity="other">Dienų</item>
+    </plurals>
+    <string name="permissions_background_location_description">Leidžia programėlei bendrinti jūsų įrenginio vietovę su serveriu netgi tada, kai programėlė nenaudojama.</string>
+    <string name="permissions_notifications_label">Pranešimai</string>
+    <string name="permissions_grant_button_label">Suteikti</string>
+    <string name="permissions_granted_button_label">Suteiktas</string>
+    <string name="permissions_lock_header">Užrakinti įrenginį</string>
+    <string name="permissions_lock_description">Leidžia programėlei nuotoliniu būdu užrakinti įrenginį tuo atveju, jeigu jis pamestas ar pavogtas.</string>
 </resources>
