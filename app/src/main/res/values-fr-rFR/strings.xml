@@ -88,4 +88,8 @@
     <string name="service_websocket_lock_screen_notification_title">Information</string>
     <string name="offline_title">La connexion au serveur a été perdue</string>
     <string name="service_websocket_channel_name">Service de WebSocket</string>
+    <string name="device_actions_ring">Sonner</string>
+    <string name="device_actions_lock">Verrouiller</string>
+    <string name="device_actions_flash">Flash</string>
+    <string name="device_actions_navigate">Itinéraire</string>
 </resources>
