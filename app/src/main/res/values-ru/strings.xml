@@ -13,17 +13,17 @@
     <string name="login_found_servers_button">Показать найденные сервера</string>
     <string name="login_found_servers_dialog_title">Найденные сервера</string>
     <string name="login_title">Onloc</string>
-    <string name="login_description">Log into an instance</string>
+    <string name="login_description">Войти в аккаунт</string>
     <string name="login_submit_button_label">Войти</string>
     <string name="login_error_invalid_credentials">Неверные данные</string>
     <string name="login_error_server">Ошибка сервера (%1$d)</string>
     <string name="main_title">Onloc</string>
-    <string name="main_service_status_no_selection">Устройство не выбранно</string>
+    <string name="main_service_status_no_selection">Устройство не выбрано</string>
     <string name="main_service_status_missing_permissions">Отсутсвует необходимое разрешение</string>
     <string name="main_device_button_label">Выбрать устройство</string>
     <string name="avatar_dialog_title">Аккаунт</string>
     <string name="avatar_logout_button_label">Выйти</string>
-    <string name="device_actions_ring">Подать сигнал</string>
+    <string name="device_actions_ring">Подать звуковой сигнал</string>
     <string name="device_actions_lock">Заблокировать</string>
     <string name="device_actions_flash">Вспышка</string>
     <string name="device_actions_navigate">Построить маршрут</string>
@@ -41,7 +41,7 @@
         <item quantity="other">Секунды</item>
     </plurals>
     <plurals name="interval_picker_minutes">
-	<item quantity="one">Миунта</item>
+	<item quantity="one">Минута</item>
         <item quantity="few">Минуты</item>
         <item quantity="many">Минут</item>
         <item quantity="other">Минуты</item>
@@ -78,7 +78,7 @@
         Приложение будет ожидать команды от сервера и подаст звуковой сигнал при их получении.
     </string>
     <string name="permissions_grant_button_label">Разрешить</string>
-    <string name="permissions_granted_button_label">Разрешенно</string>
+    <string name="permissions_granted_button_label">Разрешено</string>
     <string name="permissions_admin_label">Администратор устройста</string>
     <string name="permissions_lock_header">Заблокировать устройство</string>
     <string name="permissions_lock_description">Позволяет приложению удаленно заблокировать ваше устройство в случае его потери или кражи.
