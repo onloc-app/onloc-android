@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Onloc</string>
+
+    <string name="title_activity_location">Местоположение</string>
+    <string name="title_activity_login">Авторизация</string>
+    <string name="title_activity_ringer">Звонок</string>
+    <string name="title_activity_offline">Автономный режим</string>
+
+    <string name="login_username_field_label">Имя пользователя</string>
+    <string name="login_password_field_label">Пароль</string>
+    <string name="login_ip_field_label">Адрес сервера</string>
+    <string name="login_found_servers_button">Показать найденные сервера</string>
+    <string name="login_found_servers_dialog_title">Найденные сервера</string>
+    <string name="login_title">Onloc</string>
+    <string name="login_description">Войти в аккаунт</string>
+    <string name="login_submit_button_label">Войти</string>
+    <string name="login_error_invalid_credentials">Неверные данные</string>
+    <string name="login_error_server">Ошибка сервера (%1$d)</string>
+    <string name="main_title">Onloc</string>
+    <string name="main_service_status_no_selection">Устройство не выбрано</string>
+    <string name="main_service_status_missing_permissions">Отсутсвует необходимое разрешение</string>
+    <string name="main_device_button_label">Выбрать устройство</string>
+    <string name="avatar_dialog_title">Аккаунт</string>
+    <string name="avatar_logout_button_label">Выйти</string>
+    <string name="device_actions_ring">Подать звуковой сигнал</string>
+    <string name="device_actions_lock">Заблокировать</string>
+    <string name="device_actions_flash">Вспышка</string>
+    <string name="device_actions_navigate">Построить маршрут</string>
+    <string name="main_location_service_switch_label">Сервис локации</string>
+    <string name="main_settings_header">Настройки</string>
+    <string name="permissions_header">Функции и разрешения</string>
+    <string name="main_interval_slider_label">Интервал между обновлениями</string>
+    <string name="main_interval_slider_realtime_label">Обновлять в реальном времени</string>
+    <string name="generic_close_button">Закрыть</string>
+
+    <plurals name="interval_picker_seconds">
+        <item quantity="one">Секунда</item>
+        <item quantity="few">Секунды</item>	
+        <item quantity="many">Секунд</item>
+        <item quantity="other">Секунды</item>
+    </plurals>
+    <plurals name="interval_picker_minutes">
+	<item quantity="one">Минута</item>
+        <item quantity="few">Минуты</item>
+        <item quantity="many">Минут</item>
+        <item quantity="other">Минуты</item>
+    </plurals>
+    <plurals name="interval_picker_hours">
+	<item quantity="one">Час</item>
+	<item quantity="few">Часы</item>     
+        <item quantity="many">Часов</item>
+        <item quantity="other">Часы</item>
+    </plurals>
+    <plurals name="interval_picker_days">
+	<item quantity="one">День</item>
+        <item quantity="few">Дни</item>
+        <item quantity="many">Дней</item>
+        <item quantity="other">Дни</item>
+    </plurals>
+
+    <!-- Offline -->
+    <string name="offline_title">Потеряно соединение с сервером</string>
+    <string name="offline_retry_button_label">Повторить попытку</string>
+    <string name="offline_logout_button_label">Выйти</string>
+
+    <!-- Permissions -->
+    <string name="permissions_background_location_header">Фоновое отслеживание местоположения</string>
+    <string name="permissions_background_location_description">
+        Разрешает передавать местоположение устройства на сервер даже если приложение закрыто
+    </string>
+    <string name="permissions_notifications_label">Уведомления</string>
+    <string name="permissions_location_label">Локация</string>
+    <string name="permissions_do_not_disturb_label">Доступ к Не беспокоить</string>
+    <string name="permissions_overlay_label">Показ поверх других приложений</string>
+    <string name="permissions_ring_header">Удаленный сигнал</string>
+    <string name="permissions_ring_description">
+        Приложение будет ожидать команды от сервера и подаст звуковой сигнал при их получении.
+    </string>
+    <string name="permissions_grant_button_label">Разрешить</string>
+    <string name="permissions_granted_button_label">Разрешено</string>
+    <string name="permissions_admin_label">Администратор устройста</string>
+    <string name="permissions_lock_header">Заблокировать устройство</string>
+    <string name="permissions_lock_description">Позволяет приложению удаленно заблокировать ваше устройство в случае его потери или кражи.
+    </string>
+
+    <!-- Services -->
+    <string name="service_location_channel_name">Геолокация</string>
+    <string name="service_location_start_notification_title">Служба геоблокации запущена</string>
+    <string name="service_location_start_notification_description">Отслеживание местоположения в фоновом режиме</string>
+    <string name="service_location_stop_notification_title">Служба геолокации остановлена</string>
+    <string name="service_location_stop_notification_description">
+        Отслеживание местоположения прекращено
+    </string>
+    <string name="service_location_enable_gps">Необходимо включить GPS</string>
+
+    <string name="service_websocket_channel_name">Служба WebSocket</string>
+    <string name="service_websocket_start_notification_title">Ожидание команд</string>
+    <string name="service_websocket_start_notification_description">Устройство будет отвечать на команды</string>
+
+    <string name="service_ringer_channel_name">Сигнал</string>
+    <string name="service_ringer_start_notification_title">Подача сигнала</string>
+    <string name="service_ringer_start_notification_description">Устройство подает звуковой сигнал</string>
+    <string name="service_websocket_lock_screen_notification_title">Информация</string>
+</resources>
