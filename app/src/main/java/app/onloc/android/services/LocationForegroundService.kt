@@ -24,16 +24,14 @@ import android.location.Location
 import android.os.BatteryManager
 import android.os.IBinder
 import androidx.core.app.ActivityCompat
+import app.onloc.android.AppPreferences
 import app.onloc.android.R
+import app.onloc.android.ServicePreferences
 import app.onloc.android.api.locations.LocationsApiService
 import app.onloc.android.helpers.NotificationFactory.createStartLocationServiceNotification
 import app.onloc.android.helpers.NotificationFactory.createStopLocationServiceNotification
 import app.onloc.android.helpers.START_LOCATION_SERVICE_NOTIFICATION_ID
 import app.onloc.android.helpers.STOP_LOCATION_SERVICE_NOTIFICATION_ID
-import app.onloc.android.helpers.getIP
-import app.onloc.android.helpers.getInterval
-import app.onloc.android.helpers.getRealTime
-import app.onloc.android.helpers.getSelectedDeviceId
 import app.onloc.locationclient.LocationClient
 import app.onloc.locationclient.locationClientConfig
 import kotlinx.coroutines.CoroutineScope
@@ -51,17 +49,13 @@ class LocationForegroundService : Service() {
 
     private var locationClient: LocationClient? = null
 
-    private val deviceEncryptedPreferences by lazy {
-        createDeviceProtectedStorageContext()
-            .getSharedPreferences("device_protected_preferences", MODE_PRIVATE)
-    }
-
     /**
      * Launched when a location update arrives.
      */
     private fun handleLocation(location: Location) {
-        val ip = getIP(deviceEncryptedPreferences)
-        val selectedDeviceId = getSelectedDeviceId(deviceEncryptedPreferences)
+        val appPrefs = AppPreferences(this)
+        val ip = appPrefs.getIP()
+        val selectedDeviceId = appPrefs.getDeviceId()
 
         val batteryManager = applicationContext.getSystemService(BATTERY_SERVICE) as BatteryManager
         val batteryLevel: Int = batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY)
@@ -99,8 +93,9 @@ class LocationForegroundService : Service() {
             return
         }
 
-        val interval = getInterval(deviceEncryptedPreferences)
-        val realTime = getRealTime(deviceEncryptedPreferences)
+        val servicePrefs = ServicePreferences(this)
+        val interval = servicePrefs.getLocationUpdatesInterval()
+        val realTime = servicePrefs.getRealTime()
 
         if (!realTime && interval == null) return
 

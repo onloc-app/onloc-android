@@ -19,27 +19,23 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.util.Log
+import app.onloc.android.ServicePreferences
 import app.onloc.android.services.ServiceManager
 
 class BootReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         Log.d("BootReceiver", "Received intent: ${intent.action}")
-        val deviceEncryptedPreferences by lazy {
-            context.createDeviceProtectedStorageContext()
-                .getSharedPreferences("device_protected_preferences", Context.MODE_PRIVATE)
-        }
 
-        fun getLocationServiceStatus(): Boolean {
-            return deviceEncryptedPreferences.getBoolean("location", false)
-        }
+        val preferences = ServicePreferences(context)
+        val status = preferences.getLocationServiceStatus()
 
         Log.d("BootReceiver", "Intent action: ${intent.action}")
-        Log.d("BootReceiver", "Location service status: ${getLocationServiceStatus()}")
+        Log.d("BootReceiver", "Location service status: ${status}")
 
         if (intent.action == Intent.ACTION_LOCKED_BOOT_COMPLETED || intent.action == Intent.ACTION_BOOT_COMPLETED) {
-            Log.d("BootReceiver", "Boot completed, starting service.")
+            Log.d("BootReceiver", "Boot completed, starting services.")
 
-            if (getLocationServiceStatus()) {
+            if (status) {
                 ServiceManager.startLocationServiceIfAllowed(context)
             }
 

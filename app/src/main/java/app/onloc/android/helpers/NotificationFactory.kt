@@ -36,6 +36,8 @@ const val LOCATION_SERVICE_CHANNEL_ID = "location_service_channel"
 const val START_LOCATION_SERVICE_NOTIFICATION_ID = 1001
 const val STOP_LOCATION_SERVICE_NOTIFICATION_ID = 1002
 
+const val RINGER_SERVICE_CHANNEL_ID = "ringer_service_channel"
+
 /**
  * Creates various notifications used around the app
  */
@@ -126,6 +128,29 @@ object NotificationFactory {
             .setSmallIcon(android.R.drawable.ic_dialog_alert)
             .setContentTitle(context.getString(R.string.service_location_stop_notification_title))
             .setContentText(context.getString(R.string.service_location_stop_notification_description))
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .build()
+    }
+
+    //endregion
+
+    //region Ringer service
+
+    /**
+     * Creates the notification displayed when the ringer service starts.
+     */
+    fun createStartRingerServiceNotification(context: Context): Notification {
+        val channelId = RINGER_SERVICE_CHANNEL_ID
+        val channelName = context.getString(R.string.service_ringer_channel_name)
+        val channel = NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_HIGH)
+
+        val notificationManager = context.getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.createNotificationChannel(channel)
+
+        return NotificationCompat.Builder(context, channelId)
+            .setContentTitle(context.getString(R.string.service_ringer_start_notification_title))
+            .setContentText(context.getString(R.string.service_ringer_start_notification_description))
+            .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .build()
     }

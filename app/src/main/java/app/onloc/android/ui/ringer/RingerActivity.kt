@@ -39,10 +39,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import app.onloc.android.services.RingerService
 import app.onloc.android.singletons.RingerState
 import app.onloc.android.ui.theme.OnlocAndroidTheme
 import kotlinx.coroutines.delay
+import kotlin.time.Duration.Companion.milliseconds
 
 const val DURATION = 60000L
 
@@ -61,8 +61,6 @@ class RingerActivity : ComponentActivity() {
         ringtone = RingtoneManager.getRingtone(applicationContext, ringtoneUri)
 
         setContent {
-            val context = LocalContext.current
-
             LaunchedEffect(Unit) {
                 startRinging(DURATION)
             }
@@ -81,7 +79,6 @@ class RingerActivity : ComponentActivity() {
                                 .padding(16.dp)
                                 .size(256.dp),
                             onClick = {
-                                stopRingerService(context)
                                 finish()
                             }) {
                             Text(text = "Stop", fontSize = 24.sp)
@@ -104,7 +101,7 @@ class RingerActivity : ComponentActivity() {
         raiseVolume()
         ringtone?.play()
 
-        delay(duration)
+        delay(duration.milliseconds)
 
         finish()
     }
@@ -125,10 +122,5 @@ class RingerActivity : ComponentActivity() {
 
         oldRingerMode?.let { audioManager.ringerMode = it }
         oldAlarmVolume?.let { audioManager.setStreamVolume(AudioManager.STREAM_RING, it, 0) }
-    }
-
-    fun stopRingerService(context: Context) {
-        val ringerServiceIntent = Intent(context, RingerService::class.java)
-        context.stopService(ringerServiceIntent)
     }
 }

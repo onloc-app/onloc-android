@@ -25,14 +25,13 @@ import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkRequest
 import android.os.IBinder
+import app.onloc.android.AppPreferences
+import app.onloc.android.UserPreferences
 import app.onloc.android.helpers.LOCK_SCREEN_CHANNEL_ID
 import app.onloc.android.helpers.LOCK_SCREEN_NOTIFICATION_ID
 import app.onloc.android.helpers.NotificationFactory.createLockScreenNotification
 import app.onloc.android.helpers.NotificationFactory.createStartWebSocketServiceNotification
 import app.onloc.android.helpers.START_WEBSOCKET_SERVICE_NOTIFICATION_ID
-import app.onloc.android.helpers.getAccessToken
-import app.onloc.android.helpers.getIP
-import app.onloc.android.helpers.getSelectedDeviceId
 import app.onloc.android.permissions.AdminPermission
 import app.onloc.android.permissions.DoNotDisturbPermission
 import app.onloc.android.permissions.OverlayPermission
@@ -74,11 +73,6 @@ class WebSocketService : Service() {
     private val flashScope = CoroutineScope(Dispatchers.IO)
     private var flashJob: Job? = null
 
-    private val deviceEncryptedPreferences by lazy {
-        createDeviceProtectedStorageContext()
-            .getSharedPreferences("device_protected_preferences", MODE_PRIVATE)
-    }
-
     override fun onCreate() {
         super.onCreate()
 
@@ -114,9 +108,12 @@ class WebSocketService : Service() {
     private fun connectSocket() {
         connectivityManager.activeNetwork ?: return
 
-        val ip = getIP(deviceEncryptedPreferences)
-        val token = getAccessToken(deviceEncryptedPreferences)
-        val deviceId = getSelectedDeviceId(deviceEncryptedPreferences)
+        val appPrefs = AppPreferences(this)
+        val ip = appPrefs.getIP()
+        val deviceId = appPrefs.getDeviceId()
+
+        val userPrefs = UserPreferences(this)
+        val token = userPrefs.getUserCredentials().accessToken
 
         if (ip == null || token == null || deviceId == -1) return
 

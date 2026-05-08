@@ -48,6 +48,7 @@
                 android:launchMode="singleTop"
                 android:showWhenLocked="true"
                 android:theme="@style/Theme.OnlocAndroid"
+                android:directBootAware="true"
                 android:turnScreenOn="true"/>
         <activity
                 android:name=".ui.location.LocationActivity"
@@ -75,12 +76,6 @@
                 android:directBootAware="true"
                 android:exported="false"
                 android:foregroundServiceType="location">
-        </service>
-        <service
-                android:name=".services.RingerService"
-                android:directBootAware="true"
-                android:exported="false"
-                android:foregroundServiceType="mediaPlayback">
         </service>
         <service
                 android:name=".services.WebSocketService"
