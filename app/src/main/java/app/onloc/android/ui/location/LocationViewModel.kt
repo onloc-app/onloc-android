@@ -76,9 +76,6 @@ class LocationViewModel(application: Application) : AndroidViewModel(application
         initialValue = null,
     )
 
-    private val _isLocationServiceRunning = MutableStateFlow(servicePreferences.getLocationServiceStatus())
-    val isLocationServiceRunning: StateFlow<Boolean> = _isLocationServiceRunning.asStateFlow()
-
     private val _locationUpdateInterval = MutableStateFlow(servicePreferences.getLocationUpdatesInterval())
     val locationUpdateInterval: StateFlow<Int?> = _locationUpdateInterval.asStateFlow()
     fun setLocationUpdateInterval(interval: Int?) {
@@ -184,12 +181,10 @@ class LocationViewModel(application: Application) : AndroidViewModel(application
 
     fun startLocationService() {
         ServiceManager.startLocationServiceIfAllowed(context)
-        _isLocationServiceRunning.value = true
     }
 
     fun stopLocationService() {
         ServiceManager.stopLocationService(context)
-        _isLocationServiceRunning.value = false
     }
 
     @SuppressLint("MissingPermission")

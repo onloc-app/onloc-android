@@ -20,6 +20,7 @@
     <string name="main_title">Onloc</string>
     <string name="main_service_status_no_selection">No device selected</string>
     <string name="main_service_status_missing_permissions">Required permissions missing</string>
+    <string name="main_location_service_stopped">Location service stopped. Your data is not being uploaded.</string>
     <string name="main_device_button_label">Select a device</string>
     <string name="avatar_dialog_title">Account</string>
     <string name="avatar_logout_button_label">Logout</string>

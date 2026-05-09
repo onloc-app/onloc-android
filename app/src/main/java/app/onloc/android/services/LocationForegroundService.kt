@@ -131,6 +131,8 @@ class LocationForegroundService : Service() {
             START_LOCATION_SERVICE_NOTIFICATION_ID,
             createStartLocationServiceNotification(this),
         )
+
+        ServiceState.locationServiceRunning.value = true
     }
 
     override fun onDestroy() {
@@ -147,6 +149,8 @@ class LocationForegroundService : Service() {
             STOP_LOCATION_SERVICE_NOTIFICATION_ID,
             createStopLocationServiceNotification(this)
         )
+
+        ServiceState.locationServiceRunning.value = false
     }
 
     override fun onBind(intent: Intent?): IBinder? = null

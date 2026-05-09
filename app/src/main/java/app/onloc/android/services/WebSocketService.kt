@@ -100,6 +100,8 @@ class WebSocketService : Service() {
 
         // Makes sure the socket is always connected
         startWatchdog()
+
+        ServiceState.webSocketServiceRunning.value = true
     }
 
     /**
@@ -247,6 +249,8 @@ class WebSocketService : Service() {
 
         SocketManager.disconnect()
         watchdogScope.cancel()
+
+        ServiceState.webSocketServiceRunning.value = false
     }
 
     override fun onBind(intent: Intent?): IBinder? = null
