@@ -1,12 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Onloc</string>
-
     <string name="title_activity_location">Местоположение</string>
     <string name="title_activity_login">Авторизация</string>
     <string name="title_activity_ringer">Звонок</string>
     <string name="title_activity_offline">Автономный режим</string>
-
     <string name="login_username_field_label">Имя пользователя</string>
     <string name="login_password_field_label">Пароль</string>
     <string name="login_ip_field_label">Адрес сервера</string>
@@ -33,37 +31,34 @@
     <string name="main_interval_slider_label">Интервал между обновлениями</string>
     <string name="main_interval_slider_realtime_label">Обновлять в реальном времени</string>
     <string name="generic_close_button">Закрыть</string>
-
     <plurals name="interval_picker_seconds">
         <item quantity="one">Секунда</item>
-        <item quantity="few">Секунды</item>	
+        <item quantity="few">Секунды</item>
         <item quantity="many">Секунд</item>
         <item quantity="other">Секунды</item>
     </plurals>
     <plurals name="interval_picker_minutes">
-	<item quantity="one">Минута</item>
+        <item quantity="one">Минута</item>
         <item quantity="few">Минуты</item>
         <item quantity="many">Минут</item>
         <item quantity="other">Минуты</item>
     </plurals>
     <plurals name="interval_picker_hours">
-	<item quantity="one">Час</item>
-	<item quantity="few">Часы</item>     
+        <item quantity="one">Час</item>
+        <item quantity="few">Часы</item>
         <item quantity="many">Часов</item>
         <item quantity="other">Часы</item>
     </plurals>
     <plurals name="interval_picker_days">
-	<item quantity="one">День</item>
+        <item quantity="one">День</item>
         <item quantity="few">Дни</item>
         <item quantity="many">Дней</item>
         <item quantity="other">Дни</item>
     </plurals>
-
     <!-- Offline -->
     <string name="offline_title">Потеряно соединение с сервером</string>
     <string name="offline_retry_button_label">Повторить попытку</string>
     <string name="offline_logout_button_label">Выйти</string>
-
     <!-- Permissions -->
     <string name="permissions_background_location_header">Фоновое отслеживание местоположения</string>
     <string name="permissions_background_location_description">
@@ -83,7 +78,6 @@
     <string name="permissions_lock_header">Заблокировать устройство</string>
     <string name="permissions_lock_description">Позволяет приложению удаленно заблокировать ваше устройство в случае его потери или кражи.
     </string>
-
     <!-- Services -->
     <string name="service_location_channel_name">Геолокация</string>
     <string name="service_location_start_notification_title">Служба геоблокации запущена</string>
@@ -93,11 +87,9 @@
         Отслеживание местоположения прекращено
     </string>
     <string name="service_location_enable_gps">Необходимо включить GPS</string>
-
     <string name="service_websocket_channel_name">Служба WebSocket</string>
     <string name="service_websocket_start_notification_title">Ожидание команд</string>
     <string name="service_websocket_start_notification_description">Устройство будет отвечать на команды</string>
-
     <string name="service_ringer_channel_name">Сигнал</string>
     <string name="service_ringer_start_notification_title">Подача сигнала</string>
     <string name="service_ringer_start_notification_description">Устройство подает звуковой сигнал</string>
