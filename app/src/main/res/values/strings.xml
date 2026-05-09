@@ -69,7 +69,7 @@
     <string name="permissions_location_label">Location</string>
     <string name="permissions_do_not_disturb_label">Do Not Disturb access</string>
     <string name="permissions_overlay_label">Display over other apps</string>
-    <string name="permissions_ring_header">Ring Over the Air</string>
+    <string name="permissions_ring_header">Ring Device</string>
     <string name="permissions_ring_description">
         The app will listen for commands from the server and ring when commanded to.
     </string>

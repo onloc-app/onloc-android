@@ -59,7 +59,7 @@
     <string name="permissions_location_label">Localisation</string>
     <string name="permissions_do_not_disturb_label">Accès au mode Ne pas déranger</string>
     <string name="permissions_overlay_label">Afficher par-dessus les autres applications</string>
-    <string name="permissions_ring_header">Faire sonner à distance</string>
+    <string name="permissions_ring_header">Faire sonner</string>
     <string name="permissions_ring_description">
         L\'application écoute les commandes envoyées par le serveur et déclenche la sonnerie quand elle en reçoit
         l\'instruction.
