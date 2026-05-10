@@ -1,0 +1,3 @@
+The UI has been revisited a little.
+The bottom sheet is now used for device actions as I needed more space for actions and features I'll be adding in the
+near future. Small improvements here and there.
