@@ -9,12 +9,6 @@
 ## Description
 Onloc is a service that allows you to track and locate your devices. This repository contains the Android application that sends your phone's location and battery level to the Onloc instance of your choice.
 
-> [!NOTE]
-> You can find the other repositories here:
-> - Front-end: https://github.com/onloc-app/onloc-ui
-> - Back-end: https://github.com/onloc-app/onloc-api
-> - Deployment: https://github.com/onloc-app/onloc-deployment
-
 ## Translation
 
 Help us translate Onloc on [Weblate](https://hosted.weblate.org/projects/onloc/)
