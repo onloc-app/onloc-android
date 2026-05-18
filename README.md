@@ -15,5 +15,13 @@ Onloc is a service that allows you to track and locate your devices. This reposi
 > - Back-end: https://github.com/onloc-app/onloc-api
 > - Deployment: https://github.com/onloc-app/onloc-deployment
 
+## Translation
+
+Help us translate Onloc on [Weblate](https://hosted.weblate.org/projects/onloc/)
+
+[![Translation status](https://hosted.weblate.org/widget/onloc/android/svg-badge.svg)](https://hosted.weblate.org/engage/onloc/)
+
+[![Translation status](https://hosted.weblate.org/widget/onloc/android/multi-auto.svg)](https://hosted.weblate.org/engage/onloc/)
+
 ## Installation
 Instructions can be found here: https://github.com/onloc-app/onloc-deployment
