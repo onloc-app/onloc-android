@@ -92,4 +92,5 @@
     <string name="device_actions_lock">Verrouiller</string>
     <string name="device_actions_flash">Flash</string>
     <string name="device_actions_navigate">Itinéraire</string>
+    <string name="main_location_service_stopped">Le service de localisation s\'est arrêté. Vos données ne sont pas téléversées.</string>
 </resources>
