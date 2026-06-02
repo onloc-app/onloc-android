@@ -53,4 +53,18 @@
     <string name="permissions_granted_button_label">Suteiktas</string>
     <string name="permissions_lock_header">Užrakinti įrenginį</string>
     <string name="permissions_lock_description">Leidžia programėlei nuotoliniu būdu užrakinti įrenginį tuo atveju, jeigu jis pamestas ar pavogtas.</string>
+    <string name="login_found_servers_button">Rodyti rastus serverius</string>
+    <string name="login_found_servers_dialog_title">Rasti serveriai</string>
+    <string name="main_device_button_label">Pasirinkti įrenginį</string>
+    <string name="title_activity_location">Vietovės veikla</string>
+    <string name="title_activity_login">Prisijungimo veikla</string>
+    <string name="main_location_service_stopped">Vietovės paslauga sustabdyta. Jūsų duomenys nėra išsiunčiami.</string>
+    <string name="device_actions_lock">Užrakinti</string>
+    <string name="main_location_service_switch_label">Vietovės paslauga</string>
+    <string name="permissions_location_label">Vietovė</string>
+    <string name="service_location_channel_name">Vietovės paslauga</string>
+    <string name="service_location_start_notification_title">Vietovės paslauga paleista</string>
+    <string name="service_location_stop_notification_title">Vietovės paslauga sustabdyta</string>
+    <string name="service_location_enable_gps">Turi būti įjungta GPS</string>
+    <string name="service_websocket_channel_name">WebSocket paslauga</string>
 </resources>
