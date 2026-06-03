@@ -109,7 +109,7 @@ fun SharedLocationPuck(
 
         if (ready) {
             SymbolLayer(
-                id = "location-puck-${user.id}",
+                id = "location-puck-${id}",
                 source = markerSource,
                 iconImage = image(painter),
                 iconAllowOverlap = const(true),
