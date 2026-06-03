@@ -100,7 +100,7 @@ fun SharedLocationPuck(
             model = ImageRequest.Builder(LocalContext.current)
                 .data("$ip/${user.avatar.url}")
                 .bitmapConfig(Bitmap.Config.ARGB_8888)
-                .size(width = 192, height = 192)
+                .size(width = 96, height = 96)
                 .transformations(CircleCropTransformation())
                 .build(),
         )
