@@ -67,4 +67,9 @@
     <string name="service_location_stop_notification_title">Vietovės paslauga sustabdyta</string>
     <string name="service_location_enable_gps">Turi būti įjungta GPS</string>
     <string name="service_websocket_channel_name">WebSocket paslauga</string>
+    <string name="device_actions_navigate">Sukurti maršrutą</string>
+    <string name="permissions_overlay_label">Rodyti virš kitų programėlių</string>
+    <string name="permissions_ring_description">Programėlė klausysis komandų iš serverio ir skambės, kai jai bus nurodyta.</string>
+    <string name="service_websocket_start_notification_title">Klausomasi komandų</string>
+    <string name="service_websocket_start_notification_description">Įrenginys atsakys į komandas</string>
 </resources>
