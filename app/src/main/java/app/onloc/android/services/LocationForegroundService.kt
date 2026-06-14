@@ -23,6 +23,7 @@ import android.content.pm.PackageManager
 import android.location.Location
 import android.os.BatteryManager
 import android.os.IBinder
+import android.util.Log
 import androidx.core.app.ActivityCompat
 import app.onloc.android.AppPreferences
 import app.onloc.android.R
@@ -38,6 +39,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import app.onloc.android.models.Location as OnlocLocation
 
 private const val SECOND = 1000L
 
@@ -59,13 +61,16 @@ class LocationForegroundService : Service() {
 
         val batteryManager = applicationContext.getSystemService(BATTERY_SERVICE) as BatteryManager
         val batteryLevel: Int = batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY)
+        val batteryCharging: Boolean = batteryManager.isCharging
+        Log.d("battery", batteryCharging.toString())
 
-        val parsedLocation = app.onloc.android.models.Location.fromAndroidLocation(
+        val parsedLocation = OnlocLocation.fromAndroidLocation(
             0,
             selectedDeviceId ?: 0,
             location,
         )
         parsedLocation.battery = batteryLevel
+        parsedLocation.charging = batteryCharging
 
         if (ip != null && selectedDeviceId != null) {
             serviceScope.launch {

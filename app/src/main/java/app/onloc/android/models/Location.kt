@@ -15,6 +15,7 @@
 
 package app.onloc.android.models
 
+import android.location.LocationProvider
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -43,7 +44,9 @@ data class Location(
     @SerialName("speed_accuracy")
     val speedAccuracy: Float? = null,
 
+    val provider: String? = null,
     var battery: Int? = null,
+    var charging: Boolean? = null,
 
     @SerialName("created_at")
     val createdAt: String? = null,
@@ -65,6 +68,8 @@ data class Location(
                 location.bearingAccuracyDegrees,
                 location.speed,
                 location.speedAccuracyMetersPerSecond,
+                location.provider,
+                null,
                 null,
                 null,
                 null,
