@@ -15,7 +15,6 @@
 
 package app.onloc.android.models
 
-import android.location.LocationProvider
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
