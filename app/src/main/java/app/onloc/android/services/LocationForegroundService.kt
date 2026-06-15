@@ -49,8 +49,6 @@ private const val ACCEPTABLE_ACCURACY = 500f
 class LocationForegroundService : Service() {
     private val serviceScope = CoroutineScope(Dispatchers.IO)
 
-    private var locationClient: LocationClient? = null
-
     /**
      * Launched when a location update arrives.
      */
@@ -144,7 +142,6 @@ class LocationForegroundService : Service() {
         super.onDestroy()
 
         stopForegroundService()
-        locationClient = null
         serviceScope.cancel()
 
         // Send a notification
