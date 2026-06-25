@@ -56,7 +56,7 @@ data class Location(
 ) {
     companion object {
         fun fromAndroidLocation(id: Int, deviceId: Int, location: android.location.Location): Location {
-            val formattedTime = Instant.ofEpochSecond(location.time).toString()
+            val formattedTime = Instant.ofEpochMilli(location.time).toString()
 
             return Location(
                 id,
