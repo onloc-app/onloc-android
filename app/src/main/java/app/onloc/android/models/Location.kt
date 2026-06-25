@@ -17,6 +17,7 @@ package app.onloc.android.models
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import java.time.Instant
 
 @Serializable
 data class Location(
@@ -55,6 +56,8 @@ data class Location(
 ) {
     companion object {
         fun fromAndroidLocation(id: Int, deviceId: Int, location: android.location.Location): Location {
+            val formattedTime = Instant.ofEpochSecond(location.time).toString()
+
             return Location(
                 id,
                 deviceId,
@@ -70,7 +73,7 @@ data class Location(
                 location.provider,
                 null,
                 null,
-                null,
+                formattedTime,
                 null,
             )
         }
