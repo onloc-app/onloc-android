@@ -23,6 +23,9 @@ import app.onloc.android.models.api.GetSharedDevicesResponse
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.post
+import io.ktor.client.request.setBody
+import io.ktor.http.ContentType
+import io.ktor.http.contentType
 
 private const val ENDPOINT = "/api/devices"
 
@@ -56,9 +59,14 @@ class DevicesApiService(context: Context, ip: String) {
         }
     }
 
-    suspend fun lockDevice(id: Int): Result<Unit> {
+    suspend fun lockDevice(id: Int, message: String?): Result<Unit> {
         try {
-            api.client.post("$ENDPOINT/${id}/lock")
+            api.client.post("$ENDPOINT/${id}/lock") {
+                if (message != null) {
+                    contentType(ContentType.Application.Json)
+                    setBody(mapOf("message" to message))
+                }
+            }
             return Result.success(Unit)
         } catch (e: Exception) {
             return Result.failure(e)

@@ -16,23 +16,37 @@
 package app.onloc.android.components.devices
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.outlined.FlashlightOn
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.RingVolume
 import androidx.compose.material.icons.outlined.Route
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.zIndex
 import app.onloc.android.R
 import app.onloc.android.models.Device
 import app.onloc.android.models.Location
@@ -41,17 +55,20 @@ import app.onloc.android.models.Location
 fun DeviceActions(
     device: Device?,
     onRing: (Device) -> Unit,
-    onLock: (Device) -> Unit,
+    onLock: (Device, String?) -> Unit,
     onFlash: (Device) -> Unit,
     onNavigate: (Location) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    FlowRow(
-        modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        if (device != null) {
+    var lockDialogOpened by remember { mutableStateOf(false) }
+    var lockMessage by remember { mutableStateOf("") }
+
+    if (device != null) {
+        FlowRow(
+            modifier = modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
             if (device.canRing == true) {
                 ActionButton(
                     label = stringResource(R.string.device_actions_ring),
@@ -63,7 +80,7 @@ fun DeviceActions(
                 ActionButton(
                     label = stringResource(R.string.device_actions_lock),
                     imageVector = Icons.Outlined.Lock,
-                    onClick = { onLock(device) },
+                    onClick = { lockDialogOpened = true },
                 )
             }
             if (device.canFlash == true) {
@@ -79,6 +96,53 @@ fun DeviceActions(
                     imageVector = Icons.Outlined.Route,
                     onClick = { onNavigate(it) },
                 )
+            }
+        }
+        if (lockDialogOpened) {
+            Dialog(onDismissRequest = { lockDialogOpened = false }) {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    shape = RoundedCornerShape(16.dp),
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                    ) {
+                        IconButton(
+                            onClick = { lockDialogOpened = false },
+                            modifier = Modifier
+                                .align(Alignment.End)
+                                .zIndex(1f),
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.Close,
+                                contentDescription =
+                                    stringResource(R.string.generic_close_button),
+                                tint = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+
+                        OutlinedTextField(
+                            value = lockMessage,
+                            onValueChange = { lockMessage = it },
+                            label = { Text(text = "Message") },
+                        )
+
+                        Button(
+                            onClick = {
+                                val trimmedMessage = lockMessage.trim()
+                                onLock(device, trimmedMessage.ifEmpty { null })
+                            },
+                            modifier = Modifier.align(Alignment.End),
+                        ) {
+                            Text(text = "Lock")
+                        }
+                    }
+                }
             }
         }
     }

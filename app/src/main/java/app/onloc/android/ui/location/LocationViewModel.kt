@@ -144,10 +144,10 @@ class LocationViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
-    fun lockDevice(id: Int) {
+    fun lockDevice(id: Int, message: String?) {
         val ip = storedIp ?: return
         viewModelScope.launch {
-            DevicesApiService(context, ip).lockDevice(id)
+            DevicesApiService(context, ip).lockDevice(id, message)
         }
     }
 

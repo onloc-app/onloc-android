@@ -319,7 +319,7 @@ fun LocationScreen(viewModel: LocationViewModel, modifier: Modifier = Modifier) 
             DeviceActions(
                 device = focusedDevice,
                 onRing = { viewModel.ringDevice(it.id) },
-                onLock = { viewModel.lockDevice(it.id) },
+                onLock = { device, message -> viewModel.lockDevice(device.id, message) },
                 onFlash = { viewModel.flashDevice(it.id) },
                 onNavigate = { openNavigationApp(it) },
                 modifier = Modifier.padding(16.dp),
