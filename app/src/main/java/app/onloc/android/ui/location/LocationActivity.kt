@@ -43,6 +43,7 @@ import androidx.compose.material.icons.outlined.Remove
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -146,12 +147,17 @@ fun LocationScreen(viewModel: LocationViewModel, modifier: Modifier = Modifier) 
     val cameraState = rememberCameraState()
     val styleState = rememberStyleState()
 
+    // Grab the device's location on launch.
+    LaunchedEffect(Unit) {
+        viewModel.grabCurrentLocation()
+    }
+
     fun goToCurrentLocation() {
         currentLocation?.let {
             val cameraPosition = CameraPosition(
                 target = Position(
                     it.longitude,
-                    it.latitude
+                    it.latitude,
                 ),
                 zoom = 16.0,
             )
@@ -479,10 +485,7 @@ fun LocationScreen(viewModel: LocationViewModel, modifier: Modifier = Modifier) 
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.align(Alignment.TopEnd)) {
                     DisappearingCompassButton(cameraState = cameraState)
                     ElevatedButton(
-                        onClick = {
-                            viewModel.grabCurrentLocation()
-                            goToCurrentLocation()
-                        },
+                        onClick = { goToCurrentLocation() },
                         modifier = Modifier
                             .height(48.dp)
                             .width(48.dp),
@@ -503,6 +506,9 @@ fun LocationScreen(viewModel: LocationViewModel, modifier: Modifier = Modifier) 
                         )
                     }
                 }
+
+                // Not working because maps.black does not have the attribution tag
+                // Needs to be fixed
 
 //              ExpandingAttributionButton(
 //                  expanded = attributionExpanded,

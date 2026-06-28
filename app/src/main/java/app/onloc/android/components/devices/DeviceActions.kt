@@ -139,7 +139,7 @@ fun DeviceActions(
                             },
                             modifier = Modifier.align(Alignment.End),
                         ) {
-                            Text(text = "Lock")
+                            Text(text = stringResource(R.string.device_actions_lock))
                         }
                     }
                 }
@@ -159,7 +159,7 @@ private fun ActionButton(
         onClick = onClick,
         modifier = modifier,
     ) {
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
             Icon(imageVector = imageVector, contentDescription = label)
             Text(text = label)
         }
