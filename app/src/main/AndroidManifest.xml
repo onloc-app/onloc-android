@@ -72,7 +72,7 @@
                 android:theme="@style/Theme.OnlocAndroid"/>
 
         <service
-                android:name=".services.LocationForegroundService"
+                android:name=".services.LocationService"
                 android:directBootAware="true"
                 android:exported="false"
                 android:foregroundServiceType="location">

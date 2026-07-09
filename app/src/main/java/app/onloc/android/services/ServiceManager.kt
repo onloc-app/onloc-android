@@ -31,7 +31,7 @@ object ServiceManager {
 
         if (postNotificationPermission.isGranted(context) && locationPermission.isGranted(context)) {
             servicePreferences.createLocationServiceStatus(true)
-            val intent = Intent(context, LocationForegroundService::class.java)
+            val intent = Intent(context, LocationService::class.java)
             ContextCompat.startForegroundService(context, intent)
         }
     }
@@ -39,7 +39,7 @@ object ServiceManager {
     fun stopLocationService(context: Context) {
         val servicePreferences = ServicePreferences(context)
         servicePreferences.createLocationServiceStatus(false)
-        val intent = Intent(context, LocationForegroundService::class.java)
+        val intent = Intent(context, LocationService::class.java)
         context.stopService(intent)
     }
 

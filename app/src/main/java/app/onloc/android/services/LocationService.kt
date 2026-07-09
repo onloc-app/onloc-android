@@ -45,7 +45,7 @@ private const val SECOND = 1000L
 private const val REAL_TIME_MIN_DISTANCE = 12f
 private const val ACCEPTABLE_ACCURACY = 500f
 
-class LocationForegroundService : Service() {
+class LocationService : Service() {
     private val serviceScope = CoroutineScope(Dispatchers.IO)
 
     /**
