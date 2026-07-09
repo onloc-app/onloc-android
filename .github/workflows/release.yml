@@ -73,9 +73,6 @@ jobs:
         with:
           name: release-apk
 
-      - name: Checkout code
-        uses: actions/checkout@v5.0.0
-
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v3
         with:
