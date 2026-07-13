@@ -1,3 +1,87 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="app_name">Onloc</string>
+    <string name="title_activity_location">Aktivita umístění</string>
+    <string name="title_activity_login">Aktivita přihlášení</string>
+    <string name="title_activity_ringer">Aktivita Ringer</string>
+    <string name="title_activity_offline">Offline aktivita</string>
+    <string name="login_username_field_label">Uživatelské jméno</string>
+    <string name="login_password_field_label">Heslo</string>
+    <string name="login_ip_field_label">Adresa serveru</string>
+    <string name="login_found_servers_button">Zobrazit nalezené servery</string>
+    <string name="login_found_servers_dialog_title">Nalezené servery</string>
+    <string name="login_title">Onloc</string>
+    <string name="login_description">Přihlásit se k instanci</string>
+    <string name="login_submit_button_label">Přihlášení</string>
+    <string name="login_error_invalid_credentials">Neplatné přihlašovací údaje</string>
+    <string name="login_error_server">Chyba serveru (%1$d)</string>
+    <string name="main_title">Onloc</string>
+    <string name="main_service_status_no_selection">Nebylo vybráno žádné zařízení</string>
+    <string name="main_service_status_missing_permissions">Požadované povolení nebylo uděleno</string>
+    <string name="main_location_service_stopped">Polohová služba zastavena. Vaše data nejsou odesílána.</string>
+    <string name="main_device_button_label">Vybrat zařízení</string>
+    <string name="avatar_dialog_title">Účet</string>
+    <string name="avatar_logout_button_label">Odhlásit se</string>
+    <string name="device_actions_ring">Prozvonit</string>
+    <string name="device_actions_lock">Uzamknout</string>
+    <string name="device_actions_navigate">Vytvořit cestu</string>
+    <string name="main_location_service_switch_label">Polohová služba</string>
+    <string name="main_settings_header">Nastavení</string>
+    <string name="permissions_header">Funkce a povolení</string>
+    <string name="main_interval_slider_label">Interval mezi odesláním dat</string>
+    <string name="main_interval_slider_realtime_label">Používat živé aktualizace</string>
+    <string name="generic_close_button">Zavřít</string>
+    <plurals name="interval_picker_seconds">
+        <item quantity="one">Sekunda</item>
+        <item quantity="few">Sekundy</item>
+        <item quantity="many">Sekund</item>
+        <item quantity="other">Sekund</item>
+    </plurals>
+    <plurals name="interval_picker_minutes">
+        <item quantity="one">Minuta</item>
+        <item quantity="few">Minuty</item>
+        <item quantity="many">Minut</item>
+        <item quantity="other">Minut</item>
+    </plurals>
+    <plurals name="interval_picker_hours">
+        <item quantity="one">Hodina</item>
+        <item quantity="few">Hodiny</item>
+        <item quantity="many">Hodin</item>
+        <item quantity="other">Hodin</item>
+    </plurals>
+    <plurals name="interval_picker_days">
+        <item quantity="one">Den</item>
+        <item quantity="few">Dny</item>
+        <item quantity="many">Dnů</item>
+        <item quantity="other">Dnů</item>
+    </plurals>
+    <string name="offline_title">Připojení k serveru ztraceno</string>
+    <string name="offline_retry_button_label">Zkusit znovu</string>
+    <string name="offline_logout_button_label">Odhlásit se</string>
+    <string name="permissions_background_location_header">Poloha na pozadní</string>
+    <string name="permissions_background_location_description">Umožní aplikaci sdílet polohu Vašeho zařízení se serverem i mimo používání aplikace.</string>
+    <string name="permissions_notifications_label">Oznámení</string>
+    <string name="permissions_location_label">Poloha</string>
+    <string name="permissions_do_not_disturb_label">Režim nerušit</string>
+    <string name="permissions_overlay_label">Zobrazit přes ostatní okna</string>
+    <string name="permissions_ring_header">Prozvonit zařízení</string>
+    <string name="permissions_ring_description">Aplikace bude naslouchat příkazům ze serveru a bude prozvoněno, když k tomu bude požádáno.</string>
+    <string name="permissions_grant_button_label">Udělit</string>
+    <string name="permissions_granted_button_label">Uděleno</string>
+    <string name="permissions_admin_label">Administrátor</string>
+    <string name="permissions_lock_header">Uzamknout zařízení</string>
+    <string name="permissions_lock_description">Umožní aplikaci uzamknout Vaše zařízení na dálku v případě odcizení.</string>
+    <string name="service_location_channel_name">Polohové služby</string>
+    <string name="service_location_start_notification_title">Polohová služba byla aktivována</string>
+    <string name="service_location_start_notification_description">Sleduji Vaši polohu na pozadí</string>
+    <string name="service_location_stop_notification_title">Polohová služba byla zastavena</string>
+    <string name="service_location_stop_notification_description">Sledování Vaší polohy bylo vypnuto</string>
+    <string name="service_location_enable_gps">Musí být aktivována GPS</string>
+    <string name="service_websocket_channel_name">Služba WebSocket</string>
+    <string name="service_websocket_start_notification_title">Naslouchání příkazům</string>
+    <string name="service_websocket_start_notification_description">Zařízení bude odpovídat na příkazy</string>
+    <string name="service_ringer_channel_name">Prozvonit</string>
+    <string name="service_ringer_start_notification_title">Prozvánění…</string>
+    <string name="service_ringer_start_notification_description">Zařízení zvoní</string>
+    <string name="service_websocket_lock_screen_notification_title">Informace</string>
 </resources>
