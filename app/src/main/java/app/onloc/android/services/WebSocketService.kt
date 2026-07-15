@@ -249,6 +249,7 @@ class WebSocketService : Service() {
 
         SocketManager.disconnect()
         watchdogScope.cancel()
+        flashScope.cancel()
 
         ServiceState.webSocketServiceRunning.value = false
     }

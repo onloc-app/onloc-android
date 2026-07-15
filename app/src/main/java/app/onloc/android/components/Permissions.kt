@@ -16,6 +16,7 @@
 package app.onloc.android.components
 
 import androidx.activity.compose.LocalActivity
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,8 +25,11 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material3.Button
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
@@ -50,6 +54,7 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import app.onloc.android.R
 import app.onloc.android.permissions.AdminPermission
+import app.onloc.android.permissions.BatteryOptimizationPermission
 import app.onloc.android.permissions.DoNotDisturbPermission
 import app.onloc.android.permissions.LocationPermission
 import app.onloc.android.permissions.OverlayPermission
@@ -65,6 +70,7 @@ fun Permissions(
     val activity = LocalActivity.current
     val lifecycleOwner = LocalLifecycleOwner.current
 
+    var batteryOptimizationDisabled by remember { mutableStateOf(BatteryOptimizationPermission().isGranted(context)) }
     var notificationsGranted by remember { mutableStateOf(PostNotificationPermission().isGranted(context)) }
     var locationGranted by remember { mutableStateOf(LocationPermission().isGranted(context)) }
     var doNotDisturbGranted by remember { mutableStateOf(DoNotDisturbPermission().isGranted(context)) }
@@ -76,6 +82,7 @@ fun Permissions(
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
+                batteryOptimizationDisabled = BatteryOptimizationPermission().isGranted(context)
                 notificationsGranted = PostNotificationPermission().isGranted(context)
                 locationGranted = LocationPermission().isGranted(context)
                 doNotDisturbGranted = DoNotDisturbPermission().isGranted(context)
@@ -101,6 +108,24 @@ fun Permissions(
                 style = MaterialTheme.typography.titleLarge,
             )
             Spacer(modifier = Modifier.height(16.dp))
+
+            if (!batteryOptimizationDisabled) {
+                FeatureCard(
+                    name = "Disable Battery Optimization",
+                    description = "Battery optimization can stop the app while it's working in the background. This will stop the core functionalities of the app such as background location tracking and remote control.",
+                    modifier = Modifier.border(
+                        width = 1.dp,
+                        color = MaterialTheme.colorScheme.error,
+                        shape = RoundedCornerShape(8.dp),
+                    ),
+                ) {
+                    Button(
+                        onClick = { BatteryOptimizationPermission().request(activity) },
+                    ) {
+                        Text(text = "Disable")
+                    }
+                }
+            }
 
             FeatureCard(
                 name = stringResource(R.string.permissions_background_location_header),
@@ -195,8 +220,8 @@ fun Permissions(
 fun FeatureCard(
     name: String,
     description: String,
-    isGranted: Boolean,
     modifier: Modifier = Modifier,
+    isGranted: Boolean = false,
     onGrant: () -> Unit = {},
     permissionCards: @Composable () -> Unit,
 ) {
@@ -209,7 +234,7 @@ fun FeatureCard(
     }
 
     Box(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxWidth()
             .padding(bottom = 16.dp)
     ) {
@@ -217,7 +242,7 @@ fun FeatureCard(
             elevation = CardDefaults.cardElevation(
                 defaultElevation = 6.dp
             ),
-            modifier = Modifier.fillMaxWidth(),
+            modifier = modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(MaterialTheme.colorScheme.surfaceContainer)
         ) {
             Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
