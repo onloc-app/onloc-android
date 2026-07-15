@@ -105,4 +105,14 @@
     <string name="service_ringer_start_notification_title">Ringing…</string>
     <string name="service_ringer_start_notification_description">Device is ringing</string>
     <string name="service_websocket_lock_screen_notification_title">Information</string>
+
+    <!-- Device information -->
+    <string name="device_info_battery_level">Battery Level</string>
+    <string name="device_info_charging">Charging</string>
+    <string name="device_info_owner">Owner</string>
+    <string name="device_info_latest_location">Latest Location</string>
+
+    <!-- Generic values -->
+    <string name="value_true">True</string>
+    <string name="value_false">False</string>
 </resources>

@@ -53,7 +53,7 @@ import app.onloc.android.models.Location
 
 @Composable
 fun DeviceActions(
-    device: Device?,
+    device: Device,
     onRing: (Device) -> Unit,
     onLock: (Device, String?) -> Unit,
     onFlash: (Device) -> Unit,
@@ -63,84 +63,82 @@ fun DeviceActions(
     var lockDialogOpened by remember { mutableStateOf(false) }
     var lockMessage by remember { mutableStateOf("") }
 
-    if (device != null) {
-        FlowRow(
-            modifier = modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            if (device.canRing == true) {
-                ActionButton(
-                    label = stringResource(R.string.device_actions_ring),
-                    imageVector = Icons.Outlined.RingVolume,
-                    onClick = { onRing(device) },
-                )
-            }
-            if (device.canLock == true) {
-                ActionButton(
-                    label = stringResource(R.string.device_actions_lock),
-                    imageVector = Icons.Outlined.Lock,
-                    onClick = { lockDialogOpened = true },
-                )
-            }
-            if (device.canFlash == true) {
-                ActionButton(
-                    label = stringResource(R.string.device_actions_flash),
-                    imageVector = Icons.Outlined.FlashlightOn,
-                    onClick = { onFlash(device) },
-                )
-            }
-            device.latestLocation?.let {
-                ActionButton(
-                    label = stringResource(R.string.device_actions_navigate),
-                    imageVector = Icons.Outlined.Route,
-                    onClick = { onNavigate(it) },
-                )
-            }
+    FlowRow(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        if (device.canRing == true) {
+            ActionButton(
+                label = stringResource(R.string.device_actions_ring),
+                imageVector = Icons.Outlined.RingVolume,
+                onClick = { onRing(device) },
+            )
         }
-        if (lockDialogOpened) {
-            Dialog(onDismissRequest = { lockDialogOpened = false }) {
-                Card(
+        if (device.canLock == true) {
+            ActionButton(
+                label = stringResource(R.string.device_actions_lock),
+                imageVector = Icons.Outlined.Lock,
+                onClick = { lockDialogOpened = true },
+            )
+        }
+        if (device.canFlash == true) {
+            ActionButton(
+                label = stringResource(R.string.device_actions_flash),
+                imageVector = Icons.Outlined.FlashlightOn,
+                onClick = { onFlash(device) },
+            )
+        }
+        device.latestLocation?.let {
+            ActionButton(
+                label = stringResource(R.string.device_actions_navigate),
+                imageVector = Icons.Outlined.Route,
+                onClick = { onNavigate(it) },
+            )
+        }
+    }
+    if (lockDialogOpened) {
+        Dialog(onDismissRequest = { lockDialogOpened = false }) {
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                shape = RoundedCornerShape(16.dp),
+            ) {
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(16.dp),
-                    shape = RoundedCornerShape(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
-                    Column(
+                    IconButton(
+                        onClick = { lockDialogOpened = false },
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                            .align(Alignment.End)
+                            .zIndex(1f),
                     ) {
-                        IconButton(
-                            onClick = { lockDialogOpened = false },
-                            modifier = Modifier
-                                .align(Alignment.End)
-                                .zIndex(1f),
-                        ) {
-                            Icon(
-                                imageVector = Icons.Filled.Close,
-                                contentDescription =
-                                    stringResource(R.string.generic_close_button),
-                                tint = MaterialTheme.colorScheme.onSurface
-                            )
-                        }
-
-                        OutlinedTextField(
-                            value = lockMessage,
-                            onValueChange = { lockMessage = it },
-                            label = { Text(text = "Message") },
+                        Icon(
+                            imageVector = Icons.Filled.Close,
+                            contentDescription =
+                                stringResource(R.string.generic_close_button),
+                            tint = MaterialTheme.colorScheme.onSurface,
                         )
+                    }
 
-                        Button(
-                            onClick = {
-                                val trimmedMessage = lockMessage.trim()
-                                onLock(device, trimmedMessage.ifEmpty { null })
-                            },
-                            modifier = Modifier.align(Alignment.End),
-                        ) {
-                            Text(text = stringResource(R.string.device_actions_lock))
-                        }
+                    OutlinedTextField(
+                        value = lockMessage,
+                        onValueChange = { lockMessage = it },
+                        label = { Text(text = "Message") },
+                    )
+
+                    Button(
+                        onClick = {
+                            val trimmedMessage = lockMessage.trim()
+                            onLock(device, trimmedMessage.ifEmpty { null })
+                        },
+                        modifier = Modifier.align(Alignment.End),
+                    ) {
+                        Text(text = stringResource(R.string.device_actions_lock))
                     }
                 }
             }

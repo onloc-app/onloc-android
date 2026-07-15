@@ -28,6 +28,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -98,6 +99,7 @@ import app.onloc.android.R
 import app.onloc.android.api.AuthStateManager
 import app.onloc.android.components.SettingsDialog
 import app.onloc.android.components.devices.DeviceActions
+import app.onloc.android.components.devices.DeviceInformation
 import app.onloc.android.components.map.SharedLocationPuck
 import app.onloc.android.services.ServiceState
 import app.onloc.android.ui.main.MainActivity
@@ -132,6 +134,7 @@ fun LocationScreen(viewModel: LocationViewModel, modifier: Modifier = Modifier) 
     val isAuthenticated by AuthStateManager.isAuthenticated.collectAsStateWithLifecycle()
 
     val ip by rememberSaveable { mutableStateOf(viewModel.storedIp) }
+    val user by remember { mutableStateOf(viewModel.user) }
     var deviceSelectorOpened by rememberSaveable { mutableStateOf(false) }
     var settingsDialogOpened by rememberSaveable { mutableStateOf(false) }
     var onCurrentLocation by remember { mutableStateOf(false) }
@@ -276,7 +279,7 @@ fun LocationScreen(viewModel: LocationViewModel, modifier: Modifier = Modifier) 
     BottomSheetScaffold(
         modifier = modifier,
         scaffoldState = scaffoldState,
-        sheetPeekHeight = 96.dp,
+        sheetPeekHeight = 160.dp,
         sheetDragHandle = {},
         topBar = {
             TopAppBar(
@@ -302,7 +305,7 @@ fun LocationScreen(viewModel: LocationViewModel, modifier: Modifier = Modifier) 
                     ) {
                         Icon(
                             imageVector = if (settingsDialogOpened) Icons.Filled.Settings else Icons.Outlined.Settings,
-                            contentDescription = "Open settings"
+                            contentDescription = "Open settings",
                         )
                     }
                     Avatar(
@@ -321,14 +324,23 @@ fun LocationScreen(viewModel: LocationViewModel, modifier: Modifier = Modifier) 
             )
         },
         sheetContent = {
-            DeviceActions(
-                device = focusedDevice,
-                onRing = { viewModel.ringDevice(it.id) },
-                onLock = { device, message -> viewModel.lockDevice(device.id, message) },
-                onFlash = { viewModel.flashDevice(it.id) },
-                onNavigate = { openNavigationApp(it) },
-                modifier = Modifier.padding(16.dp),
-            )
+            focusedDevice?.let { device ->
+                DeviceActions(
+                    device = device,
+                    onRing = { viewModel.ringDevice(it.id) },
+                    onLock = { device, message -> viewModel.lockDevice(device.id, message) },
+                    onFlash = { viewModel.flashDevice(it.id) },
+                    onNavigate = { openNavigationApp(it) },
+                    modifier = Modifier.padding(top = 16.dp)
+                )
+                DeviceInformation(
+                    device = device,
+                    modifier = Modifier.padding(16.dp),
+                    currentUser = user,
+                    user = sharedDeviceUsers[device.userId],
+                )
+                Spacer(modifier = modifier.height(32.dp))
+            }
         },
     ) {
         Box {
