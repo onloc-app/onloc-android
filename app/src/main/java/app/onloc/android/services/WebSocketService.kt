@@ -25,8 +25,10 @@ import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkRequest
 import android.os.IBinder
+import android.util.Log
 import app.onloc.android.AppPreferences
 import app.onloc.android.UserPreferences
+import app.onloc.android.api.users.UsersApiService
 import app.onloc.android.helpers.LOCK_SCREEN_CHANNEL_ID
 import app.onloc.android.helpers.LOCK_SCREEN_NOTIFICATION_ID
 import app.onloc.android.helpers.NotificationFactory.createLockScreenNotification
@@ -47,8 +49,9 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.json.JSONObject
 import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.minutes
 
-private const val WATCHDOG_DELAY = 30000L
+private const val WATCHDOG_DELAY = 5L
 
 // Flash
 private const val FLASH_REPEAT_COUNT = 10
@@ -65,12 +68,11 @@ class WebSocketService : Service() {
     private val ringCommandEvent = "ring-command"
     private val lockCommandEvent = "lock-command"
     private val flashCommandEvent = "flash-command"
-    private val disconnectEvent = "disconnect"
     private val registerDeviceEvent = "register-device"
     private val locationsChangeEvent = "locations-change"
 
     private val watchdogScope = CoroutineScope(Dispatchers.IO)
-    private val flashScope = CoroutineScope(Dispatchers.IO)
+    private val coroutineScope = CoroutineScope(Dispatchers.IO)
     private var flashJob: Job? = null
 
     override fun onCreate() {
@@ -105,41 +107,15 @@ class WebSocketService : Service() {
     }
 
     /**
-     * Connects to the server via WebSockets and attach listeners to react to commands.
+     * Attached the command listeners to the socket.
      */
-    private fun connectSocket() {
-        connectivityManager.activeNetwork ?: return
-
-        val appPrefs = AppPreferences(this)
-        val ip = appPrefs.getIP()
-        val deviceId = appPrefs.getDeviceId()
-
-        val userPrefs = UserPreferences(this)
-        val token = userPrefs.getUserCredentials().accessToken
-
-        if (ip == null || token == null || deviceId == -1) return
-
-        // Disconnect old listeners
-        SocketManager.off(ringCommandEvent)
-        SocketManager.off(lockCommandEvent)
-        SocketManager.off(flashCommandEvent)
-        SocketManager.off(disconnectEvent)
-        SocketManager.off(locationsChangeEvent)
-
-        SocketManager.disconnect()
-        SocketManager.initialize(ip, token)
-        SocketManager.connect()
-
-        SocketManager.emit(
-            registerDeviceEvent,
-            JSONObject().put("device_id", deviceId),
-        )
-
+    private fun registerSocketListeners() {
         val postNotificationPermission = PostNotificationPermission()
         val doNotDisturbPermission = DoNotDisturbPermission()
         val overlayPermission = OverlayPermission()
         val adminPermission = AdminPermission()
 
+        // Configure the ring command
         if (
             postNotificationPermission.isGranted(this) &&
             doNotDisturbPermission.isGranted(this) &&
@@ -160,6 +136,7 @@ class WebSocketService : Service() {
             }
         }
 
+        // Configure the lock command
         if (
             postNotificationPermission.isGranted(this) &&
             adminPermission.isGranted(this)
@@ -190,11 +167,12 @@ class WebSocketService : Service() {
             }
         }
 
+        // Configure the flash command
         SocketManager.on(flashCommandEvent) { _ ->
             val cameraManager = getSystemService(CAMERA_SERVICE) as CameraManager
             val cameraId = cameraManager.cameraIdList[0]
             flashJob?.cancel()
-            flashJob = flashScope.launch {
+            flashJob = coroutineScope.launch {
                 try {
                     repeat(FLASH_REPEAT_COUNT) {
                         cameraManager.setTorchMode(cameraId, true)
@@ -208,14 +186,54 @@ class WebSocketService : Service() {
             }
         }
 
+        // React to new locations from devices
         SocketManager.on(locationsChangeEvent) {
             watchdogScope.launch {
                 SocketEventBus.emitLocationsChanged()
             }
         }
+    }
 
-        SocketManager.on(disconnectEvent) {
-            connectSocket()
+    /**
+     * Connects to the server via WebSockets and attach listeners to react to commands.
+     */
+    private fun connectSocket() {
+        connectivityManager.activeNetwork ?: return
+
+        val appPrefs = AppPreferences(this)
+        val ip = appPrefs.getIP()
+        val deviceId = appPrefs.getDeviceId()
+
+        val userPrefs = UserPreferences(this)
+        val token = userPrefs.getUserCredentials().accessToken
+
+        if (ip == null || token == null || deviceId == -1) return
+        if (SocketManager.isConnected()) return
+
+        // Initialize the WebSocket
+        SocketManager.disconnect()
+        SocketManager.initialize(ip, token)
+        SocketManager.onAuthFailure = { handleAuthFailure(ip) }
+        registerSocketListeners()
+        SocketManager.connect()
+
+        // Register device with the server
+        SocketManager.emit(
+            registerDeviceEvent,
+            JSONObject().put("device_id", deviceId),
+        )
+    }
+
+    private fun handleAuthFailure(ip: String) {
+        SocketManager.disconnect()
+        coroutineScope.launch {
+            try {
+                // Call an authenticated endpoint to let the API client refresh the access token.
+                UsersApiService(applicationContext, ip).getUserInfo()
+                connectSocket()
+            } catch (e: Exception) {
+                Log.e("onloc", e.toString())
+            }
         }
     }
 
@@ -225,7 +243,7 @@ class WebSocketService : Service() {
     private fun startWatchdog() {
         watchdogScope.launch {
             while (true) {
-                delay(WATCHDOG_DELAY.milliseconds)
+                delay(WATCHDOG_DELAY.minutes)
                 if (!SocketManager.isConnected()) {
                     connectSocket()
                 }
@@ -249,7 +267,7 @@ class WebSocketService : Service() {
 
         SocketManager.disconnect()
         watchdogScope.cancel()
-        flashScope.cancel()
+        coroutineScope.cancel()
 
         ServiceState.webSocketServiceRunning.value = false
     }

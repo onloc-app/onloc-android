@@ -15,29 +15,54 @@
 
 package app.onloc.android.services
 
+import android.util.Log
 import io.socket.client.IO
 import io.socket.client.Socket
+import okhttp3.OkHttpClient
 import org.json.JSONObject
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 
 private const val RECONNECTION_DELAY = 2000L
 private const val RECONNECTION_DELAY_MAX = 60000L
 private const val TIMEOUT = 20000L
+private const val READ_TIMEOUT = TIMEOUT + 10000L
+private const val PING_INTERVAL = 120L
 
 object SocketManager {
     private var socket: Socket? = null
+    var onAuthFailure: (() -> Unit)? = null
 
     fun initialize(url: String, token: String) {
-        val options = IO.Options().apply {
-            auth = mapOf("token" to token)
-            path = "/ws"
-            forceNew = true
-            reconnection = true
-            reconnectionAttempts = Int.MAX_VALUE
-            reconnectionDelay = RECONNECTION_DELAY
-            reconnectionDelayMax = RECONNECTION_DELAY_MAX
-            timeout = TIMEOUT
+        if (socket == null) {
+            val okHttpClient = OkHttpClient().newBuilder()
+                .connectTimeout(TIMEOUT.milliseconds)
+                .readTimeout(READ_TIMEOUT.milliseconds)
+                .writeTimeout(TIMEOUT.milliseconds)
+                .pingInterval(PING_INTERVAL.seconds)
+                .build()
+
+            val options = IO.Options().apply {
+                auth = mapOf("token" to token)
+                path = "/ws"
+                forceNew = true
+                reconnection = true
+                reconnectionAttempts = Int.MAX_VALUE
+                reconnectionDelay = RECONNECTION_DELAY
+                reconnectionDelayMax = RECONNECTION_DELAY_MAX
+                timeout = TIMEOUT
+
+                callFactory = okHttpClient
+                webSocketFactory = okHttpClient
+            }
+            socket = IO.socket(url, options)
+
+            // Handle connection errors such as an expired token
+            socket!!.on(Socket.EVENT_CONNECT_ERROR) {
+                Log.w("onloc", "Connection error")
+                onAuthFailure?.invoke()
+            }
         }
-        socket = IO.socket(url, options)
     }
 
     fun connect() {
@@ -47,6 +72,7 @@ object SocketManager {
     fun disconnect() {
         socket?.disconnect()
         socket?.off()
+        socket = null
     }
 
     fun emit(event: String, data: JSONObject) {
