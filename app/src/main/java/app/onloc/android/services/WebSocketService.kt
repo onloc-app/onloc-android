@@ -74,6 +74,7 @@ class WebSocketService : Service() {
     private val watchdogScope = CoroutineScope(Dispatchers.IO)
     private val coroutineScope = CoroutineScope(Dispatchers.IO)
     private var flashJob: Job? = null
+    private var authRefreshing = false
 
     override fun onCreate() {
         super.onCreate()
@@ -198,7 +199,7 @@ class WebSocketService : Service() {
      * Connects to the server via WebSockets and attach listeners to react to commands.
      */
     private fun connectSocket() {
-        connectivityManager.activeNetwork ?: return
+        if (connectivityManager.activeNetwork == null || SocketManager.isConnected()) return
 
         val appPrefs = AppPreferences(this)
         val ip = appPrefs.getIP()
@@ -208,7 +209,6 @@ class WebSocketService : Service() {
         val token = userPrefs.getUserCredentials().accessToken
 
         if (ip == null || token == null || deviceId == -1) return
-        if (SocketManager.isConnected()) return
 
         // Initialize the WebSocket
         SocketManager.disconnect()
@@ -225,6 +225,9 @@ class WebSocketService : Service() {
     }
 
     private fun handleAuthFailure(ip: String) {
+        if (authRefreshing) return
+        authRefreshing = true
+
         SocketManager.disconnect()
         coroutineScope.launch {
             try {
@@ -233,6 +236,8 @@ class WebSocketService : Service() {
                 connectSocket()
             } catch (e: Exception) {
                 Log.e("onloc", e.toString())
+            } finally {
+                authRefreshing = false
             }
         }
     }

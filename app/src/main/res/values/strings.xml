@@ -80,6 +80,12 @@
     <string name="permissions_lock_header">Lock Device</string>
     <string name="permissions_lock_description">Allows the app to remotely lock your device if it is lost or stolen.
     </string>
+    <string name="permissions_battery_optimization_header">Disable Battery Optimization</string>
+    <string name="permissions_battery_optimization_description">Battery optimization can stop the app while it\'s
+        working in the background. This will stop the core functionalities of the app such as background location
+        tracking and remote control.
+    </string>
+    <string name="permissions_disable_button_label">Disable</string>
 
     <!-- Services -->
     <string name="service_location_channel_name">Location Service</string>

@@ -25,7 +25,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
@@ -111,8 +110,8 @@ fun Permissions(
 
             if (!batteryOptimizationDisabled) {
                 FeatureCard(
-                    name = "Disable Battery Optimization",
-                    description = "Battery optimization can stop the app while it's working in the background. This will stop the core functionalities of the app such as background location tracking and remote control.",
+                    name = stringResource(R.string.permissions_background_location_header),
+                    description = stringResource(R.string.permissions_battery_optimization_description),
                     modifier = Modifier.border(
                         width = 1.dp,
                         color = MaterialTheme.colorScheme.error,
@@ -122,7 +121,7 @@ fun Permissions(
                     Button(
                         onClick = { BatteryOptimizationPermission().request(activity) },
                     ) {
-                        Text(text = "Disable")
+                        Text(text = stringResource(R.string.permissions_disable_button_label))
                     }
                 }
             }
