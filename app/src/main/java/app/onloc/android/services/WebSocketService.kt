@@ -199,7 +199,7 @@ class WebSocketService : Service() {
      * Connects to the server via WebSockets and attach listeners to react to commands.
      */
     private fun connectSocket() {
-        if (connectivityManager.activeNetwork == null || SocketManager.isConnected()) return
+        if (connectivityManager.activeNetwork == null) return
 
         val appPrefs = AppPreferences(this)
         val ip = appPrefs.getIP()

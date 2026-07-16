@@ -132,7 +132,7 @@ fun SharedLocationPuck(
             id = "location-puck-$id",
             source = markerSource,
             iconImage = image(painterResource(R.drawable.triangle), drawAsSdf = true),
-            iconOffset = offset(0f.dp, 1f.dp),
+            iconOffset = offset(0.dp, 1.dp),
             iconColor = const(color),
             iconAllowOverlap = const(true),
             onClick = { onClick(); ClickResult.Consume },
