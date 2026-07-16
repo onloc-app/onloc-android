@@ -35,9 +35,7 @@ import androidx.compose.material.icons.outlined.Battery4Bar
 import androidx.compose.material.icons.outlined.Battery5Bar
 import androidx.compose.material.icons.outlined.Battery6Bar
 import androidx.compose.material.icons.outlined.BatteryFull
-import androidx.compose.material.icons.outlined.DateRange
 import androidx.compose.material.icons.outlined.ElectricBolt
-import androidx.compose.material.icons.outlined.Timer
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -51,11 +49,8 @@ import app.onloc.android.R
 import app.onloc.android.models.Device
 import app.onloc.android.models.User
 import java.time.Instant
-import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-import java.util.Date
 
 @Composable
 fun DeviceInformation(device: Device, modifier: Modifier = Modifier, currentUser: User? = null, user: User? = null) {
