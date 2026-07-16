@@ -1,0 +1,2 @@
+- The background service for WebSockets has been reviewed and refactored to make it more reliable.
+- Pressing on a device now shows some details about it under the usual actions and commands.
