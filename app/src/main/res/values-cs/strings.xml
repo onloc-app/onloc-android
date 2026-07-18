@@ -84,4 +84,5 @@
     <string name="service_ringer_start_notification_title">Prozvánění…</string>
     <string name="service_ringer_start_notification_description">Zařízení zvoní</string>
     <string name="service_websocket_lock_screen_notification_title">Informace</string>
+    <string name="device_actions_flash">Zasvítit</string>
 </resources>
