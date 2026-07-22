@@ -1,5 +1,5 @@
 [versions]
-agp = "9.0.1"
+agp = "9.1.1"
 coil = "3.4.0"
 detekt = "0.5.8"
 detektPlugin = "1.23.8"

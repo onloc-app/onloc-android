@@ -26,8 +26,12 @@ import android.provider.Settings
 
 class BatteryOptimizationPermission : Permission {
     override fun isGranted(context: Context): Boolean {
+        // Battery optimizations is disabled if the app as admin privileges,
+        // but power manager does not declare it as such so grab whether the
+        // app has admin privileges.
+        val adminPermission = AdminPermission()
         val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
-        return powerManager.isIgnoringBatteryOptimizations(context.packageName)
+        return powerManager.isIgnoringBatteryOptimizations(context.packageName) || adminPermission.isGranted(context)
     }
 
     @SuppressLint("BatteryLife")
