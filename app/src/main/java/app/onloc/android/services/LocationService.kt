@@ -21,19 +21,20 @@ import android.app.Service
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
+import android.location.LocationListener
+import android.location.LocationManager
+import android.location.LocationRequest
 import android.os.BatteryManager
 import android.os.IBinder
 import androidx.core.app.ActivityCompat
+import androidx.core.content.getSystemService
 import app.onloc.android.AppPreferences
-import app.onloc.android.R
 import app.onloc.android.ServicePreferences
 import app.onloc.android.api.locations.LocationsApiService
 import app.onloc.android.helpers.NotificationFactory.createStartLocationServiceNotification
 import app.onloc.android.helpers.NotificationFactory.createStopLocationServiceNotification
 import app.onloc.android.helpers.START_LOCATION_SERVICE_NOTIFICATION_ID
 import app.onloc.android.helpers.STOP_LOCATION_SERVICE_NOTIFICATION_ID
-import app.onloc.locationclient.LocationClient
-import app.onloc.locationclient.locationClientConfig
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
@@ -47,6 +48,9 @@ private const val ACCEPTABLE_ACCURACY = 500f
 
 class LocationService : Service() {
     private val serviceScope = CoroutineScope(Dispatchers.IO)
+
+    private var locationManager: LocationManager? = null
+    private var locationListener: LocationListener? = null
 
     /**
      * Launched when a location update arrives.
@@ -103,21 +107,43 @@ class LocationService : Service() {
         val finalInterval = if (!realTime) interval!! * SECOND else 2L * SECOND
         val minDistance = if (!realTime) 0f else REAL_TIME_MIN_DISTANCE
 
-        val config = locationClientConfig {
-            requiredTimeInterval = finalInterval
-            requiredDistanceInterval = minDistance
-            acceptableAccuracy = ACCEPTABLE_ACCURACY
-            gpsMessage = getString(R.string.service_location_enable_gps)
+        val lm = getSystemService<LocationManager>() ?: return
+        locationManager = lm
+
+        if (!lm.hasProvider(LocationManager.FUSED_PROVIDER)) {
+            return
         }
 
-        val locationClient = LocationClient(applicationContext, config)
-        serviceScope.launch {
-            locationClient.locationFlow().collect { result ->
-                result.onSuccess { location ->
-                    handleLocation(location)
-                }
-            }
+        val gpsOnly = !lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
+
+        val request = LocationRequest.Builder(finalInterval)
+            .setMinUpdateDistanceMeters(minDistance)
+            .setMaxUpdateDelayMillis(if (!realTime) finalInterval else 0L)
+            .setQuality(
+                if (!realTime) LocationRequest.QUALITY_HIGH_ACCURACY
+                else
+                    if (gpsOnly) LocationRequest.QUALITY_HIGH_ACCURACY
+                    else LocationRequest.QUALITY_BALANCED_POWER_ACCURACY
+            )
+            .build()
+
+        val listener = LocationListener { location -> handleLocation(location) }
+        locationListener = listener
+
+        lm.requestLocationUpdates(
+            LocationManager.FUSED_PROVIDER,
+            request,
+            mainExecutor,
+            listener,
+        )
+    }
+
+    private fun stopLocationUpdates() {
+        locationListener?.let { listener ->
+            locationManager?.removeUpdates(listener)
         }
+        locationListener = null
+        locationManager = null
     }
 
     private fun stopForegroundService() {
@@ -139,6 +165,7 @@ class LocationService : Service() {
     override fun onDestroy() {
         super.onDestroy()
 
+        stopLocationUpdates()
         stopForegroundService()
         serviceScope.cancel()
 

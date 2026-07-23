@@ -17,6 +17,8 @@ package app.onloc.android.ui.location
 
 import android.annotation.SuppressLint
 import android.app.Application
+import android.content.Context
+import android.location.LocationManager
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import app.onloc.android.AppPreferences
@@ -34,14 +36,11 @@ import app.onloc.android.models.api.DeleteTokenRequest
 import app.onloc.android.services.LocationCallbackManager
 import app.onloc.android.services.ServiceManager
 import app.onloc.android.services.SocketEventBus
-import app.onloc.locationclient.LocationClient
-import app.onloc.locationclient.locationClientConfig
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import org.json.JSONObject
@@ -189,24 +188,13 @@ class LocationViewModel(application: Application) : AndroidViewModel(application
 
     @SuppressLint("MissingPermission")
     fun grabCurrentLocation() {
-        val config = locationClientConfig {
-            requiredTimeInterval = 0L
-            requiredDistanceInterval = 0f
-        }
-
-        viewModelScope.launch {
-            LocationClient(context, config)
-                .locationFlow()
-                .first()
-                .onSuccess { location ->
-                    if (_selectedDeviceId.value != null) {
-                        _currentLocation.value = Location.fromAndroidLocation(
-                            0,
-                            _selectedDeviceId.value!!,
-                            location
-                        )
-                    }
-                }
+        val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        locationManager.getLastKnownLocation(LocationManager.FUSED_PROVIDER)?.let {
+            _currentLocation.value = Location.fromAndroidLocation(
+                id = 0,
+                _selectedDeviceId.value!!,
+                location = it,
+            )
         }
     }
 
