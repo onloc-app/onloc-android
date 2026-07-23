@@ -59,7 +59,7 @@ fun MapAttribution(modifier: Modifier = Modifier) {
             buildAnnotatedString {
                 withLink(
                     LinkAnnotation.Url(
-                        "https://maps.black/",
+                        "https://protomaps.com/",
                         TextLinkStyles(
                             style = SpanStyle(
                                 textDecoration = TextDecoration.Underline,
@@ -67,7 +67,7 @@ fun MapAttribution(modifier: Modifier = Modifier) {
                         ),
                     ),
                 ) {
-                    append("Maps.black")
+                    append("Protomaps")
                 }
             }
         )
@@ -84,7 +84,7 @@ fun MapAttribution(modifier: Modifier = Modifier) {
                         ),
                     ),
                 ) {
-                    append("© OpenStreetMap")
+                    append("OpenStreetMap")
                 }
             }
         )

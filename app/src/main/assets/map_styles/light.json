@@ -4,8 +4,10 @@
   "id": "immich-map-light",
   "sources": {
     "vector": {
+      "attribution": "<a href=\"https://github.com/protomaps/basemaps\">Protomaps</a> © <a href=\"https://openstreetmap.org\">OpenStreetMap</a>",
       "type": "vector",
-      "url": "https://v1.maps.black/tilejson/openstreetmap-protomaps.json"
+      "tiles": [ "https://tiles.onloc.app/tiles/{z}/{x}/{y}.mvt" ],
+      "maxzoom": 15
     }
   },
   "layers": [
@@ -4749,6 +4751,6 @@
       }
     }
   ],
-  "sprite": "https://v1.maps.black/styles/openstreetmap-protomaps/protomaps/light/sprites/light/sprites",
-  "glyphs": "https://v1.maps.black/fonts-minimal/{fontstack}/{range}.pbf"
+  "sprite": "https://protomaps.github.io/basemaps-assets/sprites/v4/light",
+  "glyphs": "https://protomaps.github.io/basemaps-assets/fonts/{fontstack}/{range}.pbf"
 }

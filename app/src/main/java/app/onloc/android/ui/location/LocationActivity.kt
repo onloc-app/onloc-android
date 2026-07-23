@@ -26,10 +26,12 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -100,9 +102,11 @@ import app.onloc.android.api.AuthStateManager
 import app.onloc.android.components.SettingsDialog
 import app.onloc.android.components.devices.DeviceActions
 import app.onloc.android.components.devices.DeviceInformation
+import app.onloc.android.components.map.MapAttribution
 import app.onloc.android.components.map.SharedLocationPuck
 import app.onloc.android.services.ServiceState
 import app.onloc.android.ui.main.MainActivity
+import dev.sargunv.maplibrecompose.material3.controls.ExpandingAttributionButton
 
 private const val MAP_MOVE_BUFFER = 300
 
@@ -488,6 +492,14 @@ fun LocationScreen(viewModel: LocationViewModel, modifier: Modifier = Modifier) 
                     }
                 }
 
+                ExpandingAttributionButton(
+                    expanded = attributionExpanded,
+                    onClick = { attributionExpanded = !attributionExpanded },
+                    styleState = styleState,
+                    modifier = Modifier.height(48.dp).align(Alignment.BottomEnd),
+                    expandedContent = { MapAttribution() },
+                )
+
                 ScaleBar(
                     metersPerDp = cameraState.metersPerDpAtTarget,
                     modifier = Modifier.align(Alignment.TopStart),
@@ -517,17 +529,6 @@ fun LocationScreen(viewModel: LocationViewModel, modifier: Modifier = Modifier) 
                         )
                     }
                 }
-
-                // Not working because maps.black does not have the attribution tag
-                // Needs to be fixed
-
-//              ExpandingAttributionButton(
-//                  expanded = attributionExpanded,
-//                  onClick = { attributionExpanded = !attributionExpanded },
-//                  styleState = styleState,
-//                  modifier = Modifier.height(48.dp),
-//                  expandedContent = { MapAttribution() },
-//              )
 
                 // Center start controls
                 Column(
