@@ -44,7 +44,6 @@ import app.onloc.android.models.Location as OnlocLocation
 private const val SECOND = 1000L
 
 private const val REAL_TIME_MIN_DISTANCE = 12f
-private const val ACCEPTABLE_ACCURACY = 500f
 
 class LocationService : Service() {
     private val serviceScope = CoroutineScope(Dispatchers.IO)
@@ -107,35 +106,33 @@ class LocationService : Service() {
         val finalInterval = if (!realTime) interval!! * SECOND else 2L * SECOND
         val minDistance = if (!realTime) 0f else REAL_TIME_MIN_DISTANCE
 
-        val lm = getSystemService<LocationManager>() ?: return
+        val lm = getSystemService<LocationManager>()
         locationManager = lm
 
-        if (!lm.hasProvider(LocationManager.FUSED_PROVIDER)) {
-            return
-        }
+        if (lm != null && lm.hasProvider(LocationManager.FUSED_PROVIDER)) {
+            val gpsOnly = !lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
 
-        val gpsOnly = !lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
+            val request = LocationRequest.Builder(finalInterval)
+                .setMinUpdateDistanceMeters(minDistance)
+                .setMaxUpdateDelayMillis(if (!realTime) finalInterval else 0L)
+                .setQuality(
+                    if (!realTime) LocationRequest.QUALITY_HIGH_ACCURACY
+                    else
+                        if (gpsOnly) LocationRequest.QUALITY_HIGH_ACCURACY
+                        else LocationRequest.QUALITY_BALANCED_POWER_ACCURACY
+                )
+                .build()
 
-        val request = LocationRequest.Builder(finalInterval)
-            .setMinUpdateDistanceMeters(minDistance)
-            .setMaxUpdateDelayMillis(if (!realTime) finalInterval else 0L)
-            .setQuality(
-                if (!realTime) LocationRequest.QUALITY_HIGH_ACCURACY
-                else
-                    if (gpsOnly) LocationRequest.QUALITY_HIGH_ACCURACY
-                    else LocationRequest.QUALITY_BALANCED_POWER_ACCURACY
+            val listener = LocationListener { location -> handleLocation(location) }
+            locationListener = listener
+
+            lm.requestLocationUpdates(
+                LocationManager.FUSED_PROVIDER,
+                request,
+                mainExecutor,
+                listener,
             )
-            .build()
-
-        val listener = LocationListener { location -> handleLocation(location) }
-        locationListener = listener
-
-        lm.requestLocationUpdates(
-            LocationManager.FUSED_PROVIDER,
-            request,
-            mainExecutor,
-            listener,
-        )
+        }
     }
 
     private fun stopLocationUpdates() {
