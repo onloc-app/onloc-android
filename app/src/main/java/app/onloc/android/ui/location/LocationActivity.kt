@@ -156,6 +156,7 @@ fun LocationScreen(viewModel: LocationViewModel, modifier: Modifier = Modifier) 
         viewModel.grabCurrentLocation()
     }
 
+    // Moves the camera to see this device's location on the map.
     fun goToCurrentLocation() {
         currentLocation?.let {
             val cameraPosition = CameraPosition(
@@ -173,6 +174,7 @@ fun LocationScreen(viewModel: LocationViewModel, modifier: Modifier = Modifier) 
         }
     }
 
+    // Changes the view of the map to see all available devices.
     fun fitMapBounds(positions: List<Position>) {
         if (positions.isNotEmpty()) {
             if (positions.size == 1) {
@@ -209,6 +211,22 @@ fun LocationScreen(viewModel: LocationViewModel, modifier: Modifier = Modifier) 
         }
     }
 
+    // Moves the camera to a specific location on the map.
+    fun goToLocation(location: Location) {
+        coroutineScope.launch {
+            cameraState.animateTo(
+                CameraPosition(
+                    target = Position(
+                        location.longitude,
+                        location.latitude,
+                    ),
+                    zoom = 16.0,
+                )
+            )
+        }
+    }
+
+    // Opens the default navigation app for this device with a route to the selected location.
     fun openNavigationApp(location: Location) {
         val uri = "geo:${location.latitude},${location.longitude}?q=${location.latitude},${location.longitude}".toUri()
         context.startActivity(Intent(Intent.ACTION_VIEW, uri))
@@ -444,17 +462,7 @@ fun LocationScreen(viewModel: LocationViewModel, modifier: Modifier = Modifier) 
                                 showProfilePicture = true,
                                 showCone = true,
                                 onClick = {
-                                    coroutineScope.launch {
-                                        cameraState.animateTo(
-                                            CameraPosition(
-                                                target = Position(
-                                                    location.longitude,
-                                                    location.latitude,
-                                                ),
-                                                zoom = 16.0,
-                                            )
-                                        )
-                                    }
+                                    goToLocation(location)
                                     focusedDevice = device
                                 },
                                 onLongClick = {
@@ -468,8 +476,9 @@ fun LocationScreen(viewModel: LocationViewModel, modifier: Modifier = Modifier) 
                 LaunchedEffect(allPositions) {
                     if (onCurrentLocation) {
                         goToCurrentLocation()
-                    } else {
-                        fitMapBounds(allPositions)
+                    }
+                    focusedDevice?.latestLocation?.let { location ->
+                        goToLocation(location)
                     }
                 }
             }
