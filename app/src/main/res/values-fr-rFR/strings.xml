@@ -93,4 +93,13 @@
     <string name="device_actions_flash">Flash</string>
     <string name="device_actions_navigate">Itinéraire</string>
     <string name="main_location_service_stopped">Le service de localisation s\'est arrêté. Vos données ne sont pas téléversées.</string>
+    <string name="permissions_battery_optimization_header">Désactiver l\'optimisation de la batterie</string>
+    <string name="permissions_battery_optimization_description">L\'optimisation de la batterie peut interrompre l\'application lorsqu\'elle fonctionne en arrière-plan. Cela empêchera les fonctionnalités principales de l\'application, telles que le suivi de la localisation en arrière-plan et le contrôle à distance.</string>
+    <string name="permissions_disable_button_label">Désactiver</string>
+    <string name="device_info_battery_level">Niveau de la batterie</string>
+    <string name="device_info_charging">Charge</string>
+    <string name="device_info_owner">Propriétaire</string>
+    <string name="device_info_latest_location">Dernière localisation</string>
+    <string name="value_true">Vrai</string>
+    <string name="value_false">Faux</string>
 </resources>
