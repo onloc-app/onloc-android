@@ -15,10 +15,12 @@
 
 package app.onloc.android.ui.location
 
-import android.annotation.SuppressLint
+import android.Manifest
 import android.app.Application
 import android.content.Context
 import android.location.LocationManager
+import android.location.LocationRequest
+import androidx.annotation.RequiresPermission
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import app.onloc.android.AppPreferences
@@ -186,15 +188,25 @@ class LocationViewModel(application: Application) : AndroidViewModel(application
         ServiceManager.stopLocationService(context)
     }
 
-    @SuppressLint("MissingPermission")
+    @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
     fun grabCurrentLocation() {
         val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
-        locationManager.getLastKnownLocation(LocationManager.FUSED_PROVIDER)?.let {
-            _currentLocation.value = Location.fromAndroidLocation(
-                id = 0,
-                _selectedDeviceId.value!!,
-                location = it,
-            )
+        val request = LocationRequest.Builder(0)
+            .setQuality(LocationRequest.QUALITY_HIGH_ACCURACY)
+            .build()
+        locationManager.getCurrentLocation(
+            LocationManager.FUSED_PROVIDER,
+            request,
+            null,
+            context.mainExecutor,
+        ) {
+            if (it != null) {
+                _currentLocation.value = Location.fromAndroidLocation(
+                    id = -1,
+                    deviceId = -1,
+                    location = it,
+                )
+            }
         }
     }
 

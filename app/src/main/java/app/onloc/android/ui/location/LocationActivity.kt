@@ -57,6 +57,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -73,6 +74,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.onloc.android.components.Avatar
 import app.onloc.android.components.devices.DeviceSelector
@@ -103,6 +107,7 @@ import app.onloc.android.components.devices.DeviceActions
 import app.onloc.android.components.devices.DeviceInformation
 import app.onloc.android.components.map.MapAttribution
 import app.onloc.android.components.map.SharedLocationPuck
+import app.onloc.android.permissions.LocationPermission
 import app.onloc.android.services.ServiceState
 import app.onloc.android.ui.main.MainActivity
 import dev.sargunv.maplibrecompose.material3.controls.ExpandingAttributionButton
@@ -128,6 +133,7 @@ class LocationActivity : ComponentActivity() {
 @Composable
 fun LocationScreen(viewModel: LocationViewModel, modifier: Modifier = Modifier) {
     val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
 
     val devices by viewModel.devices.collectAsStateWithLifecycle()
     val sharedDevices by viewModel.sharedDevices.collectAsStateWithLifecycle()
@@ -143,6 +149,7 @@ fun LocationScreen(viewModel: LocationViewModel, modifier: Modifier = Modifier) 
     var onCurrentLocation by remember { mutableStateOf(false) }
     var focusedDevice by remember { mutableStateOf<Device?>(null) }
     var notificationGranted by remember { mutableStateOf(PostNotificationPermission().isGranted(context)) }
+    var locationGranted by remember { mutableStateOf(LocationPermission().isGranted(context)) }
     var lastGestureEnd by remember { mutableLongStateOf(0L) }
     var attributionExpanded by remember { mutableStateOf(false) }
 
@@ -152,9 +159,26 @@ fun LocationScreen(viewModel: LocationViewModel, modifier: Modifier = Modifier) 
     val cameraState = rememberCameraState()
     val styleState = rememberStyleState()
 
+    // Watch when the app comes back on to see if permissions changed.
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                locationGranted = LocationPermission().isGranted(context)
+            }
+        }
+
+        lifecycleOwner.lifecycle.addObserver(observer)
+
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
+
     // Grab the device's location on launch.
     LaunchedEffect(Unit) {
-        viewModel.grabCurrentLocation()
+        if (locationGranted) {
+            viewModel.grabCurrentLocation()
+        }
     }
 
     // Moves the camera to see this device's location on the map.
@@ -514,7 +538,9 @@ fun LocationScreen(viewModel: LocationViewModel, modifier: Modifier = Modifier) 
                     expanded = attributionExpanded,
                     onClick = { attributionExpanded = !attributionExpanded },
                     styleState = styleState,
-                    modifier = Modifier.height(48.dp).align(Alignment.BottomEnd),
+                    modifier = Modifier
+                        .height(48.dp)
+                        .align(Alignment.BottomEnd),
                     expandedContent = { MapAttribution() },
                 )
 
@@ -526,12 +552,15 @@ fun LocationScreen(viewModel: LocationViewModel, modifier: Modifier = Modifier) 
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.align(Alignment.TopEnd)) {
                     DisappearingCompassButton(cameraState = cameraState)
                     ElevatedButton(
-                        onClick = { goToCurrentLocation() },
+                        onClick = {
+                            viewModel.grabCurrentLocation()
+                            goToCurrentLocation()
+                        },
                         modifier = Modifier
                             .height(48.dp)
                             .width(48.dp),
                         contentPadding = PaddingValues(0.dp),
-                        enabled = notificationGranted
+                        enabled = notificationGranted && locationGranted
                     ) {
                         var icon = Icons.Outlined.GpsOff
                         if (notificationGranted) {

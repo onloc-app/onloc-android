@@ -42,10 +42,8 @@ import kotlinx.coroutines.launch
 import app.onloc.android.models.Location as OnlocLocation
 
 private const val SECOND = 1000L
-private const val ONE_HOUR_MILLIS = 60 * 60 * 1000L
-
-private const val MOVING_SPEED_THRESHOLD = 0.2
 private const val REAL_TIME_MIN_DISTANCE = 12f
+private const val ACCURACY_THRESHOLD = 50f
 
 class LocationService : Service() {
     private val serviceScope = CoroutineScope(Dispatchers.IO)
@@ -53,13 +51,12 @@ class LocationService : Service() {
     private var locationManager: LocationManager? = null
     private var locationListener: LocationListener? = null
 
-    private var firstLocationSent = false
-    private var lastLocationTime = 0L
-
     /**
      * Launched when a location update arrives.
      */
     private fun handleLocation(location: Location) {
+        if (location.accuracy >= ACCURACY_THRESHOLD) return
+
         val appPrefs = AppPreferences(this)
         val ip = appPrefs.getIP()
         val selectedDeviceId = appPrefs.getDeviceId()
@@ -77,18 +74,11 @@ class LocationService : Service() {
         parsedLocation.charging = batteryCharging
 
         if (ip != null && selectedDeviceId != null) {
-            // Don't send location if the device has not moved in the last hour.
-            val isMoving = location.speed >= MOVING_SPEED_THRESHOLD
-            val oneHourPassed = location.time - lastLocationTime >= ONE_HOUR_MILLIS
-            if ((isMoving || !firstLocationSent) || oneHourPassed) {
-                serviceScope.launch {
-                    LocationsApiService(applicationContext, ip).postLocation(parsedLocation)
-                }
+            serviceScope.launch {
+                LocationsApiService(applicationContext, ip).postLocation(parsedLocation)
             }
         }
         LocationCallbackManager.callback?.invoke(location)
-
-        firstLocationSent = true
     }
 
     /**
