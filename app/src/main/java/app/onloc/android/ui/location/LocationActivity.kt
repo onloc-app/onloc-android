@@ -60,6 +60,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -473,6 +474,16 @@ fun LocationScreen(viewModel: LocationViewModel, modifier: Modifier = Modifier) 
                     }
                 }
 
+                // Fit bounds only when the devices on the map change.
+                var previousPositionsCount by rememberSaveable { mutableIntStateOf(0) }
+                LaunchedEffect(allPositions.size) {
+                    if (allPositions.size != previousPositionsCount) {
+                        fitMapBounds(allPositions)
+                    }
+                    previousPositionsCount = allPositions.size
+                }
+
+                // Stay on the focused location.
                 LaunchedEffect(allPositions) {
                     if (onCurrentLocation) {
                         goToCurrentLocation()
