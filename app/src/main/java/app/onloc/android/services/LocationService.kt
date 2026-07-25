@@ -43,7 +43,7 @@ import app.onloc.android.models.Location as OnlocLocation
 
 private const val SECOND = 1000L
 private const val REAL_TIME_MIN_DISTANCE = 12f
-private const val ACCURACY_THRESHOLD = 50f
+private const val ACCURACY_THRESHOLD = 200f
 
 class LocationService : Service() {
     private val serviceScope = CoroutineScope(Dispatchers.IO)
@@ -112,17 +112,10 @@ class LocationService : Service() {
         locationManager = lm
 
         if (lm != null && lm.hasProvider(LocationManager.FUSED_PROVIDER)) {
-            val gpsOnly = !lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
-
             val request = LocationRequest.Builder(finalInterval)
                 .setMinUpdateDistanceMeters(minDistance)
                 .setMaxUpdateDelayMillis(if (!realTime) finalInterval else 0L)
-                .setQuality(
-                    if (!realTime) LocationRequest.QUALITY_HIGH_ACCURACY
-                    else
-                        if (gpsOnly) LocationRequest.QUALITY_HIGH_ACCURACY
-                        else LocationRequest.QUALITY_BALANCED_POWER_ACCURACY
-                )
+                .setQuality(LocationRequest.QUALITY_HIGH_ACCURACY)
                 .build()
 
             val listener = LocationListener { location -> handleLocation(location) }
