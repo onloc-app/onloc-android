@@ -1,3 +1,67 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="app_name">Onloc</string>
+    <string name="title_activity_location">Locatie-activiteit</string>
+    <string name="title_activity_login">Login-activiteit</string>
+    <string name="title_activity_offline">Offline-activiteit</string>
+    <string name="login_username_field_label">Gebruikersnaam</string>
+    <string name="login_password_field_label">Wachtwoord</string>
+    <string name="login_ip_field_label">URL van Website</string>
+    <string name="login_found_servers_button">Toon Gevonden Servers</string>
+    <string name="login_found_servers_dialog_title">Gevonden Servers</string>
+    <string name="login_title">Onloc</string>
+    <string name="login_description">Inloggen bij een Instantie</string>
+    <string name="login_submit_button_label">Inloggen</string>
+    <string name="login_error_invalid_credentials">Onjuiste Inloggegevens</string>
+    <string name="login_error_server">Serverfout (%1$d)</string>
+    <string name="main_title">Onloc</string>
+    <string name="main_service_status_no_selection">Geen apparaat geselecteerd</string>
+    <string name="main_service_status_missing_permissions">Missende vereiste permissies</string>
+    <string name="main_location_service_stopped">Locatievoorzieningen zijn gestopt. Uw data wordt niet geüploaded.</string>
+    <string name="main_device_button_label">Selecteer een apparaat</string>
+    <string name="avatar_dialog_title">Account</string>
+    <string name="avatar_logout_button_label">Uitloggen</string>
+    <string name="device_actions_lock">Vergrendelen</string>
+    <string name="device_actions_navigate">Maak route</string>
+    <string name="main_location_service_switch_label">Locatievoorziening</string>
+    <string name="main_interval_slider_label">Interval tussen uploads</string>
+    <string name="generic_close_button">Sluit</string>
+    <plurals name="interval_picker_seconds">
+        <item quantity="one">seconde</item>
+        <item quantity="other">secondes</item>
+    </plurals>
+    <plurals name="interval_picker_minutes">
+        <item quantity="one">minuut</item>
+        <item quantity="other">minuten</item>
+    </plurals>
+    <plurals name="interval_picker_hours">
+        <item quantity="one">uur</item>
+        <item quantity="other">uren</item>
+    </plurals>
+    <plurals name="interval_picker_days">
+        <item quantity="one">dag</item>
+        <item quantity="other">dagen</item>
+    </plurals>
+    <string name="offline_title">Connectie met de server is verloren</string>
+    <string name="offline_retry_button_label">Probeer opnieuw</string>
+    <string name="offline_logout_button_label">Uitloggen</string>
+    <string name="permissions_background_location_header">Locatie op de achtergrond</string>
+    <string name="permissions_background_location_description">Geeft de app toestemming om de locatie van je apparaat met de server te delen, ook als de app niet in gebruik is.</string>
+    <string name="permissions_notifications_label">Notificaties</string>
+    <string name="permissions_location_label">Locatie</string>
+    <string name="permissions_do_not_disturb_label">Toegang tot Niet Storen</string>
+    <string name="permissions_overlay_label">Tonen over andere apps heen</string>
+    <string name="permissions_ring_description">De app luistert naar commando\'s van de server en rinkelt wanneer het daartoe opdracht krijgt.</string>
+    <string name="permissions_grant_button_label">Toekennen</string>
+    <string name="permissions_granted_button_label">Toegekend</string>
+    <string name="permissions_admin_label">Apparaat Admin</string>
+    <string name="permissions_lock_header">Vergrendel Apparaat</string>
+    <string name="permissions_lock_description">Geeft de app toestemming je apparaat op afstand te vergrendelen als het verloren of gestolen is.</string>
+    <string name="permissions_battery_optimization_header">Batterijoptimalisatie Uitschakelen</string>
+    <string name="permissions_battery_optimization_description">Batterijoptimalisatie kan de app afsluiten terwijl deze op de achtergrond actief is. Hierdoor worden de belangrijkste functies van de app, zoals locatiebepaling op de achtergrond en bediening op afstand, uitgeschakeld.</string>
+    <string name="permissions_disable_button_label">Uitzetten</string>
+    <string name="service_location_channel_name">Locatievoorziening</string>
+    <string name="service_location_start_notification_title">Locatievoorziening Gestart</string>
+    <string name="service_location_start_notification_description">Je locatie wordt op de achtergrond bijgehouden</string>
+    <string name="service_location_stop_notification_title">Locatievoorziening Gestopt</string>
 </resources>
