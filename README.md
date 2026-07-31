@@ -20,5 +20,5 @@ Help us translate Onloc on [Weblate](https://hosted.weblate.org/projects/onloc/)
 
 [![Translation status](https://hosted.weblate.org/widget/onloc/android/multi-auto.svg)](https://hosted.weblate.org/engage/onloc/)
 
-## Installation (self-hosted instance)
-Installation steps can be found on [Onloc's website](https://onloc.app/docs/self-host/installation) or here on GitHub in the [website's repository](https://github.com/onloc-app/onloc-website/blob/main/docs/self-host/installation.mdx).
+## Installationhttps://onloc.app/docs/android/installationhttps://onloc.app/docs/android/installation
+Installation steps can be found on [Onloc's website](https://onloc.app/docs/android/installation) or here on GitHub in the [website's repository](https://github.com/onloc-app/onloc-website/blob/main/docs/android/installation.mdx).
