@@ -64,4 +64,26 @@
     <string name="service_location_start_notification_title">Locatievoorziening Gestart</string>
     <string name="service_location_start_notification_description">Je locatie wordt op de achtergrond bijgehouden</string>
     <string name="service_location_stop_notification_title">Locatievoorziening Gestopt</string>
+    <string name="title_activity_ringer">Belactiviteit</string>
+    <string name="device_actions_ring">Laat afgaan</string>
+    <string name="device_actions_flash">Flits</string>
+    <string name="main_settings_header">Instellingen</string>
+    <string name="permissions_header">Functies en machtigingen</string>
+    <string name="main_interval_slider_realtime_label">Gebruik realtime updates</string>
+    <string name="permissions_ring_header">Laat Apparaat Afgaan</string>
+    <string name="service_location_stop_notification_description">De locatievolgservice is stopgezet</string>
+    <string name="service_location_enable_gps">GPS moet zijn ingeschakeld</string>
+    <string name="service_websocket_channel_name">WebSocket-service</string>
+    <string name="service_websocket_start_notification_title">Luisteren naar commando\'s</string>
+    <string name="service_websocket_start_notification_description">Het apparaat zal reageren op commando\'s</string>
+    <string name="service_ringer_channel_name">Bel</string>
+    <string name="service_ringer_start_notification_title">Laat afgaan…</string>
+    <string name="service_ringer_start_notification_description">Het apparaat gaat af</string>
+    <string name="service_websocket_lock_screen_notification_title">Informatie</string>
+    <string name="device_info_battery_level">Batterijniveau</string>
+    <string name="device_info_charging">Laadt op</string>
+    <string name="device_info_owner">Eigenaar</string>
+    <string name="device_info_latest_location">Meest recente locatie</string>
+    <string name="value_true">Waar</string>
+    <string name="value_false">Onwaar</string>
 </resources>
