@@ -38,7 +38,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             val context = getApplication<Application>()
             val credentials = UserPreferences(context).getUserCredentials()
-            val ip = AppPreferences(context).getIP()
+            val ip = AppPreferences(context).getServerUrl()
 
             val accessToken = credentials.accessToken
             val user = credentials.user

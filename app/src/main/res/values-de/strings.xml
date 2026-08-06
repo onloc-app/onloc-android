@@ -5,7 +5,7 @@
     <string name="login_password_field_label">Passwort</string>
     <string name="login_ip_field_label">Serveradresse</string>
     <string name="title_activity_offline">Offline Aktivität</string>
-    <string name="login_found_servers_dialog_title">Gefundene Server</string>
+    <string name="login_found_servers_title">Gefundene Server</string>
     <string name="login_title">Onloc</string>
     <string name="login_description">Bei einer Instanz anmelden</string>
     <string name="login_submit_button_label">Anmelden</string>

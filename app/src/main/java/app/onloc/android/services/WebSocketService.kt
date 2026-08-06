@@ -202,7 +202,7 @@ class WebSocketService : Service() {
         if (connectivityManager.activeNetwork == null) return
 
         val appPrefs = AppPreferences(this)
-        val ip = appPrefs.getIP()
+        val ip = appPrefs.getServerUrl()
         val deviceId = appPrefs.getDeviceId()
 
         val userPrefs = UserPreferences(this)

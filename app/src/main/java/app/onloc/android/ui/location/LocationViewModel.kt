@@ -91,7 +91,7 @@ class LocationViewModel(application: Application) : AndroidViewModel(application
         servicePreferences.createRealTime(realTime)
     }
 
-    val storedIp: String? get() = appPreferences.getIP()
+    val storedIp: String? get() = appPreferences.getServerUrl()
     val user: User? get() = userPreferences.getUserCredentials().user
 
     init {

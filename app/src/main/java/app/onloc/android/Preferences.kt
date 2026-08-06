@@ -20,7 +20,8 @@ import androidx.core.content.edit
 import app.onloc.android.models.User
 import com.google.gson.Gson
 
-const val IP_KEY = "ip"
+const val DEPRACATED_IP_KEY = "ip"
+const val SERVER_URL_KEY = "server_url"
 const val DEVICE_ID_KEY = "device_id"
 const val ACCESS_TOKEN_KEY = "access_token"
 const val REFRESH_TOKEN_KEY = "refresh_token"
@@ -42,12 +43,20 @@ class AppPreferences(private val context: Context) {
             )
     }
 
-    fun getIP(): String? {
-        return prefs.getString(IP_KEY, null)
+    fun getServerUrl(): String? {
+        // Switch to new key if coming from a version before v1.2.8
+        // TODO: remove in future updates
+        val ip = prefs.getString(DEPRACATED_IP_KEY, null)
+        if (ip != null) {
+            createServerUrl(ip)
+            prefs.edit { remove(DEPRACATED_IP_KEY) }
+        }
+
+        return prefs.getString(SERVER_URL_KEY, null)
     }
 
-    fun createIP(ip: String) {
-        prefs.edit { putString(IP_KEY, ip) }
+    fun createServerUrl(url: String) {
+        prefs.edit { putString(SERVER_URL_KEY, url) }
     }
 
     fun getDeviceId(): Int? {

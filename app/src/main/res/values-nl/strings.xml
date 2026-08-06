@@ -8,7 +8,7 @@
     <string name="login_password_field_label">Wachtwoord</string>
     <string name="login_ip_field_label">URL van Website</string>
     <string name="login_found_servers_button">Toon Gevonden Servers</string>
-    <string name="login_found_servers_dialog_title">Gevonden Servers</string>
+    <string name="login_found_servers_title">Gevonden Servers</string>
     <string name="login_title">Onloc</string>
     <string name="login_description">Inloggen bij een Instantie</string>
     <string name="login_submit_button_label">Inloggen</string>

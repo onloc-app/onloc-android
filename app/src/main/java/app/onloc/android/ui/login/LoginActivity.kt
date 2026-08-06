@@ -15,33 +15,50 @@
 
 package app.onloc.android.ui.login
 
+import android.app.Application
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.os.ext.SdkExtensions
+import android.util.Log
+import android.util.Patterns
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.CopyAll
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -49,27 +66,46 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import app.onloc.android.AppPreferences
 import app.onloc.android.ui.location.LocationActivity
 import app.onloc.android.MIN_TIRAMISU_VERSION
 import app.onloc.android.R
 import app.onloc.android.ServerDiscovery
+import app.onloc.android.api.status.StatusApiService
 import app.onloc.android.components.PasswordTextField
-import app.onloc.android.components.ServerDiscoveryButton
+import app.onloc.android.models.Server
+import app.onloc.android.permissions.LocalNetworkAccessPermission
 import app.onloc.android.ui.theme.OnlocAndroidTheme
+import kotlinx.coroutines.launch
 import kotlin.jvm.java
 
 private const val LOGIN_FORM_WIDTH = 0.8f
+private const val NAVIGATION_TRANSITION_TIME = 250
+
+private object LoginRoutes {
+    const val SERVER_URL = "server_url"
+    const val CREDENTIALS = "credentials"
+}
 
 class LoginActivity : ComponentActivity() {
     private val viewModel by viewModels<LoginViewModel>()
@@ -80,25 +116,21 @@ class LoginActivity : ComponentActivity() {
         setContent {
             OnlocAndroidTheme {
                 Surface(modifier = Modifier.fillMaxSize()) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(16.dp)
-                            .verticalScroll(rememberScrollState()),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center,
-                    ) {
-                        Text(
-                            text = stringResource(R.string.login_title),
-                            style = MaterialTheme.typography.headlineLarge,
-                        )
-                        Text(
-                            text = stringResource(R.string.login_description),
-                            style = MaterialTheme.typography.titleMedium,
-                            modifier = Modifier.padding(bottom = 8.dp),
-                        )
-                        LoginForm(viewModel)
+                    val context = LocalContext.current
+                    val loginState by viewModel.loginState.collectAsStateWithLifecycle()
+
+                    LaunchedEffect(loginState) {
+                        if (loginState is LoginState.Success) {
+                            startActivity(
+                                Intent(context, LocationActivity::class.java).apply {
+                                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                                }
+                            )
+                        }
                     }
+
+                    val navController = rememberNavController()
+                    LoginNavHost(navController, viewModel)
                 }
             }
         }
@@ -106,45 +138,278 @@ class LoginActivity : ComponentActivity() {
 }
 
 @Composable
-fun LoginForm(viewModel: LoginViewModel, modifier: Modifier = Modifier) {
+private fun LoginNavHost(navController: NavHostController, viewModel: LoginViewModel) {
+    NavHost(
+        navController = navController,
+        startDestination = LoginRoutes.SERVER_URL,
+        enterTransition = {
+            slideIntoContainer(
+                towards = AnimatedContentTransitionScope.SlideDirection.Left,
+                animationSpec = tween(NAVIGATION_TRANSITION_TIME),
+            )
+        },
+        exitTransition = {
+            slideOutOfContainer(
+                towards = AnimatedContentTransitionScope.SlideDirection.Left,
+                animationSpec = tween(NAVIGATION_TRANSITION_TIME),
+            )
+        },
+        popExitTransition = {
+            slideOutOfContainer(
+                towards = AnimatedContentTransitionScope.SlideDirection.Right,
+                animationSpec = tween(NAVIGATION_TRANSITION_TIME),
+            )
+        },
+        popEnterTransition = {
+            slideIntoContainer(
+                towards = AnimatedContentTransitionScope.SlideDirection.Right,
+                animationSpec = tween(NAVIGATION_TRANSITION_TIME),
+            )
+        }
+    ) {
+        composable(LoginRoutes.SERVER_URL) {
+            ServerUrlScreen(
+                viewModel = viewModel,
+                onContinue = { navController.navigate(route = LoginRoutes.CREDENTIALS) },
+            )
+        }
+        composable(LoginRoutes.CREDENTIALS) {
+            CredentialsScreen(
+                viewModel = viewModel,
+                onBack = { navController.popBackStack() }
+            )
+        }
+    }
+}
+
+@Composable
+fun ServerUrlScreen(viewModel: LoginViewModel, onContinue: () -> Unit, modifier: Modifier = Modifier) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
-    val loginState by viewModel.loginState.collectAsStateWithLifecycle()
+    val activity = LocalActivity.current
+    val cs = rememberCoroutineScope()
 
-    // Form data
-    var ip by rememberSaveable { mutableStateOf(viewModel.storedIp) }
-    var isIpError by rememberSaveable { mutableStateOf("") }
-    var username by rememberSaveable { mutableStateOf("") }
-    var isUsernameError by rememberSaveable { mutableStateOf("") }
-    var password by rememberSaveable { mutableStateOf("") }
-    var isPasswordError by rememberSaveable { mutableStateOf("") }
+    var url by rememberSaveable { mutableStateOf(viewModel.storedUrl) }
+    var urlError by rememberSaveable { mutableStateOf("") }
+    var generalError by rememberSaveable { mutableStateOf("") }
+    var loading by rememberSaveable { mutableStateOf(false) }
 
     // Server discovery
-    var showDialogButton by rememberSaveable { mutableStateOf(false) }
-    val servers = remember { mutableStateListOf<Pair<String, Int>>() }
+    var localNetworkAccessGranted by remember { mutableStateOf(LocalNetworkAccessPermission().isGranted(context)) }
+    val servers = remember { mutableStateListOf<Server>() }
     val serverDiscovery = remember {
-        ServerDiscovery(context) { service ->
+        ServerDiscovery(context) { server ->
             if (lifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {
-                servers.add(service)
+                servers.add(server)
+                Log.d("discovery", "server: $server")
             }
         }
     }
     if (SdkExtensions.getExtensionVersion(Build.VERSION_CODES.TIRAMISU) >= MIN_TIRAMISU_VERSION) {
-        DisposableEffect(Unit) {
-            serverDiscovery.startDiscovery()
+        DisposableEffect(localNetworkAccessGranted) {
+            if (localNetworkAccessGranted) {
+                serverDiscovery.startDiscovery()
+            }
             onDispose {
                 serverDiscovery.stopDiscovery()
             }
         }
     }
 
-    LaunchedEffect(loginState) {
-        if (loginState is LoginState.Success) {
-            context.startActivity(
-                Intent(context, LocationActivity::class.java).apply {
-                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+    // Watch when the app comes back on to see if permissions changed.
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                localNetworkAccessGranted = LocalNetworkAccessPermission().isGranted(context)
+            }
+        }
+
+        lifecycleOwner.lifecycle.addObserver(observer)
+
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
+
+    // Makes sure the server is reachable before the login step
+    fun handleContinue() {
+        urlError = ""
+        generalError = ""
+
+        var isValid = true
+        if (url.isBlank()) {
+            // TODO: Localize
+            urlError = "URL is required"
+            isValid = false
+        } else if (!Patterns.WEB_URL.matcher(url).matches()) {
+            urlError = "Invalid URL"
+            isValid = false
+        } else {
+            urlError = ""
+        }
+        if (!isValid) return
+
+        cs.launch {
+            loading = true
+            StatusApiService(context, url).getStatus()
+                .onSuccess {
+                    generalError = ""
+                    viewModel.storedUrl = url
+                    onContinue()
                 }
+                .onFailure { e ->
+                    generalError = e.localizedMessage ?: e.message ?: e.toString()
+                }
+            loading = false
+        }
+    }
+
+    Box(
+        modifier = modifier.imePadding(),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            modifier = Modifier.fillMaxWidth(LOGIN_FORM_WIDTH),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Image(painter = painterResource(R.drawable.foreground), contentDescription = null)
+                Column(horizontalAlignment = Alignment.Start) {
+                    Text(
+                        text = stringResource(R.string.login_title),
+                        style = MaterialTheme.typography.headlineLarge,
+                    )
+                    Text(
+                        text = stringResource(R.string.login_description),
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier.padding(bottom = 8.dp),
+                    )
+                }
+            }
+
+            OutlinedTextField(
+                value = url,
+                onValueChange = { url = it },
+                label = { Text(stringResource(R.string.login_ip_field_label)) },
+                singleLine = true,
+                enabled = !loading,
+                isError = urlError.isNotEmpty(),
+                supportingText = {
+                    if (urlError.isNotEmpty()) {
+                        Text(
+                            modifier = Modifier.fillMaxWidth(),
+                            text = urlError,
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    }
+                },
+                modifier = Modifier.fillMaxWidth(),
             )
+
+            if (!localNetworkAccessGranted) {
+                Button(onClick = {
+                    activity?.let { LocalNetworkAccessPermission().request(it) }
+                }) {
+                    Text(text = stringResource(R.string.login_enable_network_discovery))
+                }
+            } else {
+                if (servers.isNotEmpty()) {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text(
+                            text = stringResource(R.string.login_found_servers_title),
+                            modifier = Modifier.align(Alignment.CenterHorizontally),
+                            textAlign = TextAlign.Center,
+                            style = MaterialTheme.typography.titleLarge,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+
+                        Card(shape = RoundedCornerShape(16.dp)) {
+                            LazyColumn(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .verticalScroll(rememberScrollState())
+                                    .heightIn(max = 200.dp),
+                            ) {
+                                items(servers) { (name, address, port) ->
+                                    TextButton(
+                                        onClick = {
+                                            url = "https://$address:$port"
+                                        },
+                                        enabled = !loading,
+                                        shape = RoundedCornerShape(16.dp),
+                                        modifier = Modifier.animateItem(),
+                                    ) {
+                                        Row(verticalAlignment = Alignment.CenterVertically) {
+                                            Column(modifier = Modifier.weight(1f)) {
+                                                Text(text = name)
+                                                Text(text = "https://$address:$port")
+                                            }
+                                            Icon(
+                                                imageVector = Icons.Outlined.CopyAll,
+                                                contentDescription = null,
+                                                modifier = Modifier.align(Alignment.CenterVertically),
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            AnimatedVisibility(generalError.isNotEmpty()) {
+                Text(
+                    text = generalError,
+                    color = MaterialTheme.colorScheme.error,
+                )
+            }
+
+            Button(onClick = { handleContinue() }, enabled = !loading, modifier = Modifier.fillMaxWidth()) {
+                if (loading) {
+                    CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                } else {
+                    Text(text = stringResource(R.string.login_continue_button))
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun CredentialsScreen(viewModel: LoginViewModel, onBack: () -> Unit, modifier: Modifier = Modifier) {
+    val loginState by viewModel.loginState.collectAsStateWithLifecycle()
+
+    var username by rememberSaveable { mutableStateOf("") }
+    var usernameError by rememberSaveable { mutableStateOf("") }
+    var password by rememberSaveable { mutableStateOf("") }
+    var passwordError by rememberSaveable { mutableStateOf("") }
+
+    fun handleLogin() {
+        usernameError = ""
+        passwordError = ""
+
+        var isValid = true
+
+        if (username.isBlank()) {
+            usernameError = "Username is required"
+            isValid = false
+        } else {
+            usernameError = ""
+        }
+
+        if (password.isBlank()) {
+            passwordError = "Password is required"
+            isValid = false
+        } else {
+            passwordError = ""
+        }
+
+        if (isValid) {
+            viewModel.login(username, password)
         }
     }
 
@@ -157,45 +422,17 @@ fun LoginForm(viewModel: LoginViewModel, modifier: Modifier = Modifier) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             OutlinedTextField(
-                value = ip,
-                onValueChange = { ip = it },
-                label = { Text(stringResource(R.string.login_ip_field_label)) },
-                singleLine = true,
-                isError = isIpError.isNotEmpty(),
-                supportingText = {
-                    if (isIpError.isNotEmpty()) {
-                        Text(
-                            modifier = Modifier.fillMaxWidth(),
-                            text = isIpError,
-                            color = MaterialTheme.colorScheme.error
-                        )
-                    }
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .onFocusChanged { focusState ->
-                        showDialogButton = focusState.isFocused
-                    }
-            )
-
-            if (showDialogButton && servers.isNotEmpty()) {
-                ServerDiscoveryButton(
-                    servers = servers,
-                    onSelect = { ip = it },
-                )
-            }
-
-            OutlinedTextField(
                 value = username,
                 onValueChange = { username = it },
                 label = { Text(stringResource(R.string.login_username_field_label)) },
                 singleLine = true,
-                isError = isUsernameError.isNotEmpty(),
+                enabled = loginState !is LoginState.Loading,
+                isError = usernameError.isNotEmpty(),
                 supportingText = {
-                    if (isUsernameError.isNotEmpty()) {
+                    if (usernameError.isNotEmpty()) {
                         Text(
                             modifier = Modifier.fillMaxWidth(),
-                            text = isUsernameError,
+                            text = usernameError,
                             color = MaterialTheme.colorScheme.error
                         )
                     }
@@ -206,7 +443,8 @@ fun LoginForm(viewModel: LoginViewModel, modifier: Modifier = Modifier) {
             PasswordTextField(
                 password = password,
                 onPasswordChange = { password = it },
-                isPasswordError = isPasswordError
+                enabled = loginState !is LoginState.Loading,
+                isPasswordError = passwordError,
             )
 
             AnimatedVisibility(loginState is LoginState.Error) {
@@ -219,19 +457,9 @@ fun LoginForm(viewModel: LoginViewModel, modifier: Modifier = Modifier) {
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(
-                onClick = {
-                    val isValid = validateInputs(
-                        ip = ip,
-                        username = username,
-                        password = password,
-                        onIpError = { isIpError = it },
-                        onUsernameError = { isUsernameError = it },
-                        onPasswordError = { isPasswordError = it }
-                    )
-                    if (isValid) viewModel.login(ip, username, password)
-                },
+                onClick = { handleLogin() },
                 enabled = loginState !is LoginState.Loading,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
             ) {
                 if (loginState !is LoginState.Loading) {
                     Text(stringResource(R.string.login_submit_button_label))

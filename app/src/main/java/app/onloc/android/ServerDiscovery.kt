@@ -22,13 +22,15 @@ import android.net.wifi.WifiManager
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresExtension
+import app.onloc.android.helpers.getLocalSubnet
+import app.onloc.android.helpers.isInSameSubnet
+import app.onloc.android.models.Server
 
 const val MIN_TIRAMISU_VERSION = 7
 
-private const val SERVICE_TYPE = "_http._tcp"
-private const val SERVICE_NAME = "onloc"
+private const val SERVICE_TYPE = "_onloc._tcp"
 
-class ServerDiscovery(context: Context, callback: (service: Pair<String, Int>) -> Unit) {
+class ServerDiscovery(context: Context, callback: (server: Server) -> Unit) {
     private val nsdManager = context.getSystemService(Context.NSD_SERVICE) as NsdManager
     private val wifiManager = context.getSystemService(Context.WIFI_SERVICE) as WifiManager
     private val multicastLock = wifiManager.createMulticastLock("Onloc-Bonjour")
@@ -48,9 +50,7 @@ class ServerDiscovery(context: Context, callback: (service: Pair<String, Int>) -
 
         @RequiresExtension(extension = Build.VERSION_CODES.TIRAMISU, version = 7)
         override fun onServiceFound(serviceInfo: NsdServiceInfo) {
-            if (serviceInfo.serviceName == SERVICE_NAME) {
-                queueResolve(serviceInfo)
-            }
+            queueResolve(serviceInfo)
         }
 
         override fun onServiceLost(serviceInfo: NsdServiceInfo) {
@@ -76,7 +76,22 @@ class ServerDiscovery(context: Context, callback: (service: Pair<String, Int>) -
         override fun onServiceResolved(serviceInfo: NsdServiceInfo) {
             Log.d("ServerDiscovery", "Service resolved: $serviceInfo")
             if (serviceInfo.hostAddresses.isNotEmpty() && serviceInfo.hostAddresses.first() != null) {
-                callback(serviceInfo.hostAddresses.first().hostAddress!! to serviceInfo.port)
+                var bestAddress = serviceInfo.hostAddresses.first().hostAddress
+
+                val localSubnet = getLocalSubnet(context)
+                if (localSubnet != null) {
+                    val match = serviceInfo.hostAddresses.firstOrNull { isInSameSubnet(it, localSubnet) }
+                    if (match != null) bestAddress = match.hostAddress
+                }
+
+                if (bestAddress != null) {
+                    val name  = serviceInfo.serviceName
+                    val address = bestAddress
+                    val port = serviceInfo.port
+
+                    val server = Server(name, address, port)
+                    callback(server)
+                }
             }
             resolving = false
         }

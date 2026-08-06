@@ -63,7 +63,7 @@
     <string name="login_password_field_label">Contraseña</string>
     <string name="login_ip_field_label">URL del servidor</string>
     <string name="login_found_servers_button">Mostrar servidores encontrados</string>
-    <string name="login_found_servers_dialog_title">Funda servidores</string>
+    <string name="login_found_servers_title">Funda servidores</string>
     <string name="login_title">Onloc</string>
     <string name="login_description">Entra en una instancia</string>
     <string name="login_submit_button_label">Iniciar sesión</string>

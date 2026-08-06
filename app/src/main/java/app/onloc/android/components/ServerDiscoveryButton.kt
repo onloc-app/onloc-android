@@ -90,7 +90,7 @@ fun ServerDiscoveryButton(
                         }
 
                         Text(
-                            text = stringResource(R.string.login_found_servers_dialog_title),
+                            text = stringResource(R.string.login_found_servers_title),
                             modifier = Modifier.align(Alignment.Center),
                             textAlign = TextAlign.Center,
                             style = MaterialTheme.typography.titleLarge,
@@ -105,13 +105,13 @@ fun ServerDiscoveryButton(
                             .fillMaxWidth()
                             .padding(top = 64.dp)
                     ) {
-                        for (server in servers) {
+                        for ((address, port) in servers) {
                             ElevatedCard(
                                 elevation = CardDefaults.cardElevation(2.dp),
                                 colors = CardDefaults.cardColors(MaterialTheme.colorScheme.surfaceVariant),
                                 shape = AbsoluteRoundedCornerShape(16.dp),
                                 onClick = {
-                                    onSelect("http://${server.first}:${server.second}")
+                                    onSelect("http://$address:$port")
                                     showDialog = false
                                 }
                             ) {
@@ -119,7 +119,7 @@ fun ServerDiscoveryButton(
                                     modifier = Modifier.padding(16.dp),
                                 ) {
                                     Text(
-                                        "http://${server.first}:${server.second}",
+                                        "http://$address:$port",
                                         style = MaterialTheme.typography.bodyLarge,
                                     )
                                 }

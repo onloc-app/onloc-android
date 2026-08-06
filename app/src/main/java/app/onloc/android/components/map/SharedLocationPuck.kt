@@ -48,6 +48,7 @@ import dev.sargunv.maplibrecompose.expressions.dsl.image
 
 private const val ACCURACY_OPACITY = 0.5f
 private const val BACKGROUND_LAYER_SIZE = 1.25f
+private val BASED_SHARED_ICON_OFFSET = 0.dp to (-2.5).dp
 
 @Composable
 fun SharedLocationPuck(
@@ -95,12 +96,12 @@ fun SharedLocationPuck(
         opacity = const(ACCURACY_OPACITY),
         color = const(color),
     )
-    if (showProfilePicture && ip != null && user.avatar?.url != null) {
+    if (!showProfilePicture && ip != null && user.avatar?.url != null) {
         val painter = rememberAsyncImagePainter(
             model = ImageRequest.Builder(LocalContext.current)
                 .data("$ip/${user.avatar.url}")
                 .bitmapConfig(Bitmap.Config.ARGB_8888)
-                .size(width = 96, height = 96)
+                .size(width = 128, height = 128)
                 .transformations(CircleCropTransformation())
                 .build(),
         )
@@ -122,6 +123,7 @@ fun SharedLocationPuck(
             id = "location-puck-border-$id",
             source = markerSource,
             iconImage = image(painterResource(R.drawable.triangle), drawAsSdf = true),
+            iconOffset = offset(BASED_SHARED_ICON_OFFSET.first, BASED_SHARED_ICON_OFFSET.second),
             iconSize = const(BACKGROUND_LAYER_SIZE),
             iconColor = const(Color.White),
             iconAllowOverlap = const(true),
@@ -132,7 +134,7 @@ fun SharedLocationPuck(
             id = "location-puck-$id",
             source = markerSource,
             iconImage = image(painterResource(R.drawable.triangle), drawAsSdf = true),
-            iconOffset = offset(0.dp, 1.dp),
+            iconOffset = offset(BASED_SHARED_ICON_OFFSET.first, BASED_SHARED_ICON_OFFSET.second + 1.dp),
             iconColor = const(color),
             iconAllowOverlap = const(true),
             onClick = { onClick(); ClickResult.Consume },

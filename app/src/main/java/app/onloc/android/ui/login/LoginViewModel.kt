@@ -22,6 +22,7 @@ import app.onloc.android.AppPreferences
 import app.onloc.android.UserPreferences
 import app.onloc.android.api.AuthStateManager
 import app.onloc.android.api.auth.AuthApiService
+import app.onloc.android.api.status.StatusApiService
 import app.onloc.android.models.api.LoginRequest
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -35,23 +36,24 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
     private val appPreferences = AppPreferences(application)
     private val userPreferences = UserPreferences(application)
 
-    val storedIp: String get() = appPreferences.getIP().orEmpty()
+    var storedUrl: String
+        get() = appPreferences.getServerUrl().orEmpty()
+        set(value) = appPreferences.createServerUrl(value)
 
-    fun login(ip: String, username: String, password: String) {
+    fun login(username: String, password: String) {
         viewModelScope.launch {
             val context = getApplication<Application>()
             _loginState.value = LoginState.Loading
 
-            AuthApiService(context, ip).login(LoginRequest(username, password))
+            AuthApiService(context, storedUrl).login(LoginRequest(username, password))
                 .onSuccess { loginResponse ->
                     val (accessToken, refreshToken, user) = loginResponse
-                    appPreferences.createIP(ip)
                     userPreferences.createUserCredentials(accessToken to refreshToken, user)
                     AuthStateManager.onLoggedIn()
                     _loginState.value = LoginState.Success
                 }
                 .onFailure { e ->
-                    _loginState.value = LoginState.Error(e.localizedMessage.orEmpty())
+                    _loginState.value = LoginState.Error(e.localizedMessage ?: e.message ?: e.toString())
                 }
         }
     }

@@ -26,6 +26,7 @@ import app.onloc.android.R
 fun PasswordTextField(
     password: String,
     onPasswordChange: (String) -> Unit,
+    enabled: Boolean = true,
     isPasswordError: String,
     modifier: Modifier = Modifier,
 ) {
@@ -36,6 +37,7 @@ fun PasswordTextField(
         onValueChange = onPasswordChange,
         label = { Text(stringResource(R.string.login_password_field_label)) },
         singleLine = true,
+        enabled = enabled,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
         visualTransformation =
             if (passwordVisible)

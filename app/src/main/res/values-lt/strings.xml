@@ -54,7 +54,7 @@
     <string name="permissions_lock_header">Užrakinti įrenginį</string>
     <string name="permissions_lock_description">Leidžia programėlei nuotoliniu būdu užrakinti įrenginį tuo atveju, jeigu jis pamestas ar pavogtas.</string>
     <string name="login_found_servers_button">Rodyti rastus serverius</string>
-    <string name="login_found_servers_dialog_title">Rasti serveriai</string>
+    <string name="login_found_servers_title">Rasti serveriai</string>
     <string name="main_device_button_label">Pasirinkti įrenginį</string>
     <string name="title_activity_location">Vietovės veikla</string>
     <string name="title_activity_login">Prisijungimo veikla</string>

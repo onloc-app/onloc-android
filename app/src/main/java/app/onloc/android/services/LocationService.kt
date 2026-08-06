@@ -58,7 +58,7 @@ class LocationService : Service() {
         if (location.accuracy >= ACCURACY_THRESHOLD) return
 
         val appPrefs = AppPreferences(this)
-        val ip = appPrefs.getIP()
+        val ip = appPrefs.getServerUrl()
         val selectedDeviceId = appPrefs.getDeviceId()
 
         val batteryManager = applicationContext.getSystemService(BATTERY_SERVICE) as BatteryManager
