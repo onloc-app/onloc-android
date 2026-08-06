@@ -422,22 +422,17 @@ fun LocationScreen(viewModel: LocationViewModel, modifier: Modifier = Modifier) 
                     val longitude = currentLocation.longitude
                     val latitude = currentLocation.latitude
                     val accuracy = currentLocation.accuracy.toDouble()
-                    val name = devices.find { it.id == selectedDevice?.id }?.name
 
-                    val canDisplayCurrentLocation = name != null
-
-                    if (canDisplayCurrentLocation) {
-                        LocationPuck(
-                            id = 0,
-                            longitude = longitude,
-                            latitude = latitude,
-                            accuracy = accuracy,
-                            color = MaterialTheme.colorScheme.secondary,
-                            metersPerDp = cameraState.metersPerDpAtTarget,
-                            useCurrentBearing = true,
-                            onClick = { goToCurrentLocation() },
-                        )
-                    }
+                    LocationPuck(
+                        id = 0,
+                        longitude = longitude,
+                        latitude = latitude,
+                        accuracy = accuracy,
+                        color = MaterialTheme.colorScheme.secondary,
+                        metersPerDp = cameraState.metersPerDpAtTarget,
+                        useCurrentBearing = true,
+                        onClick = { goToCurrentLocation() },
+                    )
                 }
 
                 // Display the location of every other device

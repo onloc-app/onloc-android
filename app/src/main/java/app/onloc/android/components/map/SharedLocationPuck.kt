@@ -102,7 +102,7 @@ fun SharedLocationPuck(
         opacity = const(ACCURACY_OPACITY),
         color = const(color),
     )
-    if (!showProfilePicture && ip != null && user.avatar?.url != null) {
+    if (showProfilePicture && ip != null && user.avatar?.url != null) {
         val painter = rememberAsyncImagePainter(
             model = ImageRequest.Builder(LocalContext.current).data("$ip/${user.avatar.url}")
                 .bitmapConfig(Bitmap.Config.ARGB_8888).size(width = 128, height = 128)
