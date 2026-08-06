@@ -39,7 +39,7 @@ class AppPreferences(private val context: Context) {
         context.createDeviceProtectedStorageContext()
             .getSharedPreferences(
                 APP_PREFERENCES,
-                Context.MODE_PRIVATE
+                Context.MODE_PRIVATE,
             )
     }
 
@@ -78,10 +78,9 @@ class ServicePreferences(private val context: Context) {
         context.createDeviceProtectedStorageContext()
             .getSharedPreferences(
                 SERVICE_PREFERENCES,
-                Context.MODE_PRIVATE
+                Context.MODE_PRIVATE,
             )
     }
-
 
     fun getLocationServiceStatus(): Boolean {
         return prefs.getBoolean(LOCATION_SERVICE_KEY, false)
@@ -114,7 +113,7 @@ class UserPreferences(private val context: Context) {
         context.createDeviceProtectedStorageContext()
             .getSharedPreferences(
                 USER_PREFERENCES,
-                Context.MODE_PRIVATE
+                Context.MODE_PRIVATE,
             )
     }
 

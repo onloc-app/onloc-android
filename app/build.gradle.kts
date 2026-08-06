@@ -99,5 +99,6 @@ dependencies {
     implementation(libs.coil)
     implementation(libs.coil.network.okhttp)
     implementation(libs.coil.compose)
-    detektPlugins(libs.detekt)
+    detektPlugins(libs.detekt.compose)
+    detektPlugins(libs.detekt.formatting)
 }

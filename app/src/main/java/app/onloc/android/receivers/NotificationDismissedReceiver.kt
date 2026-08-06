@@ -31,8 +31,7 @@ class NotificationDismissedReceiver : BroadcastReceiver() {
         val isLocked = keyguardManager.isKeyguardLocked
 
         if (isLocked) {
-            val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE)
-                    as NotificationManager
+            val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
             notificationManager.notify(
                 LOCK_SCREEN_NOTIFICATION_ID,

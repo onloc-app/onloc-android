@@ -18,8 +18,8 @@ package app.onloc.android.api.devices
 import android.content.Context
 import app.onloc.android.api.ApiClient
 import app.onloc.android.models.Device
-import app.onloc.android.models.api.GetDevicesResponse
-import app.onloc.android.models.api.GetSharedDevicesResponse
+import app.onloc.android.models.api.devices.GetDevicesResponse
+import app.onloc.android.models.api.devices.GetSharedDevicesResponse
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.post
@@ -52,7 +52,7 @@ class DevicesApiService(context: Context, ip: String) {
 
     suspend fun ringDevice(id: Int): Result<Unit> {
         try {
-            api.client.post("$ENDPOINT/${id}/ring")
+            api.client.post("$ENDPOINT/$id/ring")
             return Result.success(Unit)
         } catch (e: Exception) {
             return Result.failure(e)
@@ -61,7 +61,7 @@ class DevicesApiService(context: Context, ip: String) {
 
     suspend fun lockDevice(id: Int, message: String?): Result<Unit> {
         try {
-            api.client.post("$ENDPOINT/${id}/lock") {
+            api.client.post("$ENDPOINT/$id/lock") {
                 if (message != null) {
                     contentType(ContentType.Application.Json)
                     setBody(mapOf("message" to message))
@@ -75,7 +75,7 @@ class DevicesApiService(context: Context, ip: String) {
 
     suspend fun flashDevice(id: Int): Result<Unit> {
         try {
-            api.client.post("$ENDPOINT/${id}/flash")
+            api.client.post("$ENDPOINT/$id/flash")
             return Result.success(Unit)
         } catch (e: Exception) {
             return Result.failure(e)

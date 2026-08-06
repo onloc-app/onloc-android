@@ -41,10 +41,10 @@ import dev.sargunv.maplibrecompose.compose.layer.SymbolLayer
 import dev.sargunv.maplibrecompose.compose.source.rememberGeoJsonSource
 import dev.sargunv.maplibrecompose.core.source.GeoJsonData
 import dev.sargunv.maplibrecompose.expressions.dsl.const
+import dev.sargunv.maplibrecompose.expressions.dsl.image
 import dev.sargunv.maplibrecompose.expressions.dsl.offset
 import io.github.dellisd.spatialk.geojson.Point
 import io.github.dellisd.spatialk.geojson.Position
-import dev.sargunv.maplibrecompose.expressions.dsl.image
 
 private const val ACCURACY_OPACITY = 0.5f
 private const val BACKGROUND_LAYER_SIZE = 1.25f
@@ -52,6 +52,7 @@ private const val BACKGROUND_LAYER_SIZE = 1.25f
 // Base shared icon offset
 @SuppressWarnings("MagicNumber")
 private val BASE_SHARED_ICON_OFFSET = offset(0.dp, (-2.5).dp)
+
 @SuppressWarnings("MagicNumber")
 private val FOREGROUND_SHARED_ICON_OFFSET = offset(0.dp, (-1.5).dp)
 
@@ -90,8 +91,8 @@ fun SharedLocationPuck(
         data = GeoJsonData.Features(
             Point(
                 Position(location.longitude, location.latitude),
-            )
-        )
+            ),
+        ),
     )
 
     CircleLayer(
@@ -103,24 +104,27 @@ fun SharedLocationPuck(
     )
     if (!showProfilePicture && ip != null && user.avatar?.url != null) {
         val painter = rememberAsyncImagePainter(
-            model = ImageRequest.Builder(LocalContext.current)
-                .data("$ip/${user.avatar.url}")
-                .bitmapConfig(Bitmap.Config.ARGB_8888)
-                .size(width = 128, height = 128)
-                .transformations(CircleCropTransformation())
-                .build(),
+            model = ImageRequest.Builder(LocalContext.current).data("$ip/${user.avatar.url}")
+                .bitmapConfig(Bitmap.Config.ARGB_8888).size(width = 128, height = 128)
+                .transformations(CircleCropTransformation()).build(),
         )
         val state by painter.state.collectAsState()
         val ready = state is AsyncImagePainter.State.Success
 
         if (ready) {
             SymbolLayer(
-                id = "location-puck-${id}",
+                id = "location-puck-$id",
                 source = markerSource,
                 iconImage = image(painter),
                 iconAllowOverlap = const(true),
-                onClick = { onClick(); ClickResult.Consume },
-                onLongClick = { onLongClick(); ClickResult.Consume },
+                onClick = {
+                    onClick()
+                    ClickResult.Consume
+                },
+                onLongClick = {
+                    onLongClick()
+                    ClickResult.Consume
+                },
             )
         }
     } else {
@@ -132,8 +136,14 @@ fun SharedLocationPuck(
             iconSize = const(BACKGROUND_LAYER_SIZE),
             iconColor = const(Color.White),
             iconAllowOverlap = const(true),
-            onClick = { onClick(); ClickResult.Consume },
-            onLongClick = { onLongClick(); ClickResult.Consume },
+            onClick = {
+                onClick()
+                ClickResult.Consume
+            },
+            onLongClick = {
+                onLongClick()
+                ClickResult.Consume
+            },
         )
         SymbolLayer(
             id = "location-puck-$id",
@@ -142,8 +152,14 @@ fun SharedLocationPuck(
             iconOffset = FOREGROUND_SHARED_ICON_OFFSET,
             iconColor = const(color),
             iconAllowOverlap = const(true),
-            onClick = { onClick(); ClickResult.Consume },
-            onLongClick = { onLongClick(); ClickResult.Consume },
+            onClick = {
+                onClick()
+                ClickResult.Consume
+            },
+            onLongClick = {
+                onLongClick()
+                ClickResult.Consume
+            },
         )
     }
 

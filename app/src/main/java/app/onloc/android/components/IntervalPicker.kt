@@ -76,7 +76,7 @@ private val timeSteps = arrayOf(
         steps = 7 - 2,
         stepSize = 1,
         pluralResId = R.plurals.interval_picker_days,
-    )
+    ),
 )
 
 @Composable
@@ -102,7 +102,7 @@ fun IntervalPicker(
                 SegmentedButton(
                     shape = SegmentedButtonDefaults.itemShape(
                         index = index,
-                        count = timeSteps.size
+                        count = timeSteps.size,
                     ),
                     checked = timeStep == selectedOption,
                     onCheckedChange = {
@@ -136,12 +136,12 @@ fun IntervalPicker(
         Text(
             text = "${(value / selectedOption.multiplier)} ${
                 pluralStringResource(selectedOption.pluralResId, value / selectedOption.multiplier)
-            }"
+            }",
         )
 
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(defaultPadding)
+            horizontalArrangement = Arrangement.spacedBy(defaultPadding),
         ) {
             Text(
                 text = stringResource(R.string.main_interval_slider_realtime_label),

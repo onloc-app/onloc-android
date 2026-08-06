@@ -30,7 +30,7 @@ class LocalNetworkAccessPermission : Permission {
     override fun isGranted(context: Context): Boolean {
         return Build.VERSION.SDK_INT < MINIMUM_API_VERSION || ContextCompat.checkSelfPermission(
             context,
-            Manifest.permission.ACCESS_LOCAL_NETWORK
+            Manifest.permission.ACCESS_LOCAL_NETWORK,
         ) == PERMISSION_GRANTED
     }
 

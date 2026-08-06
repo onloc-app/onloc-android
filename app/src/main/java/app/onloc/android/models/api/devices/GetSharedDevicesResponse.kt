@@ -13,22 +13,12 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-package app.onloc.android.models.api
+package app.onloc.android.models.api.devices
 
 import app.onloc.android.models.Device
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class GetDevicesResponse(
-    val devices: List<Device>
-)
-
-@Serializable
-data class GetDeviceResponse(
-    val device: Device
-)
-
-@Serializable
 data class GetSharedDevicesResponse(
-    val devices: List<Device>
+    val devices: List<Device>,
 )

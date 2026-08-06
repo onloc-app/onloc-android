@@ -22,7 +22,7 @@ import app.onloc.android.AppPreferences
 import app.onloc.android.UserPreferences
 import app.onloc.android.api.AuthStateManager
 import app.onloc.android.api.auth.AuthApiService
-import app.onloc.android.models.api.LoginRequest
+import app.onloc.android.models.api.auth.LoginRequest
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

@@ -58,7 +58,7 @@ fun DeviceActions(
     onLock: (Device, String?) -> Unit,
     onFlash: (Device) -> Unit,
     onNavigate: (Location) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     var lockDialogOpened by remember { mutableStateOf(false) }
     var lockMessage by remember { mutableStateOf("") }
@@ -119,8 +119,7 @@ fun DeviceActions(
                     ) {
                         Icon(
                             imageVector = Icons.Filled.Close,
-                            contentDescription =
-                                stringResource(R.string.generic_close_button),
+                            contentDescription = stringResource(R.string.generic_close_button),
                             tint = MaterialTheme.colorScheme.onSurface,
                         )
                     }

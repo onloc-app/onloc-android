@@ -29,7 +29,7 @@ class OverlayPermission : Permission {
     override fun request(activity: Activity) {
         val intent = Intent(
             Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-            "package: ${activity.packageName}".toUri()
+            "package: ${activity.packageName}".toUri(),
         )
         activity.startActivity(intent)
     }

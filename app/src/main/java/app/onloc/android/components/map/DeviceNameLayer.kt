@@ -40,7 +40,7 @@ fun DeviceNameLayer(
     onLongClick: () -> Unit = {},
 ) {
     val markerSource = rememberGeoJsonSource(
-        data = GeoJsonData.Features(Point(Position(longitude, latitude)))
+        data = GeoJsonData.Features(Point(Position(longitude, latitude))),
     )
 
     val textColor = if (isSystemInDarkTheme()) Color.White else Color.Black
@@ -49,7 +49,7 @@ fun DeviceNameLayer(
         id = "location-device-name-$id",
         source = markerSource,
         textField = format(
-            span(const(name), textSize = const(1.2f.em))
+            span(const(name), textSize = const(1.2f.em)),
         ),
         textFont = const(listOf("Noto Sans Regular")),
         textSize = const(1.2f.em),

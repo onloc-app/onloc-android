@@ -102,9 +102,8 @@ fun SettingsDialog(
                 ) {
                     Icon(
                         imageVector = Icons.Filled.Close,
-                        contentDescription =
-                            stringResource(R.string.generic_close_button),
-                        tint = MaterialTheme.colorScheme.onSurface
+                        contentDescription = stringResource(R.string.generic_close_button),
+                        tint = MaterialTheme.colorScheme.onSurface,
                     )
                 }
 
@@ -123,8 +122,11 @@ fun SettingsDialog(
                             Text(
                                 text = stringResource(R.string.main_location_service_switch_label),
                                 style = MaterialTheme.typography.titleMedium,
-                                color = if (!canStartLocationService)
-                                    MaterialTheme.colorScheme.onBackground else Color.Unspecified,
+                                color = if (!canStartLocationService) {
+                                    MaterialTheme.colorScheme.onBackground
+                                } else {
+                                    Color.Unspecified
+                                },
                             )
                             Switch(
                                 checked = locationServiceRunning,
@@ -135,7 +137,7 @@ fun SettingsDialog(
                                         viewModel.startLocationService()
                                     }
                                 },
-                                enabled = canStartLocationService
+                                enabled = canStartLocationService,
                             )
                         }
 
@@ -150,22 +152,21 @@ fun SettingsDialog(
                     )
 
                     Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
                     ) {
                         ElevatedCard(
                             elevation = CardDefaults.cardElevation(
-                                defaultElevation = 6.dp
+                                defaultElevation = 6.dp,
                             ),
                             modifier = Modifier.fillMaxWidth(),
                             colors = CardDefaults.cardColors(
-                                MaterialTheme.colorScheme.surfaceContainer
-                            )
+                                MaterialTheme.colorScheme.surfaceContainer,
+                            ),
                         ) {
                             Column(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(16.dp)
+                                    .padding(16.dp),
                             ) {
                                 Text(
                                     text = stringResource(R.string.main_interval_slider_label),

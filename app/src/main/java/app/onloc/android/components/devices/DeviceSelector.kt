@@ -40,7 +40,7 @@ fun DeviceSelector(
         ModalBottomSheet(
             modifier = modifier.fillMaxHeight(),
             sheetState = sheetState,
-            onDismissRequest = onClose
+            onDismissRequest = onClose,
         ) {
             if (devices.isNotEmpty()) {
                 LazyColumn {

@@ -25,7 +25,6 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import app.onloc.android.AppPreferences
 import app.onloc.android.ServicePreferences
-import app.onloc.android.services.SocketManager
 import app.onloc.android.UserPreferences
 import app.onloc.android.api.AuthStateManager
 import app.onloc.android.api.devices.DevicesApiService
@@ -34,10 +33,11 @@ import app.onloc.android.api.users.UsersApiService
 import app.onloc.android.models.Device
 import app.onloc.android.models.Location
 import app.onloc.android.models.User
-import app.onloc.android.models.api.DeleteTokenRequest
+import app.onloc.android.models.api.tokens.DeleteTokenRequest
 import app.onloc.android.services.LocationCallbackManager
 import app.onloc.android.services.ServiceManager
 import app.onloc.android.services.SocketEventBus
+import app.onloc.android.services.SocketManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow

@@ -13,22 +13,13 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-package app.onloc.android.permissions
+package app.onloc.android.models.api.auth
 
-import android.app.Activity
-import android.app.NotificationManager
-import android.content.Context
-import android.content.Intent
-import android.provider.Settings
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
-class DoNotDisturbPermission : Permission {
-    override fun isGranted(context: Context): Boolean {
-        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        return notificationManager.isNotificationPolicyAccessGranted
-    }
-
-    override fun request(activity: Activity) {
-        val intent = Intent(Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS)
-        activity.startActivity(intent)
-    }
-}
+@Serializable
+data class RefreshResponse(
+    @SerialName("access_token")
+    val accessToken: String,
+)

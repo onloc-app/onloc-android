@@ -17,7 +17,7 @@ package app.onloc.android.api
 
 import android.content.Context
 import app.onloc.android.UserPreferences
-import app.onloc.android.models.api.RefreshResponse
+import app.onloc.android.models.api.auth.RefreshResponse
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.okhttp.OkHttp
@@ -59,11 +59,13 @@ class ApiClient(
         }
 
         install(ContentNegotiation) {
-            json(Json {
-                ignoreUnknownKeys = true
-                isLenient = true
-                prettyPrint = true
-            })
+            json(
+                Json {
+                    ignoreUnknownKeys = true
+                    isLenient = true
+                    prettyPrint = true
+                },
+            )
         }
 
         install(HttpRequestRetry) {

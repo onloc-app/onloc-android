@@ -44,19 +44,19 @@ fun DeviceRow(
             .selectable(
                 selected = selected,
                 onClick = { onSelect() },
-                role = Role.RadioButton
+                role = Role.RadioButton,
             )
             .padding(horizontal = 16.dp),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         RadioButton(
             selected = selected,
-            onClick = null
+            onClick = null,
         )
         Text(
             text = device.name,
             style = MaterialTheme.typography.bodyLarge,
-            modifier = Modifier.padding(start = 16.dp)
+            modifier = Modifier.padding(start = 16.dp),
         )
     }
 }

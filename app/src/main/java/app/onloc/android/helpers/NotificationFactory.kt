@@ -55,7 +55,7 @@ object NotificationFactory {
             context,
             System.currentTimeMillis().toInt(),
             intent,
-            PendingIntent.FLAG_IMMUTABLE
+            PendingIntent.FLAG_IMMUTABLE,
         )
         return NotificationCompat.Builder(context, LOCK_SCREEN_CHANNEL_ID)
             .setSmallIcon(android.R.drawable.ic_menu_info_details)

@@ -27,13 +27,13 @@ private const val LOCATION_REQUEST_CODE = 1
 class LocationPermission : Permission {
     fun isForegroundGranted(context: Context): Boolean {
         return ContextCompat.checkSelfPermission(
-            context, Manifest.permission.ACCESS_FINE_LOCATION
+            context, Manifest.permission.ACCESS_FINE_LOCATION,
         ) == PERMISSION_GRANTED
     }
 
     fun isBackgroundLocationGranted(context: Context): Boolean {
         return ContextCompat.checkSelfPermission(
-            context, Manifest.permission.ACCESS_BACKGROUND_LOCATION
+            context, Manifest.permission.ACCESS_BACKGROUND_LOCATION,
         ) == PERMISSION_GRANTED
     }
 

@@ -50,8 +50,8 @@ fun LocationPuck(
         data = GeoJsonData.Features(
             Point(
                 Position(longitude, latitude),
-            )
-        )
+            ),
+        ),
     )
 
     if (useCurrentBearing) {

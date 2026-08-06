@@ -80,7 +80,7 @@ fun Avatar(
 
     IconButton(
         onClick = { accountDialogOpened = true },
-        modifier = modifier
+        modifier = modifier,
     ) {
         AvatarIcon(filled = accountDialogOpened)
     }
@@ -98,20 +98,19 @@ fun Avatar(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(16.dp)
+                        .padding(16.dp),
                 ) {
                     Box(
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
                     ) {
                         IconButton(
                             onClick = { accountDialogOpened = false },
-                            modifier = Modifier.align(Alignment.CenterEnd)
+                            modifier = Modifier.align(Alignment.CenterEnd),
                         ) {
                             Icon(
                                 imageVector = Icons.Outlined.Close,
-                                contentDescription =
-                                    stringResource(R.string.generic_close_button),
-                                tint = MaterialTheme.colorScheme.onSurface
+                                contentDescription = stringResource(R.string.generic_close_button),
+                                tint = MaterialTheme.colorScheme.onSurface,
                             )
                         }
 
@@ -120,7 +119,7 @@ fun Avatar(
                             modifier = Modifier.align(Alignment.Center),
                             textAlign = TextAlign.Center,
                             style = MaterialTheme.typography.titleLarge,
-                            color = MaterialTheme.colorScheme.primary
+                            color = MaterialTheme.colorScheme.primary,
                         )
                     }
 
@@ -129,17 +128,17 @@ fun Avatar(
                         verticalArrangement = Arrangement.spacedBy(32.dp),
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(top = 64.dp)
+                            .padding(top = 64.dp),
                     ) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
                             AvatarIcon(modifier = Modifier.size(48.dp))
 
                             Text(
                                 text = user?.username.orEmpty(),
-                                style = MaterialTheme.typography.titleLarge
+                                style = MaterialTheme.typography.titleLarge,
                             )
                         }
 

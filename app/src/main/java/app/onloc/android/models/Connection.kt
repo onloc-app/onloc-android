@@ -39,5 +39,5 @@ data class Connection(
 
 @Keep
 data class ConnectionResponse(
-    val connections: List<Connection>
+    val connections: List<Connection>,
 )

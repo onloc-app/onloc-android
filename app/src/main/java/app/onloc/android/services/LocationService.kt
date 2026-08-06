@@ -89,11 +89,11 @@ class LocationService : Service() {
         if (
             ActivityCompat.checkSelfPermission(
                 applicationContext,
-                Manifest.permission.ACCESS_FINE_LOCATION
+                Manifest.permission.ACCESS_FINE_LOCATION,
             ) != PackageManager.PERMISSION_GRANTED ||
             ActivityCompat.checkSelfPermission(
                 applicationContext,
-                Manifest.permission.ACCESS_BACKGROUND_LOCATION
+                Manifest.permission.ACCESS_BACKGROUND_LOCATION,
             ) != PackageManager.PERMISSION_GRANTED
         ) {
             return
@@ -166,7 +166,7 @@ class LocationService : Service() {
             getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.notify(
             STOP_LOCATION_SERVICE_NOTIFICATION_ID,
-            createStopLocationServiceNotification(this)
+            createStopLocationServiceNotification(this),
         )
 
         ServiceState.locationServiceRunning.value = false

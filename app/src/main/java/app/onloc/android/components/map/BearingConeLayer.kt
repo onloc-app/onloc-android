@@ -52,14 +52,8 @@ fun BearingConeLayer(
 
     val coneSource = rememberGeoJsonSource(
         data = GeoJsonData.Features(
-            generateBearingCone(
-                longitude,
-                latitude,
-                bearing,
-                bearingAccuracyDegrees,
-                metersPerDp
-            )
-        )
+            generateBearingCone(longitude, latitude, bearing, bearingAccuracyDegrees, metersPerDp),
+        ),
     )
 
     FillLayer(
@@ -87,13 +81,12 @@ private fun generateBearingCone(
         val lonRad = Math.toRadians(lon)
 
         val newLat = asin(
-            sin(latRad) * cos(distance / EARTH_RADIUS) +
-                    cos(latRad) * sin(distance / EARTH_RADIUS) * cos(bearingRad)
+            sin(latRad) * cos(distance / EARTH_RADIUS) + cos(latRad) * sin(distance / EARTH_RADIUS) * cos(bearingRad),
         )
 
         val newLon = lonRad + atan2(
             sin(bearingRad) * sin(distance / EARTH_RADIUS) * cos(latRad),
-            cos(distance / EARTH_RADIUS) - sin(latRad) * sin(newLat)
+            cos(distance / EARTH_RADIUS) - sin(latRad) * sin(newLat),
         )
 
         return Position(Math.toDegrees(newLon), Math.toDegrees(newLat))

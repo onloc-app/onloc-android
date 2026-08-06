@@ -77,7 +77,8 @@ class RingerActivity : ComponentActivity() {
                                 .size(256.dp),
                             onClick = {
                                 finish()
-                            }) {
+                            },
+                        ) {
                             Text(text = "Stop", fontSize = 24.sp)
                         }
                     }

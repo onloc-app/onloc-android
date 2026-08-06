@@ -87,7 +87,6 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import app.onloc.android.ui.location.LocationActivity
 import app.onloc.android.MIN_TIRAMISU_VERSION
 import app.onloc.android.R
 import app.onloc.android.ServerDiscovery
@@ -95,9 +94,9 @@ import app.onloc.android.api.status.StatusApiService
 import app.onloc.android.components.PasswordTextField
 import app.onloc.android.models.Server
 import app.onloc.android.permissions.LocalNetworkAccessPermission
+import app.onloc.android.ui.location.LocationActivity
 import app.onloc.android.ui.theme.OnlocAndroidTheme
 import kotlinx.coroutines.launch
-import kotlin.jvm.java
 
 private const val FORM_WIDTH = 0.8f
 private const val NAVIGATION_TRANSITION_TIME = 250
@@ -124,7 +123,7 @@ class LoginActivity : ComponentActivity() {
                             startActivity(
                                 Intent(context, LocationActivity::class.java).apply {
                                     flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                                }
+                                },
                             )
                         }
                     }
@@ -165,7 +164,7 @@ private fun LoginNavHost(navController: NavHostController, viewModel: LoginViewM
                 towards = AnimatedContentTransitionScope.SlideDirection.Right,
                 animationSpec = tween(NAVIGATION_TRANSITION_TIME),
             )
-        }
+        },
     ) {
         composable(LoginRoutes.SERVER_URL) {
             ServerUrlScreen(
@@ -176,7 +175,7 @@ private fun LoginNavHost(navController: NavHostController, viewModel: LoginViewM
         composable(LoginRoutes.CREDENTIALS) {
             CredentialsScreen(
                 viewModel = viewModel,
-                onBack = { navController.popBackStack() }
+                onBack = { navController.popBackStack() },
             )
         }
     }
@@ -269,7 +268,7 @@ fun ServerUrlScreen(viewModel: LoginViewModel, onContinue: () -> Unit, modifier:
 
     Box(
         modifier = modifier.imePadding(),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
         Column(
             modifier = Modifier.fillMaxWidth(FORM_WIDTH),
@@ -324,7 +323,7 @@ fun ServerUrlScreen(viewModel: LoginViewModel, onContinue: () -> Unit, modifier:
                             modifier = Modifier.align(Alignment.CenterHorizontally),
                             textAlign = TextAlign.Center,
                             style = MaterialTheme.typography.titleLarge,
-                            color = MaterialTheme.colorScheme.primary
+                            color = MaterialTheme.colorScheme.primary,
                         )
 
                         Card(shape = RoundedCornerShape(16.dp)) {
@@ -439,7 +438,7 @@ fun CredentialsScreen(viewModel: LoginViewModel, onBack: () -> Unit, modifier: M
         Column(
             modifier = Modifier.fillMaxWidth(FORM_WIDTH),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Icon(Icons.Outlined.Lan, null, modifier = Modifier.size(64.dp))
@@ -477,7 +476,7 @@ fun CredentialsScreen(viewModel: LoginViewModel, onBack: () -> Unit, modifier: M
                             )
                         }
                     },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
                 )
 
                 PasswordTextField(
@@ -493,7 +492,7 @@ fun CredentialsScreen(viewModel: LoginViewModel, onBack: () -> Unit, modifier: M
                                 color = MaterialTheme.colorScheme.error,
                             )
                         }
-                    }
+                    },
                 )
             }
 

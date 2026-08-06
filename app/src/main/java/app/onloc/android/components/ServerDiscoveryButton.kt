@@ -73,19 +73,19 @@ fun ServerDiscoveryButton(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(16.dp)
+                        .padding(16.dp),
                 ) {
                     Box(
                         modifier = Modifier.fillMaxWidth(),
                     ) {
                         IconButton(
                             onClick = { showDialog = false },
-                            modifier = Modifier.align(Alignment.CenterEnd)
+                            modifier = Modifier.align(Alignment.CenterEnd),
                         ) {
                             Icon(
                                 imageVector = Icons.Filled.Close,
                                 contentDescription = "Close",
-                                tint = MaterialTheme.colorScheme.onSurface
+                                tint = MaterialTheme.colorScheme.onSurface,
                             )
                         }
 
@@ -94,7 +94,7 @@ fun ServerDiscoveryButton(
                             modifier = Modifier.align(Alignment.Center),
                             textAlign = TextAlign.Center,
                             style = MaterialTheme.typography.titleLarge,
-                            color = MaterialTheme.colorScheme.primary
+                            color = MaterialTheme.colorScheme.primary,
                         )
                     }
 
@@ -103,7 +103,7 @@ fun ServerDiscoveryButton(
                         verticalArrangement = Arrangement.spacedBy(8.dp),
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(top = 64.dp)
+                            .padding(top = 64.dp),
                     ) {
                         for ((address, port) in servers) {
                             ElevatedCard(
@@ -113,7 +113,7 @@ fun ServerDiscoveryButton(
                                 onClick = {
                                     onSelect("http://$address:$port")
                                     showDialog = false
-                                }
+                                },
                             ) {
                                 Box(
                                     modifier = Modifier.padding(16.dp),

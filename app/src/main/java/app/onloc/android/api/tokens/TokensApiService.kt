@@ -17,7 +17,7 @@ package app.onloc.android.api.tokens
 
 import android.content.Context
 import app.onloc.android.api.ApiClient
-import app.onloc.android.models.api.DeleteTokenRequest
+import app.onloc.android.models.api.tokens.DeleteTokenRequest
 import io.ktor.client.request.delete
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType

@@ -18,9 +18,9 @@ package app.onloc.android.api.users
 import android.content.Context
 import app.onloc.android.api.ApiClient
 import app.onloc.android.models.User
-import app.onloc.android.models.api.GetUserInfoResponse
-import app.onloc.android.models.api.GetUserResponse
-import app.onloc.android.models.api.GetUsersResponse
+import app.onloc.android.models.api.users.GetUserInfoResponse
+import app.onloc.android.models.api.users.GetUserResponse
+import app.onloc.android.models.api.users.GetUsersResponse
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 

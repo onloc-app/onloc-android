@@ -236,14 +236,14 @@ fun FeatureCard(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(bottom = 16.dp)
+            .padding(bottom = 16.dp),
     ) {
         ElevatedCard(
             elevation = CardDefaults.cardElevation(
-                defaultElevation = 6.dp
+                defaultElevation = 6.dp,
             ),
             modifier = modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(MaterialTheme.colorScheme.surfaceContainer)
+            colors = CardDefaults.cardColors(MaterialTheme.colorScheme.surfaceContainer),
         ) {
             Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Row(
@@ -294,7 +294,7 @@ fun PermissionCard(
                     stringResource(R.string.permissions_granted_button_label)
                 } else {
                     stringResource(R.string.permissions_grant_button_label)
-                }
+                },
             )
         }
     }

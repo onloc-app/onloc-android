@@ -78,12 +78,22 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import app.onloc.android.R
+import app.onloc.android.api.AuthStateManager
 import app.onloc.android.components.Avatar
+import app.onloc.android.components.SettingsDialog
+import app.onloc.android.components.devices.DeviceActions
+import app.onloc.android.components.devices.DeviceInformation
 import app.onloc.android.components.devices.DeviceSelector
 import app.onloc.android.components.map.LocationPuck
+import app.onloc.android.components.map.MapAttribution
+import app.onloc.android.components.map.SharedLocationPuck
 import app.onloc.android.models.Device
 import app.onloc.android.models.Location
+import app.onloc.android.permissions.LocationPermission
 import app.onloc.android.permissions.PostNotificationPermission
+import app.onloc.android.services.ServiceState
+import app.onloc.android.ui.main.MainActivity
 import app.onloc.android.ui.theme.OnlocAndroidTheme
 import dev.sargunv.maplibrecompose.compose.MaplibreMap
 import dev.sargunv.maplibrecompose.compose.rememberCameraState
@@ -95,22 +105,12 @@ import dev.sargunv.maplibrecompose.core.GestureOptions
 import dev.sargunv.maplibrecompose.core.MapOptions
 import dev.sargunv.maplibrecompose.core.OrnamentOptions
 import dev.sargunv.maplibrecompose.material3.controls.DisappearingCompassButton
+import dev.sargunv.maplibrecompose.material3.controls.ExpandingAttributionButton
 import dev.sargunv.maplibrecompose.material3.controls.ScaleBar
 import io.github.dellisd.spatialk.geojson.BoundingBox
 import io.github.dellisd.spatialk.geojson.Position
 import kotlinx.coroutines.launch
 import java.lang.System.currentTimeMillis
-import app.onloc.android.R
-import app.onloc.android.api.AuthStateManager
-import app.onloc.android.components.SettingsDialog
-import app.onloc.android.components.devices.DeviceActions
-import app.onloc.android.components.devices.DeviceInformation
-import app.onloc.android.components.map.MapAttribution
-import app.onloc.android.components.map.SharedLocationPuck
-import app.onloc.android.permissions.LocationPermission
-import app.onloc.android.services.ServiceState
-import app.onloc.android.ui.main.MainActivity
-import dev.sargunv.maplibrecompose.material3.controls.ExpandingAttributionButton
 
 private const val MAP_MOVE_BUFFER = 300
 
@@ -211,7 +211,7 @@ fun LocationScreen(viewModel: LocationViewModel, modifier: Modifier = Modifier) 
                                 positions[0].latitude,
                             ),
                             zoom = 16.0,
-                        )
+                        ),
                     )
                 }
             } else {
@@ -246,7 +246,7 @@ fun LocationScreen(viewModel: LocationViewModel, modifier: Modifier = Modifier) 
                         location.latitude,
                     ),
                     zoom = 16.0,
-                )
+                ),
             )
         }
     }
@@ -262,7 +262,7 @@ fun LocationScreen(viewModel: LocationViewModel, modifier: Modifier = Modifier) 
             context.startActivity(
                 Intent(context, MainActivity::class.java).apply {
                     flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                }
+                },
             )
         }
     }
@@ -331,7 +331,7 @@ fun LocationScreen(viewModel: LocationViewModel, modifier: Modifier = Modifier) 
                 title = { Text(stringResource(R.string.main_title)) },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.primary
+                    titleContentColor = MaterialTheme.colorScheme.primary,
                 ),
                 actions = {
                     TextButton(
@@ -361,11 +361,11 @@ fun LocationScreen(viewModel: LocationViewModel, modifier: Modifier = Modifier) 
                             context.startActivity(
                                 Intent(context, MainActivity::class.java).apply {
                                     flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                                }
+                                },
                             )
                         },
                     )
-                }
+                },
             )
         },
         sheetContent = {
@@ -376,7 +376,7 @@ fun LocationScreen(viewModel: LocationViewModel, modifier: Modifier = Modifier) 
                     onLock = { device, message -> viewModel.lockDevice(device.id, message) },
                     onFlash = { viewModel.flashDevice(it.id) },
                     onNavigate = { openNavigationApp(it) },
-                    modifier = Modifier.padding(top = 16.dp)
+                    modifier = Modifier.padding(top = 16.dp),
                 )
                 DeviceInformation(
                     device = device,
@@ -404,7 +404,7 @@ fun LocationScreen(viewModel: LocationViewModel, modifier: Modifier = Modifier) 
                 onDeviceSelect = { id ->
                     viewModel.selectDevice(id)
                     deviceSelectorOpened = false
-                }
+                },
             )
 
             MaplibreMap(
@@ -461,7 +461,7 @@ fun LocationScreen(viewModel: LocationViewModel, modifier: Modifier = Modifier) 
                                                     location.latitude,
                                                 ),
                                                 zoom = 16.0,
-                                            )
+                                            ),
                                         )
                                     }
                                     focusedDevice = device
@@ -560,7 +560,7 @@ fun LocationScreen(viewModel: LocationViewModel, modifier: Modifier = Modifier) 
                             .height(48.dp)
                             .width(48.dp),
                         contentPadding = PaddingValues(0.dp),
-                        enabled = notificationGranted && locationGranted
+                        enabled = notificationGranted && locationGranted,
                     ) {
                         var icon = Icons.Outlined.GpsOff
                         if (notificationGranted) {

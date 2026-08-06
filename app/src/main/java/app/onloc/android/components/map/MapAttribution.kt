@@ -46,13 +46,13 @@ fun MapAttribution(modifier: Modifier = Modifier) {
                         TextLinkStyles(
                             style = SpanStyle(
                                 textDecoration = TextDecoration.Underline,
-                            )
+                            ),
                         ),
                     ),
                 ) {
                     append("MapLibre")
                 }
-            }
+            },
         )
         VerticalDivider(modifier = Modifier.fillMaxHeight())
         Text(
@@ -63,13 +63,13 @@ fun MapAttribution(modifier: Modifier = Modifier) {
                         TextLinkStyles(
                             style = SpanStyle(
                                 textDecoration = TextDecoration.Underline,
-                            )
+                            ),
                         ),
                     ),
                 ) {
                     append("Protomaps")
                 }
-            }
+            },
         )
         VerticalDivider(modifier = Modifier.fillMaxHeight())
         Text(
@@ -80,13 +80,13 @@ fun MapAttribution(modifier: Modifier = Modifier) {
                         TextLinkStyles(
                             style = SpanStyle(
                                 textDecoration = TextDecoration.Underline,
-                            )
+                            ),
                         ),
                     ),
                 ) {
                     append("OpenStreetMap")
                 }
-            }
+            },
         )
     }
 }

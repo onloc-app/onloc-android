@@ -30,7 +30,7 @@ class BootReceiver : BroadcastReceiver() {
         val status = preferences.getLocationServiceStatus()
 
         Log.d("BootReceiver", "Intent action: ${intent.action}")
-        Log.d("BootReceiver", "Location service status: ${status}")
+        Log.d("BootReceiver", "Location service status: $status")
 
         if (intent.action == Intent.ACTION_LOCKED_BOOT_COMPLETED || intent.action == Intent.ACTION_BOOT_COMPLETED) {
             Log.d("BootReceiver", "Boot completed, starting services.")

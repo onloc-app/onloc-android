@@ -64,19 +64,19 @@ fun MainScreen(viewModel: MainViewModel, modifier: Modifier = Modifier) {
             is AuthState.Authenticated -> context.startActivity(
                 Intent(context, LocationActivity::class.java).apply {
                     flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                }
+                },
             )
 
             is AuthState.Unauthenticated -> context.startActivity(
                 Intent(context, LoginActivity::class.java).apply {
                     flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                }
+                },
             )
 
             is AuthState.Offline -> context.startActivity(
                 Intent(context, OfflineActivity::class.java).apply {
                     flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                }
+                },
             )
 
             is AuthState.Loading -> Unit
@@ -87,7 +87,7 @@ fun MainScreen(viewModel: MainViewModel, modifier: Modifier = Modifier) {
         Column(
             modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+            verticalArrangement = Arrangement.Center,
         ) {
             CircularProgressIndicator(modifier = Modifier.size(48.dp))
         }

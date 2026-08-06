@@ -15,7 +15,7 @@
 
 @file:Suppress("MatchingDeclarationName")
 
-package app.onloc.android.models.api
+package app.onloc.android.models.api.tokens
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

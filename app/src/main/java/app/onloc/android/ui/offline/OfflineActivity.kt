@@ -70,13 +70,13 @@ fun OfflineScreen(viewModel: OfflineViewModel, modifier: Modifier = Modifier) {
             OfflineState.Online -> context.startActivity(
                 Intent(context, LocationActivity::class.java).apply {
                     flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                }
+                },
             )
 
             OfflineState.LoggedOut -> context.startActivity(
                 Intent(context, LoginActivity::class.java).apply {
                     flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                }
+                },
             )
 
             else -> Unit
@@ -87,7 +87,7 @@ fun OfflineScreen(viewModel: OfflineViewModel, modifier: Modifier = Modifier) {
         Column(
             modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically)
+            verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
         ) {
             Text(stringResource(R.string.offline_title), style = MaterialTheme.typography.titleLarge)
             Button(

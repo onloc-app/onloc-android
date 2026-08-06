@@ -39,26 +39,23 @@ fun PasswordTextField(
         singleLine = true,
         enabled = enabled,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-        visualTransformation =
-            if (passwordVisible)
-                VisualTransformation.None
-            else
-                PasswordVisualTransformation(),
+        visualTransformation = if (passwordVisible) {
+            VisualTransformation.None
+        } else {
+            PasswordVisualTransformation()
+        },
         trailingIcon = {
-            val image = if (passwordVisible)
-                Icons.Default.Visibility
-            else
-                Icons.Default.VisibilityOff
+            val image = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff
 
             IconButton(onClick = { passwordVisible = !passwordVisible }) {
                 Icon(
                     imageVector = image,
-                    contentDescription = if (passwordVisible) "Hide password" else "Show password"
+                    contentDescription = if (passwordVisible) "Hide password" else "Show password",
                 )
             }
         },
         isError = isError,
         supportingText = supportingText,
-        modifier = modifier.fillMaxWidth()
+        modifier = modifier.fillMaxWidth(),
     )
 }

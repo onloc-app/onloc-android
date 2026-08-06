@@ -85,7 +85,7 @@ class ServerDiscovery(context: Context, callback: (server: Server) -> Unit) {
                 }
 
                 if (bestAddress != null) {
-                    val name  = serviceInfo.serviceName
+                    val name = serviceInfo.serviceName
                     val address = bestAddress
                     val port = serviceInfo.port
 

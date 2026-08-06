@@ -20,8 +20,8 @@ import app.onloc.android.R
 import app.onloc.android.api.ApiClient
 import app.onloc.android.api.ApiException
 import app.onloc.android.api.safeApiCall
-import app.onloc.android.models.api.LoginRequest
-import app.onloc.android.models.api.LoginResponse
+import app.onloc.android.models.api.auth.LoginRequest
+import app.onloc.android.models.api.auth.LoginResponse
 import io.ktor.client.call.body
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
@@ -44,11 +44,11 @@ class AuthApiService(private val context: Context, ip: String) {
             HttpStatusCode.OK -> response.body<LoginResponse>()
 
             HttpStatusCode.Unauthorized -> throw ApiException(
-                context.getString(R.string.login_error_invalid_credentials)
+                context.getString(R.string.login_error_invalid_credentials),
             )
 
             else -> throw ApiException(
-                context.getString(R.string.login_error_server, response.status.value)
+                context.getString(R.string.login_error_server, response.status.value),
             )
         }
     }
