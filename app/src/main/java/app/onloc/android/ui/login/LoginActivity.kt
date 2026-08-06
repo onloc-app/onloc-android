@@ -15,7 +15,6 @@
 
 package app.onloc.android.ui.login
 
-import android.app.Application
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
@@ -43,17 +42,21 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.CopyAll
+import androidx.compose.material.icons.outlined.Lan
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
@@ -80,13 +83,10 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import app.onloc.android.AppPreferences
 import app.onloc.android.ui.location.LocationActivity
 import app.onloc.android.MIN_TIRAMISU_VERSION
 import app.onloc.android.R
@@ -99,7 +99,7 @@ import app.onloc.android.ui.theme.OnlocAndroidTheme
 import kotlinx.coroutines.launch
 import kotlin.jvm.java
 
-private const val LOGIN_FORM_WIDTH = 0.8f
+private const val FORM_WIDTH = 0.8f
 private const val NAVIGATION_TRANSITION_TIME = 250
 
 private object LoginRoutes {
@@ -190,8 +190,11 @@ fun ServerUrlScreen(viewModel: LoginViewModel, onContinue: () -> Unit, modifier:
     val cs = rememberCoroutineScope()
 
     var url by rememberSaveable { mutableStateOf(viewModel.storedUrl) }
-    var urlError by rememberSaveable { mutableStateOf("") }
-    var generalError by rememberSaveable { mutableStateOf("") }
+    var urlError by rememberSaveable { mutableStateOf<String?>(null) }
+    val urlRequiredMessage = stringResource(R.string.login_url_required)
+    val invalidUrlMessage = stringResource(R.string.login_invalid_url)
+
+    var generalError by rememberSaveable { mutableStateOf<String?>(null) }
     var loading by rememberSaveable { mutableStateOf(false) }
 
     // Server discovery
@@ -233,34 +236,34 @@ fun ServerUrlScreen(viewModel: LoginViewModel, onContinue: () -> Unit, modifier:
 
     // Makes sure the server is reachable before the login step
     fun handleContinue() {
-        urlError = ""
-        generalError = ""
+        urlError = null
+        generalError = null
 
         var isValid = true
         if (url.isBlank()) {
-            // TODO: Localize
-            urlError = "URL is required"
+            urlError = urlRequiredMessage
             isValid = false
         } else if (!Patterns.WEB_URL.matcher(url).matches()) {
-            urlError = "Invalid URL"
+            urlError = invalidUrlMessage
             isValid = false
         } else {
-            urlError = ""
+            urlError = null
         }
-        if (!isValid) return
 
-        cs.launch {
-            loading = true
-            StatusApiService(context, url).getStatus()
-                .onSuccess {
-                    generalError = ""
-                    viewModel.storedUrl = url
-                    onContinue()
-                }
-                .onFailure { e ->
-                    generalError = e.localizedMessage ?: e.message ?: e.toString()
-                }
-            loading = false
+        if (isValid) {
+            cs.launch {
+                loading = true
+                StatusApiService(context, url).getStatus()
+                    .onSuccess {
+                        generalError = null
+                        viewModel.storedUrl = url
+                        onContinue()
+                    }
+                    .onFailure { e ->
+                        generalError = e.localizedMessage ?: e.message ?: e.toString()
+                    }
+                loading = false
+            }
         }
     }
 
@@ -269,12 +272,12 @@ fun ServerUrlScreen(viewModel: LoginViewModel, onContinue: () -> Unit, modifier:
         contentAlignment = Alignment.Center
     ) {
         Column(
-            modifier = Modifier.fillMaxWidth(LOGIN_FORM_WIDTH),
+            modifier = Modifier.fillMaxWidth(FORM_WIDTH),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Image(painter = painterResource(R.drawable.foreground), contentDescription = null)
+                Image(painterResource(R.drawable.foreground), null)
                 Column(horizontalAlignment = Alignment.Start) {
                     Text(
                         text = stringResource(R.string.login_title),
@@ -294,13 +297,13 @@ fun ServerUrlScreen(viewModel: LoginViewModel, onContinue: () -> Unit, modifier:
                 label = { Text(stringResource(R.string.login_ip_field_label)) },
                 singleLine = true,
                 enabled = !loading,
-                isError = urlError.isNotEmpty(),
+                isError = urlError != null,
                 supportingText = {
-                    if (urlError.isNotEmpty()) {
+                    urlError?.let {
                         Text(
                             modifier = Modifier.fillMaxWidth(),
-                            text = urlError,
-                            color = MaterialTheme.colorScheme.error
+                            text = it,
+                            color = MaterialTheme.colorScheme.error,
                         )
                     }
                 },
@@ -361,11 +364,13 @@ fun ServerUrlScreen(viewModel: LoginViewModel, onContinue: () -> Unit, modifier:
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            AnimatedVisibility(generalError.isNotEmpty()) {
-                Text(
-                    text = generalError,
-                    color = MaterialTheme.colorScheme.error,
-                )
+            AnimatedVisibility(visible = generalError != null) {
+                generalError?.let {
+                    Text(
+                        text = it,
+                        color = MaterialTheme.colorScheme.error,
+                    )
+                }
             }
 
             Button(onClick = { handleContinue() }, enabled = !loading, modifier = Modifier.fillMaxWidth()) {
@@ -384,28 +389,31 @@ fun CredentialsScreen(viewModel: LoginViewModel, onBack: () -> Unit, modifier: M
     val loginState by viewModel.loginState.collectAsStateWithLifecycle()
 
     var username by rememberSaveable { mutableStateOf("") }
-    var usernameError by rememberSaveable { mutableStateOf("") }
+    var usernameError by rememberSaveable { mutableStateOf<String?>(null) }
+    val usernameRequiredMessage = stringResource(R.string.login_username_required)
+
     var password by rememberSaveable { mutableStateOf("") }
-    var passwordError by rememberSaveable { mutableStateOf("") }
+    var passwordError by rememberSaveable { mutableStateOf<String?>(null) }
+    val passwordRequiredMessage = stringResource(R.string.login_password_required)
 
     fun handleLogin() {
-        usernameError = ""
-        passwordError = ""
+        usernameError = null
+        passwordError = null
 
         var isValid = true
 
         if (username.isBlank()) {
-            usernameError = "Username is required"
+            usernameError = usernameRequiredMessage
             isValid = false
         } else {
-            usernameError = ""
+            usernameError = null
         }
 
         if (password.isBlank()) {
-            passwordError = "Password is required"
+            passwordError = passwordRequiredMessage
             isValid = false
         } else {
-            passwordError = ""
+            passwordError = null
         }
 
         if (isValid) {
@@ -414,38 +422,80 @@ fun CredentialsScreen(viewModel: LoginViewModel, onBack: () -> Unit, modifier: M
     }
 
     Box(
-        modifier = modifier.imePadding(),
-        contentAlignment = Alignment.Center
+        modifier = modifier
+            .imePadding()
+            .statusBarsPadding()
+            .fillMaxSize(),
+        contentAlignment = Alignment.Center,
     ) {
-        Column(
-            modifier = Modifier.fillMaxWidth(LOGIN_FORM_WIDTH),
-            horizontalAlignment = Alignment.CenterHorizontally
+        IconButton(
+            onClick = { onBack() },
+            modifier = Modifier
+                .align(Alignment.TopStart)
+                .padding(16.dp),
         ) {
-            OutlinedTextField(
-                value = username,
-                onValueChange = { username = it },
-                label = { Text(stringResource(R.string.login_username_field_label)) },
-                singleLine = true,
-                enabled = loginState !is LoginState.Loading,
-                isError = usernameError.isNotEmpty(),
-                supportingText = {
-                    if (usernameError.isNotEmpty()) {
-                        Text(
-                            modifier = Modifier.fillMaxWidth(),
-                            text = usernameError,
-                            color = MaterialTheme.colorScheme.error
-                        )
-                    }
-                },
-                modifier = Modifier.fillMaxWidth()
-            )
+            Icon(Icons.AutoMirrored.Outlined.ArrowBack, null)
+        }
+        Column(
+            modifier = Modifier.fillMaxWidth(FORM_WIDTH),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Icon(Icons.Outlined.Lan, null, modifier = Modifier.size(64.dp))
+                Column(horizontalAlignment = Alignment.Start) {
+                    Text(
+                        text = stringResource(R.string.login_selected_server),
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                    Text(
+                        text = viewModel.storedUrl,
+                        style = MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(bottom = 8.dp),
+                    )
+                }
+            }
 
-            PasswordTextField(
-                password = password,
-                onPasswordChange = { password = it },
-                enabled = loginState !is LoginState.Loading,
-                isPasswordError = passwordError,
-            )
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                OutlinedTextField(
+                    value = username,
+                    onValueChange = { username = it },
+                    label = { Text(stringResource(R.string.login_username_field_label)) },
+                    singleLine = true,
+                    enabled = loginState !is LoginState.Loading,
+                    isError = usernameError != null,
+                    supportingText = {
+                        usernameError?.let {
+                            Text(
+                                modifier = Modifier.fillMaxWidth(),
+                                text = it,
+                                color = MaterialTheme.colorScheme.error,
+                            )
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                PasswordTextField(
+                    password = password,
+                    onPasswordChange = { password = it },
+                    enabled = loginState !is LoginState.Loading,
+                    isError = passwordError != null,
+                    supportingText = {
+                        passwordError?.let {
+                            Text(
+                                modifier = Modifier.fillMaxWidth(),
+                                text = it,
+                                color = MaterialTheme.colorScheme.error,
+                            )
+                        }
+                    }
+                )
+            }
 
             AnimatedVisibility(loginState is LoginState.Error) {
                 Text(
@@ -453,8 +503,6 @@ fun CredentialsScreen(viewModel: LoginViewModel, onBack: () -> Unit, modifier: M
                     color = MaterialTheme.colorScheme.error,
                 )
             }
-
-            Spacer(modifier = Modifier.height(16.dp))
 
             Button(
                 onClick = { handleLogin() },

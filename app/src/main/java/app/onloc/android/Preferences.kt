@@ -45,7 +45,7 @@ class AppPreferences(private val context: Context) {
 
     fun getServerUrl(): String? {
         // Switch to new key if coming from a version before v1.2.8
-        // TODO: remove in future updates
+        // Remove in future updates
         val ip = prefs.getString(DEPRACATED_IP_KEY, null)
         if (ip != null) {
             createServerUrl(ip)

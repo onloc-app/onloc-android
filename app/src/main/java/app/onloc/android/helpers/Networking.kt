@@ -17,50 +17,51 @@ package app.onloc.android.helpers
 
 import android.content.Context
 import android.net.ConnectivityManager
-import android.net.LinkAddress
-import android.net.Network
 import java.net.Inet4Address
 import java.net.InetAddress
 
-data class LocalSubnet(val address: Inet4Address, val prefixLength: Int)
-
 fun getLocalSubnet(context: Context): LocalSubnet? {
     val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-    val network: Network = cm.activeNetwork ?: return null
-    val linkProperties = cm.getLinkProperties(network) ?: return null
 
-    val linkAddress: LinkAddress = linkProperties.linkAddresses
-        .firstOrNull { it.address is Inet4Address && !it.address.isLoopbackAddress }
-        ?: return null
-
-    return LocalSubnet(
-        address = linkAddress.address as Inet4Address,
-        prefixLength = linkAddress.prefixLength
-    )
+    return cm.activeNetwork
+        ?.let(cm::getLinkProperties)
+        ?.linkAddresses
+        ?.firstOrNull {
+            it.address is Inet4Address && !it.address.isLoopbackAddress
+        }
+        ?.let {
+            LocalSubnet(
+                address = it.address as Inet4Address,
+                prefixLength = it.prefixLength,
+            )
+        }
 }
 
+@SuppressWarnings("MagicNumber")
 fun isInSameSubnet(candidate: InetAddress, local: LocalSubnet): Boolean {
     if (candidate !is Inet4Address) return false
 
     val localBytes = local.address.address
     val candidateBytes = candidate.address
 
-    val prefixLength = local.prefixLength
-    val fullBytes = prefixLength / 8
-    val remainingBits = prefixLength % 8
+    val fullBytes = local.prefixLength / 8
+    val remainingBits = local.prefixLength % 8
 
-    // Compare the full bytes covered by the prefix
+    var matches = true
+
     for (i in 0 until fullBytes) {
-        if (localBytes[i] != candidateBytes[i]) return false
-    }
-
-    // Compare any remaining bits in the next byte
-    if (remainingBits > 0 && fullBytes < 4) {
-        val mask = (0xFF shl (8 - remainingBits)) and 0xFF
-        if ((localBytes[fullBytes].toInt() and mask) != (candidateBytes[fullBytes].toInt() and mask)) {
-            return false
+        if (localBytes[i] != candidateBytes[i]) {
+            matches = false
+            break
         }
     }
 
-    return true
+    if (matches && remainingBits > 0 && fullBytes < 4) {
+        val mask = (0xFF shl (8 - remainingBits)) and 0xFF
+        matches = (localBytes[fullBytes].toInt() and mask) == (candidateBytes[fullBytes].toInt() and mask)
+    }
+
+    return matches
 }
+
+data class LocalSubnet(val address: Inet4Address, val prefixLength: Int)

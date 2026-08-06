@@ -13,13 +13,13 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-package app.onloc.android.models.api
+package app.onloc.android.models
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class GetStatusResponse(
+data class Status(
     @SerialName("is_setup")
     val isSetup: Boolean,
     val registration: Boolean,

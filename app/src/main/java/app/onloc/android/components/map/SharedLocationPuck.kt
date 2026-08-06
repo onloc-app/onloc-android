@@ -48,7 +48,12 @@ import dev.sargunv.maplibrecompose.expressions.dsl.image
 
 private const val ACCURACY_OPACITY = 0.5f
 private const val BACKGROUND_LAYER_SIZE = 1.25f
-private val BASED_SHARED_ICON_OFFSET = 0.dp to (-2.5).dp
+
+// Base shared icon offset
+@SuppressWarnings("MagicNumber")
+private val BASE_SHARED_ICON_OFFSET = offset(0.dp, (-2.5).dp)
+@SuppressWarnings("MagicNumber")
+private val FOREGROUND_SHARED_ICON_OFFSET = offset(0.dp, (-1.5).dp)
 
 @Composable
 fun SharedLocationPuck(
@@ -123,7 +128,7 @@ fun SharedLocationPuck(
             id = "location-puck-border-$id",
             source = markerSource,
             iconImage = image(painterResource(R.drawable.triangle), drawAsSdf = true),
-            iconOffset = offset(BASED_SHARED_ICON_OFFSET.first, BASED_SHARED_ICON_OFFSET.second),
+            iconOffset = BASE_SHARED_ICON_OFFSET,
             iconSize = const(BACKGROUND_LAYER_SIZE),
             iconColor = const(Color.White),
             iconAllowOverlap = const(true),
@@ -134,7 +139,7 @@ fun SharedLocationPuck(
             id = "location-puck-$id",
             source = markerSource,
             iconImage = image(painterResource(R.drawable.triangle), drawAsSdf = true),
-            iconOffset = offset(BASED_SHARED_ICON_OFFSET.first, BASED_SHARED_ICON_OFFSET.second + 1.dp),
+            iconOffset = FOREGROUND_SHARED_ICON_OFFSET,
             iconColor = const(color),
             iconAllowOverlap = const(true),
             onClick = { onClick(); ClickResult.Consume },

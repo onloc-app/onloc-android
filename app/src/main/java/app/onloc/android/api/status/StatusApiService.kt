@@ -17,7 +17,7 @@ package app.onloc.android.api.status
 
 import android.content.Context
 import app.onloc.android.api.ApiClient
-import app.onloc.android.models.api.GetStatusResponse
+import app.onloc.android.models.Status
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 
@@ -26,9 +26,9 @@ private const val ENDPOINT = "/api/status"
 class StatusApiService(private val context: Context, ip: String) {
     private val api = ApiClient(context, ip)
 
-    suspend fun getStatus(): Result<GetStatusResponse> {
+    suspend fun getStatus(): Result<Status> {
         try {
-            val response: GetStatusResponse = api.client.get(ENDPOINT).body()
+            val response: Status = api.client.get(ENDPOINT).body()
             return Result.success(response)
         } catch (e: Exception) {
             return Result.failure(e)

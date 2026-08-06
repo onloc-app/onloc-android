@@ -19,6 +19,11 @@
     <string name="login_error_server">Server error (%1$d)</string>
     <string name="login_enable_network_discovery">Enable network discovery</string>
     <string name="login_continue_button">Continue</string>
+    <string name="login_url_required">URL is required</string>
+    <string name="login_invalid_url">Invalid URL</string>
+    <string name="login_username_required">Username required</string>
+    <string name="login_password_required">Password required</string>
+    <string name="login_selected_server">Selected server</string>
 
     <string name="main_title">Onloc</string>
     <string name="main_service_status_no_selection">No device selected</string>
