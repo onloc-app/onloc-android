@@ -1,0 +1,3 @@
+- Improvements to the location service
+- Improved login screen with a two-step login process
+- Refactored the server detection logic
