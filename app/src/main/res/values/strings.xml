@@ -42,6 +42,8 @@
     <string name="main_interval_slider_label">Interval between uploads</string>
     <string name="main_interval_slider_realtime_label">Use real-time updates</string>
     <string name="generic_close_button">Close</string>
+    <string name="device_sheet_actions_title">Actions</string>
+    <string name="device_sheet_information_title">Information</string>
 
     <plurals name="interval_picker_seconds">
         <item quantity="one">Second</item>

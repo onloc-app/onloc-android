@@ -55,7 +55,6 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun DeviceInformation(device: Device, modifier: Modifier = Modifier, currentUser: User? = null, user: User? = null) {
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text(text = "Information", style = MaterialTheme.typography.titleLarge)
         if (currentUser != null && user != null) {
             // Only show the owner row for shared devices
             if (currentUser.id != device.userId) {

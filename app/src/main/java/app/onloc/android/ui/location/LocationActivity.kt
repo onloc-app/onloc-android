@@ -370,20 +370,33 @@ fun LocationScreen(viewModel: LocationViewModel, modifier: Modifier = Modifier) 
         },
         sheetContent = {
             focusedDevice?.let { device ->
-                DeviceActions(
-                    device = device,
-                    onRing = { viewModel.ringDevice(it.id) },
-                    onLock = { device, message -> viewModel.lockDevice(device.id, message) },
-                    onFlash = { viewModel.flashDevice(it.id) },
-                    onNavigate = { openNavigationApp(it) },
-                    modifier = Modifier.padding(top = 16.dp),
-                )
-                DeviceInformation(
-                    device = device,
-                    modifier = Modifier.padding(16.dp),
-                    currentUser = user,
-                    user = sharedDeviceUsers[device.userId],
-                )
+                Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(
+                        text = device.name,
+                        style = MaterialTheme.typography.headlineMedium,
+                        modifier = Modifier.align(Alignment.CenterHorizontally),
+                    )
+                    Text(
+                        text = stringResource(R.string.device_sheet_actions_title),
+                        style = MaterialTheme.typography.titleLarge,
+                    )
+                    DeviceActions(
+                        device = device,
+                        onRing = { viewModel.ringDevice(it.id) },
+                        onLock = { device, message -> viewModel.lockDevice(device.id, message) },
+                        onFlash = { viewModel.flashDevice(it.id) },
+                        onNavigate = { openNavigationApp(it) },
+                    )
+                    Text(
+                        text = stringResource(R.string.device_sheet_information_title),
+                        style = MaterialTheme.typography.titleLarge,
+                    )
+                    DeviceInformation(
+                        device = device,
+                        currentUser = user,
+                        user = sharedDeviceUsers[device.userId],
+                    )
+                }
                 Spacer(modifier = modifier.height(32.dp))
             }
         },
@@ -461,9 +474,7 @@ fun LocationScreen(viewModel: LocationViewModel, modifier: Modifier = Modifier) 
                                     }
                                     focusedDevice = device
                                 },
-                                onLongClick = {
-                                    openNavigationApp(location)
-                                },
+                                onLongClick = { openNavigationApp(location) },
                             )
                         }
                     }
@@ -485,9 +496,7 @@ fun LocationScreen(viewModel: LocationViewModel, modifier: Modifier = Modifier) 
                                     goToLocation(location)
                                     focusedDevice = device
                                 },
-                                onLongClick = {
-                                    openNavigationApp(location)
-                                },
+                                onLongClick = { openNavigationApp(location) },
                             )
                         }
                     }
