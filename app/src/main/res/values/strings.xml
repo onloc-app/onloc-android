@@ -47,6 +47,10 @@
     <string name="settings_dialog_interval_slider_realtime_label">Use real-time updates</string>
     <string name="settings_dialog_quality_label">Location quality</string>
 
+    <string name="quality_high_accuracy">High</string>
+    <string name="quality_balance_power_accuracy">Balance</string>
+    <string name="quality_low_power">Low</string>
+
     <plurals name="interval_picker_seconds">
         <item quantity="one">Second</item>
         <item quantity="many">Seconds</item>

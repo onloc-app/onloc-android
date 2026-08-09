@@ -21,7 +21,6 @@ import android.content.Context
 import android.location.LocationManager
 import android.location.LocationRequest
 import androidx.annotation.RequiresPermission
-import androidx.core.location.LocationRequestCompat
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import app.onloc.android.AppPreferences

@@ -81,13 +81,13 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.onloc.android.R
 import app.onloc.android.api.AuthStateManager
 import app.onloc.android.components.Avatar
-import app.onloc.android.components.settings.SettingsDialog
 import app.onloc.android.components.devices.DeviceActions
 import app.onloc.android.components.devices.DeviceInformation
 import app.onloc.android.components.devices.DeviceSelector
 import app.onloc.android.components.map.LocationPuck
 import app.onloc.android.components.map.MapAttribution
 import app.onloc.android.components.map.SharedLocationPuck
+import app.onloc.android.components.settings.SettingsDialog
 import app.onloc.android.models.Device
 import app.onloc.android.models.Location
 import app.onloc.android.permissions.LocationPermission

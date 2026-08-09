@@ -24,6 +24,8 @@ import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import app.onloc.android.R
 
 @Composable
 fun QualityPicker(
@@ -50,10 +52,15 @@ fun QualityPicker(
                     label = {
                         Text(
                             when (option) {
-                                LocationRequest.QUALITY_HIGH_ACCURACY -> "High"
-                                LocationRequest.QUALITY_BALANCED_POWER_ACCURACY -> "Balance"
-                                else -> "Low"
-                            }
+                                LocationRequest.QUALITY_HIGH_ACCURACY ->
+                                    stringResource(R.string.quality_high_accuracy)
+
+                                LocationRequest.QUALITY_BALANCED_POWER_ACCURACY ->
+                                    stringResource(R.string.quality_balance_power_accuracy)
+
+                                else ->
+                                    stringResource(R.string.quality_low_power)
+                            },
                         )
                     },
                     enabled = enabled,
