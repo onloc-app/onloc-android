@@ -16,19 +16,21 @@
 package app.onloc.android
 
 import android.content.Context
+import android.location.LocationRequest
 import androidx.core.content.edit
 import app.onloc.android.models.User
 import com.google.gson.Gson
 
-const val DEPRACATED_IP_KEY = "ip"
-const val SERVER_URL_KEY = "server_url"
-const val DEVICE_ID_KEY = "device_id"
-const val ACCESS_TOKEN_KEY = "access_token"
-const val REFRESH_TOKEN_KEY = "refresh_token"
-const val USER_KEY = "user"
-const val LOCATION_SERVICE_KEY = "location"
-const val LOCATION_UPDATES_INTERVAL_KEY = "interval"
-const val REALTIME_KEY = "realtime"
+private const val DEPRACATED_IP_KEY = "ip"
+private const val SERVER_URL_KEY = "server_url"
+private const val DEVICE_ID_KEY = "device_id"
+private const val ACCESS_TOKEN_KEY = "access_token"
+private const val REFRESH_TOKEN_KEY = "refresh_token"
+private const val USER_KEY = "user"
+private const val LOCATION_SERVICE_KEY = "location"
+private const val LOCATION_UPDATES_INTERVAL_KEY = "interval"
+private const val REALTIME_KEY = "realtime"
+private const val QUALITY_KEY = "quality"
 
 private const val APP_PREFERENCES = "app_preferences"
 private const val SERVICE_PREFERENCES = "service_preferences"
@@ -105,6 +107,14 @@ class ServicePreferences(private val context: Context) {
 
     fun createRealTime(realTime: Boolean) {
         prefs.edit { putBoolean(REALTIME_KEY, realTime) }
+    }
+
+    fun getQuality(): Int {
+        return prefs.getInt(QUALITY_KEY, LocationRequest.QUALITY_BALANCED_POWER_ACCURACY)
+    }
+
+    fun createQuality(quality: Int) {
+        prefs.edit { putInt(QUALITY_KEY, quality) }
     }
 }
 

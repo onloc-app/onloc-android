@@ -28,8 +28,8 @@
     <string name="main_location_service_switch_label">Сервис локации</string>
     <string name="main_settings_header">Настройки</string>
     <string name="permissions_header">Функции и разрешения</string>
-    <string name="main_interval_slider_label">Интервал между обновлениями</string>
-    <string name="main_interval_slider_realtime_label">Обновлять в реальном времени</string>
+    <string name="settings_dialog_interval_slider_label">Интервал между обновлениями</string>
+    <string name="settings_dialog_interval_slider_realtime_label">Обновлять в реальном времени</string>
     <string name="generic_close_button">Закрыть</string>
     <plurals name="interval_picker_seconds">
         <item quantity="one">Секунда</item>

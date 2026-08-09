@@ -13,7 +13,7 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-package app.onloc.android.components
+package app.onloc.android.components.settings
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -144,7 +144,7 @@ fun IntervalPicker(
             horizontalArrangement = Arrangement.spacedBy(defaultPadding),
         ) {
             Text(
-                text = stringResource(R.string.main_interval_slider_realtime_label),
+                text = stringResource(R.string.settings_dialog_interval_slider_realtime_label),
                 style = MaterialTheme.typography.titleMedium,
             )
             Switch(

@@ -21,8 +21,8 @@
     <string name="main_service_status_missing_permissions">Trūksta reikalingų leidimų</string>
     <string name="avatar_logout_button_label">Atsijungti</string>
     <string name="permissions_header">Ypatybės ir leidimai</string>
-    <string name="main_interval_slider_label">Intervalas tarp išsiuntimų</string>
-    <string name="main_interval_slider_realtime_label">Naudoti tikralaikius atnaujinimus</string>
+    <string name="settings_dialog_interval_slider_label">Intervalas tarp išsiuntimų</string>
+    <string name="settings_dialog_interval_slider_realtime_label">Naudoti tikralaikius atnaujinimus</string>
     <plurals name="interval_picker_seconds">
         <item quantity="one">Sekundė</item>
         <item quantity="few">Sekundės</item>

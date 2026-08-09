@@ -24,7 +24,7 @@
     <string name="device_actions_lock">Vergrendelen</string>
     <string name="device_actions_navigate">Maak route</string>
     <string name="main_location_service_switch_label">Locatievoorziening</string>
-    <string name="main_interval_slider_label">Interval tussen uploads</string>
+    <string name="settings_dialog_interval_slider_label">Interval tussen uploads</string>
     <string name="generic_close_button">Sluit</string>
     <plurals name="interval_picker_seconds">
         <item quantity="one">seconde</item>
@@ -69,7 +69,7 @@
     <string name="device_actions_flash">Flits</string>
     <string name="main_settings_header">Instellingen</string>
     <string name="permissions_header">Functies en machtigingen</string>
-    <string name="main_interval_slider_realtime_label">Gebruik realtime updates</string>
+    <string name="settings_dialog_interval_slider_realtime_label">Gebruik realtime updates</string>
     <string name="permissions_ring_header">Laat Apparaat Afgaan</string>
     <string name="service_location_stop_notification_description">De locatievolgservice is stopgezet</string>
     <string name="service_location_enable_gps">GPS moet zijn ingeschakeld</string>

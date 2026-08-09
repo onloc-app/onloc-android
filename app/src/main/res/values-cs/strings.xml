@@ -28,8 +28,8 @@
     <string name="main_location_service_switch_label">Polohová služba</string>
     <string name="main_settings_header">Nastavení</string>
     <string name="permissions_header">Funkce a povolení</string>
-    <string name="main_interval_slider_label">Interval mezi odesláním dat</string>
-    <string name="main_interval_slider_realtime_label">Používat živé aktualizace</string>
+    <string name="settings_dialog_interval_slider_label">Interval mezi odesláním dat</string>
+    <string name="settings_dialog_interval_slider_realtime_label">Používat živé aktualizace</string>
     <string name="generic_close_button">Zavřít</string>
     <plurals name="interval_picker_seconds">
         <item quantity="one">Sekunda</item>

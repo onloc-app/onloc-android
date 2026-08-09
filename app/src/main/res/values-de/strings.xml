@@ -21,8 +21,8 @@
     <string name="main_location_service_switch_label">Standortdienst</string>
     <string name="main_settings_header">Einstellungen</string>
     <string name="permissions_header">Funktionen und Berechtigungen</string>
-    <string name="main_interval_slider_label">Intervall zwischen Uploads</string>
-    <string name="main_interval_slider_realtime_label">Echtzeit-Updates verwenden</string>
+    <string name="settings_dialog_interval_slider_label">Intervall zwischen Uploads</string>
+    <string name="settings_dialog_interval_slider_realtime_label">Echtzeit-Updates verwenden</string>
     <plurals name="interval_picker_seconds">
         <item quantity="one">Sekunde</item>
         <item quantity="other">Sekunden</item>

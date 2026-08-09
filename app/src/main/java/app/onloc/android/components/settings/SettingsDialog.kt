@@ -13,8 +13,9 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-package app.onloc.android.components
+package app.onloc.android.components.settings
 
+import android.location.LocationRequest
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -34,6 +35,9 @@ import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MultiChoiceSegmentedButtonRow
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -53,6 +57,7 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.zIndex
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.onloc.android.R
+import app.onloc.android.components.Permissions
 import app.onloc.android.permissions.LocationPermission
 import app.onloc.android.permissions.PostNotificationPermission
 import app.onloc.android.services.ServiceState
@@ -70,6 +75,7 @@ fun SettingsDialog(
     val selectedDevice by viewModel.selectedDevice.collectAsStateWithLifecycle()
     val locationUpdateInterval by viewModel.locationUpdateInterval.collectAsStateWithLifecycle()
     val realTime by viewModel.realTime.collectAsStateWithLifecycle()
+    val quality by viewModel.quality.collectAsStateWithLifecycle()
 
     val locationServiceRunning by ServiceState.locationServiceRunning.collectAsState()
 
@@ -151,35 +157,26 @@ fun SettingsDialog(
                         style = MaterialTheme.typography.titleLarge,
                     )
 
-                    Box(
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
                         modifier = Modifier.fillMaxWidth(),
                     ) {
-                        ElevatedCard(
-                            elevation = CardDefaults.cardElevation(
-                                defaultElevation = 6.dp,
-                            ),
-                            modifier = Modifier.fillMaxWidth(),
-                            colors = CardDefaults.cardColors(
-                                MaterialTheme.colorScheme.surfaceContainer,
-                            ),
-                        ) {
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(16.dp),
-                            ) {
-                                Text(
-                                    text = stringResource(R.string.main_interval_slider_label),
-                                )
-                                Spacer(modifier = Modifier.height(8.dp))
-                                IntervalPicker(
-                                    value = locationUpdateInterval ?: DEFAULT_SLIDER_POSITION,
-                                    realTime = realTime,
-                                    onToggleRealTime = { viewModel.setRealTime(it) },
-                                    enabled = !locationServiceRunning,
-                                    onChange = { viewModel.setLocationUpdateInterval(it) },
-                                )
-                            }
+                        SettingCard(title = stringResource(R.string.settings_dialog_interval_slider_label)) {
+                            IntervalPicker(
+                                value = locationUpdateInterval ?: DEFAULT_SLIDER_POSITION,
+                                realTime = realTime,
+                                onToggleRealTime = { viewModel.setRealTime(it) },
+                                enabled = !locationServiceRunning,
+                                onChange = { viewModel.setLocationUpdateInterval(it) },
+                            )
+                        }
+                        SettingCard(title = stringResource(R.string.settings_dialog_quality_label)) {
+                            QualityPicker(
+                                quality = quality,
+                                onQualityChange = { viewModel.setQuality(it) },
+                                modifier = Modifier.fillMaxWidth(),
+                                enabled = !locationServiceRunning,
+                            )
                         }
                     }
 
@@ -189,6 +186,26 @@ fun SettingsDialog(
                     })
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun SettingCard(title: String, modifier: Modifier = Modifier, content: @Composable () -> Unit) {
+    ElevatedCard(
+        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+        modifier = modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(MaterialTheme.colorScheme.surfaceContainer),
+    ) {
+        Column(modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleMedium,
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            content()
         }
     }
 }

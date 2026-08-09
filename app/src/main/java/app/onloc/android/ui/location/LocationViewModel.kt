@@ -21,6 +21,7 @@ import android.content.Context
 import android.location.LocationManager
 import android.location.LocationRequest
 import androidx.annotation.RequiresPermission
+import androidx.core.location.LocationRequestCompat
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import app.onloc.android.AppPreferences
@@ -89,6 +90,13 @@ class LocationViewModel(application: Application) : AndroidViewModel(application
     fun setRealTime(realTime: Boolean) {
         _realTime.value = realTime
         servicePreferences.createRealTime(realTime)
+    }
+
+    private val _quality = MutableStateFlow(servicePreferences.getQuality())
+    val quality: StateFlow<Int> = _quality.asStateFlow()
+    fun setQuality(quality: Int) {
+        _quality.value = quality
+        servicePreferences.createQuality(quality)
     }
 
     val storedIp: String? get() = appPreferences.getServerUrl()

@@ -4,8 +4,8 @@
     <string name="main_location_service_switch_label">Servicio de localización</string>
     <string name="main_settings_header">Ajustes</string>
     <string name="permissions_header">Características y Permisos</string>
-    <string name="main_interval_slider_label">Interval entre subidas</string>
-    <string name="main_interval_slider_realtime_label">Utilice actualizaciones en tiempo real</string>
+    <string name="settings_dialog_interval_slider_label">Interval entre subidas</string>
+    <string name="settings_dialog_interval_slider_realtime_label">Utilice actualizaciones en tiempo real</string>
     <plurals name="interval_picker_seconds">
         <item quantity="one">Segundo</item>
         <item quantity="many">Segundos</item>

@@ -102,6 +102,7 @@ class LocationService : Service() {
         val servicePrefs = ServicePreferences(this)
         val interval = servicePrefs.getLocationUpdatesInterval()
         val realTime = servicePrefs.getRealTime()
+        val quality = servicePrefs.getQuality()
 
         if (!realTime && interval == null) return
 
@@ -115,7 +116,7 @@ class LocationService : Service() {
             val request = LocationRequest.Builder(finalInterval)
                 .setMinUpdateDistanceMeters(minDistance)
                 .setMaxUpdateDelayMillis(if (!realTime) finalInterval else 0L)
-                .setQuality(LocationRequest.QUALITY_HIGH_ACCURACY)
+                .setQuality(quality)
                 .build()
 
             val listener = LocationListener { location -> handleLocation(location) }
