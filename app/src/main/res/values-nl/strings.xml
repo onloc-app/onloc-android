@@ -86,4 +86,15 @@
     <string name="device_info_latest_location">Meest recente locatie</string>
     <string name="value_true">Waar</string>
     <string name="value_false">Onwaar</string>
+    <string name="login_enable_network_discovery">Netwerkdetectie inschakelen</string>
+    <string name="login_continue_button">Doorgaan</string>
+    <string name="login_url_required">URL is verplicht</string>
+    <string name="login_invalid_url">Ongeldige URL</string>
+    <string name="login_username_required">Gebruikersnaam is verplicht</string>
+    <string name="login_password_required">Wachtwoord verplicht</string>
+    <string name="login_selected_server">Geselecteerde server</string>
+    <string name="device_sheet_actions_title">Acties</string>
+    <string name="device_sheet_information_title">Informatie</string>
+    <string name="settings_dialog_quality_label">Locatiekwaliteit</string>
+    <string name="quality_high_accuracy">Hoog</string>
 </resources>
