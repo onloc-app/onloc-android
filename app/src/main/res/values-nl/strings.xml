@@ -97,4 +97,6 @@
     <string name="device_sheet_information_title">Informatie</string>
     <string name="settings_dialog_quality_label">Locatiekwaliteit</string>
     <string name="quality_high_accuracy">Hoog</string>
+    <string name="quality_balance_power_accuracy">Acculading</string>
+    <string name="quality_low_power">Laag</string>
 </resources>
