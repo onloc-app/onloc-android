@@ -1,3 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="app_name">Onloc</string>
+    <string name="title_activity_location">Cronologia posizione</string>
+    <string name="title_activity_login">Cronologia accesso</string>
+    <string name="title_activity_ringer">Cronologia squillo</string>
+    <string name="title_activity_offline">Cronologia offline</string>
+    <string name="login_username_field_label">Nome utente</string>
+    <string name="login_password_field_label">Password</string>
+    <string name="login_ip_field_label">Indirizzo del server</string>
+    <string name="login_found_servers_button">Mostra server trovati</string>
+    <string name="login_found_servers_title">Server trovati</string>
+    <string name="login_title">Onloc</string>
+    <string name="login_description">Accedi a un\'istanza</string>
+    <string name="login_submit_button_label">Accedi</string>
+    <string name="login_error_invalid_credentials">Credenziali invalide</string>
+    <string name="login_error_server">Errore del server (%1$d)</string>
+    <string name="login_enable_network_discovery">Abilitare ricerca reti</string>
+    <string name="login_continue_button">Continua</string>
+    <string name="login_url_required">Indirizzo URL obbligatorio</string>
+    <string name="login_invalid_url">Indirizzo URL non valido</string>
 </resources>
