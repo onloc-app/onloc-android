@@ -15,12 +15,8 @@
 
 package app.onloc.android.services
 
-import android.app.NotificationChannel
-import android.app.NotificationManager
 import android.app.Service
-import android.app.admin.DevicePolicyManager
 import android.content.Intent
-import android.hardware.camera2.CameraManager
 import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkRequest
@@ -29,18 +25,12 @@ import android.util.Log
 import app.onloc.android.AppPreferences
 import app.onloc.android.UserPreferences
 import app.onloc.android.api.users.UsersApiService
-import app.onloc.android.helpers.LOCK_SCREEN_CHANNEL_ID
-import app.onloc.android.helpers.LOCK_SCREEN_NOTIFICATION_ID
-import app.onloc.android.helpers.NotificationFactory.createLockScreenNotification
+import app.onloc.android.commands.Flash
+import app.onloc.android.commands.Lock
+import app.onloc.android.commands.Ring
 import app.onloc.android.helpers.NotificationFactory.createStartWebSocketServiceNotification
 import app.onloc.android.helpers.START_WEBSOCKET_SERVICE_NOTIFICATION_ID
-import app.onloc.android.permissions.AdminPermission
-import app.onloc.android.permissions.DoNotDisturbPermission
-import app.onloc.android.permissions.OverlayPermission
-import app.onloc.android.permissions.PostNotificationPermission
 import app.onloc.android.services.ServiceStatus.isWebSocketServiceRunning
-import app.onloc.android.singletons.RingerState
-import app.onloc.android.ui.ringer.RingerActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -48,14 +38,9 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.json.JSONObject
-import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.minutes
 
 private const val WATCHDOG_DELAY = 5L
-
-// Flash
-private const val FLASH_REPEAT_COUNT = 10
-private const val FLASH_DELAY = 500L
 
 object ServiceStatus {
     var isWebSocketServiceRunning = false
@@ -73,7 +58,6 @@ class WebSocketService : Service() {
 
     private val watchdogScope = CoroutineScope(Dispatchers.IO)
     private val coroutineScope = CoroutineScope(Dispatchers.IO)
-    private var flashJob: Job? = null
     private var authRefreshing = false
 
     override fun onCreate() {
@@ -111,81 +95,10 @@ class WebSocketService : Service() {
      * Attached the command listeners to the socket.
      */
     private fun registerSocketListeners() {
-        val postNotificationPermission = PostNotificationPermission()
-        val doNotDisturbPermission = DoNotDisturbPermission()
-        val overlayPermission = OverlayPermission()
-        val adminPermission = AdminPermission()
-
-        // Configure the ring command
-        if (
-            postNotificationPermission.isGranted(this) &&
-            doNotDisturbPermission.isGranted(this) &&
-            overlayPermission.isGranted(this)
-        ) {
-            SocketManager.on(ringCommandEvent) { _ ->
-                if (!RingerState.isRinging) {
-                    RingerState.isRinging = true
-                    val ringerIntent = Intent(
-                        this,
-                        RingerActivity::class.java,
-                    )
-                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                        .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                        .addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
-                    startActivity(ringerIntent)
-                }
-            }
-        }
-
-        // Configure the lock command
-        if (
-            postNotificationPermission.isGranted(this) &&
-            adminPermission.isGranted(this)
-        ) {
-            SocketManager.on(lockCommandEvent) { args ->
-                if (args.isNotEmpty()) {
-                    val data = args[0] as JSONObject
-                    val message = data.optString("message")
-
-                    if (message.isNotBlank()) {
-                        val lockChannel = NotificationChannel(
-                            LOCK_SCREEN_CHANNEL_ID,
-                            "Lock Screen Info",
-                            NotificationManager.IMPORTANCE_HIGH,
-                        )
-                        val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
-
-                        notificationManager.createNotificationChannel(lockChannel)
-                        notificationManager.notify(
-                            LOCK_SCREEN_NOTIFICATION_ID,
-                            createLockScreenNotification(this, message),
-                        )
-                    }
-                }
-                val devicePolicyManager = getSystemService(DEVICE_POLICY_SERVICE) as DevicePolicyManager
-
-                devicePolicyManager.lockNow()
-            }
-        }
-
-        // Configure the flash command
-        SocketManager.on(flashCommandEvent) { _ ->
-            val cameraManager = getSystemService(CAMERA_SERVICE) as CameraManager
-            val cameraId = cameraManager.cameraIdList[0]
-            flashJob?.cancel()
-            flashJob = coroutineScope.launch {
-                try {
-                    repeat(FLASH_REPEAT_COUNT) {
-                        cameraManager.setTorchMode(cameraId, true)
-                        delay(FLASH_DELAY.milliseconds)
-                        cameraManager.setTorchMode(cameraId, false)
-                        delay(FLASH_DELAY.milliseconds)
-                    }
-                } catch (e: IllegalArgumentException) {
-                    e.printStackTrace()
-                }
-            }
-        }
+        // Configure commands
+        SocketManager.on(ringCommandEvent) { Ring(this).execute() }
+        SocketManager.on(lockCommandEvent) { args -> Lock(this, args).execute() }
+        SocketManager.on(flashCommandEvent) { Flash(this).execute() }
 
         // React to new locations from devices
         SocketManager.on(locationsChangeEvent) {

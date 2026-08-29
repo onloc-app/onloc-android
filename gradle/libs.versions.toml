@@ -1,6 +1,7 @@
 [versions]
 agp = "9.1.1"
-coil = "3.5.0"
+coil = "3.6.0"
+connector = "3.3.5"
 detekt = "0.6.4"
 detektPlugin = "1.23.8"
 kotlin = "2.4.10"
@@ -11,11 +12,11 @@ espressoCore = "3.7.0"
 ktorClientLogging = "3.5.2"
 lifecycleRuntimeKtx = "2.11.0"
 activityCompose = "1.13.0"
-navigationCompose = "2.9.8"
-composeBom = "2026.06.01"
+navigationCompose = "2.10.0"
+composeBom = "2026.08.00"
 materialIconsExtendedAndroid = "1.7.8"
-okhttp = "5.4.0"
-appcompat = "1.7.1"
+okhttp = "5.5.0"
+appcompat = "1.8.0"
 material = "1.14.0"
 activity = "1.13.0"
 constraintlayout = "2.2.2"
@@ -35,6 +36,7 @@ androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version
 coil = { module = "io.coil-kt.coil3:coil", version.ref = "coil" }
 coil-network-okhttp = { module = "io.coil-kt.coil3:coil-network-okhttp", version.ref = "coil" }
 coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" }
+connector = { module = "org.unifiedpush.android:connector", version.ref = "connector" }
 detekt-compose = { module = "io.nlopez.compose.rules:detekt", version.ref = "detekt" }
 detekt-formatting = { module = "io.gitlab.arturbosch.detekt:detekt-formatting", version.ref = "detektPlugin" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -42,7 +44,7 @@ androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "j
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
-androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose"}
+androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
 androidx-ui = { group = "androidx.compose.ui", name = "ui" }
 androidx-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }

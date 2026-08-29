@@ -9,6 +9,16 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
 }
 
+configurations.configureEach {
+    resolutionStrategy {
+        force("com.google.crypto.tink:tink-android:1.23.0")
+        dependencySubstitution {
+            substitute(module("com.google.crypto.tink:tink"))
+                .using(module("com.google.crypto.tink:tink-android:1.23.0"))
+        }
+    }
+}
+
 android {
     namespace = "app.onloc.android"
     compileSdk = 37
@@ -99,6 +109,7 @@ dependencies {
     implementation(libs.coil)
     implementation(libs.coil.network.okhttp)
     implementation(libs.coil.compose)
+    implementation(libs.connector)
     detektPlugins(libs.detekt.compose)
     detektPlugins(libs.detekt.formatting)
 }
