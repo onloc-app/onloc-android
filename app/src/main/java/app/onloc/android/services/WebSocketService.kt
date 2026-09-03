@@ -33,7 +33,6 @@ import app.onloc.android.helpers.START_WEBSOCKET_SERVICE_NOTIFICATION_ID
 import app.onloc.android.services.ServiceStatus.isWebSocketServiceRunning
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -97,7 +96,11 @@ class WebSocketService : Service() {
     private fun registerSocketListeners() {
         // Configure commands
         SocketManager.on(ringCommandEvent) { Ring(this).execute() }
-        SocketManager.on(lockCommandEvent) { args -> Lock(this, args).execute() }
+        SocketManager.on(lockCommandEvent) { args ->
+            val data = args[0] as JSONObject
+            val message = data.optString("message")
+            Lock(this, message).execute()
+        }
         SocketManager.on(flashCommandEvent) { Flash(this).execute() }
 
         // React to new locations from devices

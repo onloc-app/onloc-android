@@ -21,8 +21,19 @@ import androidx.core.content.ContextCompat
 import app.onloc.android.ServicePreferences
 import app.onloc.android.permissions.LocationPermission
 import app.onloc.android.permissions.PostNotificationPermission
+import app.onloc.android.services.connection.ConnectionStrategy
+import app.onloc.android.services.connection.WebSocketConnectionStrategy
 
 object ServiceManager {
+    var connectionStrategy: ConnectionStrategy = WebSocketConnectionStrategy()
+        private set
+
+    fun setConnectionStrategy(context: Context, strategy: ConnectionStrategy) {
+        connectionStrategy.stop(context)
+        connectionStrategy = strategy
+        connectionStrategy.start(context)
+    }
+
     fun startLocationServiceIfAllowed(context: Context) {
         val servicePreferences = ServicePreferences(context)
 
@@ -30,7 +41,7 @@ object ServiceManager {
         val locationPermission = LocationPermission()
 
         if (postNotificationPermission.isGranted(context) && locationPermission.isGranted(context)) {
-            servicePreferences.createLocationServiceStatus(true)
+            servicePreferences.locationServiceStatus = true
             val intent = Intent(context, LocationService::class.java)
             ContextCompat.startForegroundService(context, intent)
         }
@@ -38,23 +49,13 @@ object ServiceManager {
 
     fun stopLocationService(context: Context) {
         val servicePreferences = ServicePreferences(context)
-        servicePreferences.createLocationServiceStatus(false)
+        servicePreferences.locationServiceStatus = false
         val intent = Intent(context, LocationService::class.java)
-        context.stopService(intent)
-    }
-
-    fun startWebSocketServiceIfAllowed(context: Context) {
-        val intent = Intent(context, WebSocketService::class.java)
-        ContextCompat.startForegroundService(context, intent)
-    }
-
-    fun stopWebSocketService(context: Context) {
-        val intent = Intent(context, WebSocketService::class.java)
         context.stopService(intent)
     }
 
     fun stopAllServices(context: Context) {
         stopLocationService(context)
-        stopWebSocketService(context)
+        connectionStrategy.stop(context)
     }
 }

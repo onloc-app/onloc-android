@@ -15,32 +15,108 @@
 
 package app.onloc.android.services
 
+import android.content.Context
+import android.util.Log
+import app.onloc.android.AppPreferences
+import app.onloc.android.ServicePreferences
+import app.onloc.android.api.unifiedpush.UnifiedPushApiService
+import app.onloc.android.commands.Flash
+import app.onloc.android.commands.Lock
+import app.onloc.android.commands.Ring
+import app.onloc.android.models.UnifiedPushProvider
+import app.onloc.android.services.connection.UnifiedPushConnectionStrategy
+import app.onloc.android.services.connection.WebSocketConnectionStrategy
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import org.json.JSONException
+import org.json.JSONObject
 import org.unifiedpush.android.connector.FailedReason
 import org.unifiedpush.android.connector.PushService
+import org.unifiedpush.android.connector.UnifiedPush
 import org.unifiedpush.android.connector.data.PushEndpoint
 import org.unifiedpush.android.connector.data.PushMessage
 
-private val ringCommandEvent = "ring-command"
-private val lockCommandEvent = "lock-command"
-private val flashCommandEvent = "flash-command"
-private val registerDeviceEvent = "register-device"
-private val locationsChangeEvent = "locations-change"
+private const val RING_COMMAND_EVENT = "ring-command"
+private const val LOCK_COMMAND_EVENT = "lock-command"
+private const val FLASH_COMMAND_EVENT = "flash-command"
 
 class UnifiedPushService : PushService() {
+    val pref = ServicePreferences(this)
+
+    val cs = CoroutineScope(Dispatchers.IO)
+
     override fun onNewEndpoint(endpoint: PushEndpoint, instance: String) {
-        TODO("Not yet implemented")
+        ServiceManager.setConnectionStrategy(this, UnifiedPushConnectionStrategy())
+
+        cs.launch {
+            try {
+                val provider =
+                    UnifiedPushProvider(
+                        id = 0,
+                        deviceId = instance.toInt(),
+                        endpointUrl = endpoint.url,
+                        pubKey = endpoint.pubKeySet?.pubKey,
+                        auth = endpoint.pubKeySet?.auth,
+                    )
+                apiRegister(provider)
+
+                // Unregister the old endpoint
+                apiUnregister(this@UnifiedPushService)
+
+                // Save to app's settings
+                pref.pushEndpointUrl = endpoint.url
+            } catch (e: Exception) {
+                e.printStackTrace()
+                UnifiedPush.unregister(this@UnifiedPushService, instance)
+            }
+        }
     }
 
     override fun onMessage(message: PushMessage, instance: String) {
-        TODO("Not yet implemented")
+        val raw = String(message.content, Charsets.UTF_8).trim()
+
+        val json = try {
+            JSONObject(raw)
+        } catch (e: JSONException) {
+            Log.e("UnifiedPushService", "Failed to parse JSON response", e)
+            null
+        }
+
+        val command = json?.optString("command") ?: raw
+        val lockMessage = json?.optString("message")?.takeIf { it.isNotEmpty() }
+
+        when (command) {
+            RING_COMMAND_EVENT -> Ring(this).execute()
+            LOCK_COMMAND_EVENT -> Lock(this, lockMessage).execute()
+            FLASH_COMMAND_EVENT -> Flash(this).execute()
+            "ping" -> {} // Ignore
+            else -> Log.w("UnifiedPushService", "Unknown command $command for device $instance")
+        }
     }
 
     override fun onRegistrationFailed(reason: FailedReason, instance: String) {
-        TODO("Not yet implemented")
+        Log.w("UnifiedPushService", "Registration failed: $reason")
+        ServiceManager.setConnectionStrategy(this, WebSocketConnectionStrategy())
+        apiUnregister(this)
     }
 
     override fun onUnregistered(instance: String) {
-        TODO("Not yet implemented")
+        Log.d("UnifiedPushService", "Unregistered")
+        ServiceManager.setConnectionStrategy(this, WebSocketConnectionStrategy())
+        apiUnregister(this)
     }
 
+    private fun apiRegister(provider: UnifiedPushProvider) {
+        val serverUrl = AppPreferences(this).getServerUrl() ?: return
+        val api = UnifiedPushApiService(this, serverUrl)
+        cs.launch { api.register(provider) }
+    }
+
+    private fun apiUnregister(context: Context) {
+        val serverUrl = AppPreferences(context).getServerUrl() ?: return
+        val endpointUrl = ServicePreferences(context).pushEndpointUrl ?: return
+        val api = UnifiedPushApiService(context, serverUrl)
+        EventManager.cs.launch { api.unregister(endpointUrl) }
+    }
 }

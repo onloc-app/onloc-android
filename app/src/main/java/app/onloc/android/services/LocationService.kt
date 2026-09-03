@@ -100,9 +100,9 @@ class LocationService : Service() {
         }
 
         val servicePrefs = ServicePreferences(this)
-        val interval = servicePrefs.getLocationUpdatesInterval()
-        val realTime = servicePrefs.getRealTime()
-        val quality = servicePrefs.getQuality()
+        val interval = servicePrefs.locationUpdatesInterval
+        val realTime = servicePrefs.realtime
+        val quality = servicePrefs.quality
 
         if (!realTime && interval == null) return
 

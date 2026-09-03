@@ -34,10 +34,10 @@ import app.onloc.android.models.Device
 import app.onloc.android.models.Location
 import app.onloc.android.models.User
 import app.onloc.android.models.api.tokens.DeleteTokenRequest
+import app.onloc.android.services.EventManager
 import app.onloc.android.services.LocationCallbackManager
 import app.onloc.android.services.ServiceManager
 import app.onloc.android.services.SocketEventBus
-import app.onloc.android.services.SocketManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -45,7 +45,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import org.json.JSONObject
 
 const val TIMEOUT = 5000L
 
@@ -77,25 +76,25 @@ class LocationViewModel(application: Application) : AndroidViewModel(application
         initialValue = null,
     )
 
-    private val _locationUpdateInterval = MutableStateFlow(servicePreferences.getLocationUpdatesInterval())
+    private val _locationUpdateInterval = MutableStateFlow(servicePreferences.locationUpdatesInterval)
     val locationUpdateInterval: StateFlow<Int?> = _locationUpdateInterval.asStateFlow()
     fun setLocationUpdateInterval(interval: Int?) {
         _locationUpdateInterval.value = interval
-        servicePreferences.createLocationUpdatesInterval(interval)
+        servicePreferences.locationUpdatesInterval = interval
     }
 
-    private val _realTime = MutableStateFlow(servicePreferences.getRealTime())
+    private val _realTime = MutableStateFlow(servicePreferences.realtime)
     val realTime: StateFlow<Boolean> = _realTime.asStateFlow()
     fun setRealTime(realTime: Boolean) {
         _realTime.value = realTime
-        servicePreferences.createRealTime(realTime)
+        servicePreferences.realtime = realTime
     }
 
-    private val _quality = MutableStateFlow(servicePreferences.getQuality())
+    private val _quality = MutableStateFlow(servicePreferences.quality)
     val quality: StateFlow<Int> = _quality.asStateFlow()
     fun setQuality(quality: Int) {
         _quality.value = quality
-        servicePreferences.createQuality(quality)
+        servicePreferences.quality = quality
     }
 
     val storedIp: String? get() = appPreferences.getServerUrl()
@@ -169,22 +168,13 @@ class LocationViewModel(application: Application) : AndroidViewModel(application
     fun selectDevice(id: Int?) {
         val previousId = _selectedDeviceId.value
 
-        previousId?.let {
-            SocketManager.emit(
-                "unregister-device",
-                JSONObject().apply { put("device_id", it) },
-            )
-        }
+        previousId?.let { EventManager.unregisterDevice(context, it) }
 
         appPreferences.createDeviceId(id)
-        id?.let {
-            SocketManager.emit(
-                "register-device",
-                JSONObject().apply { put("device_id", id) },
-            )
-        }
 
         _selectedDeviceId.value = id
+
+        id?.let { EventManager.registerDevice(context, it) }
     }
 
     fun startLocationService() {
@@ -230,6 +220,8 @@ class LocationViewModel(application: Application) : AndroidViewModel(application
 
             userPreferences.deleteUserCredentials()
             appPreferences.deleteDeviceId()
+
+            _selectedDeviceId.value?.let { EventManager.unregisterDevice(context, it) }
 
             AuthStateManager.onLoggedOut()
         }

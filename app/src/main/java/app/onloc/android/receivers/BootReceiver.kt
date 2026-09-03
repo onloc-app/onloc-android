@@ -27,7 +27,7 @@ class BootReceiver : BroadcastReceiver() {
         Log.d("BootReceiver", "Received intent: ${intent.action}")
 
         val preferences = ServicePreferences(context)
-        val status = preferences.getLocationServiceStatus()
+        val status = preferences.locationServiceStatus
 
         Log.d("BootReceiver", "Intent action: ${intent.action}")
         Log.d("BootReceiver", "Location service status: $status")
@@ -39,7 +39,7 @@ class BootReceiver : BroadcastReceiver() {
                 ServiceManager.startLocationServiceIfAllowed(context)
             }
 
-            ServiceManager.startWebSocketServiceIfAllowed(context)
+            ServiceManager.connectionStrategy.start(context)
         }
     }
 }

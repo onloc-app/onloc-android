@@ -87,7 +87,8 @@
                 android:foregroundServiceType="mediaPlayback">
         </service>
         <service android:name=".services.UnifiedPushService"
-                 android:exported="false">
+                 android:exported="false"
+                 android:directBootAware="true">
             <intent-filter>
                 <action android:name="org.unifiedpush.android.connector.PUSH_EVENT"/>
             </intent-filter>

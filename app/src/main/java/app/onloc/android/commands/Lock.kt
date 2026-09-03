@@ -26,9 +26,8 @@ import app.onloc.android.helpers.LOCK_SCREEN_NOTIFICATION_ID
 import app.onloc.android.helpers.NotificationFactory.createLockScreenNotification
 import app.onloc.android.permissions.AdminPermission
 import app.onloc.android.permissions.PostNotificationPermission
-import org.json.JSONObject
 
-class Lock(val context: Context, val args: Array<Any>) : Command {
+class Lock(val context: Context, val message: String?) : Command {
     val postNotificationPermission = PostNotificationPermission()
     val adminPermission = AdminPermission()
 
@@ -37,24 +36,19 @@ class Lock(val context: Context, val args: Array<Any>) : Command {
             postNotificationPermission.isGranted(context) &&
             adminPermission.isGranted(context)
         ) {
-            if (args.isNotEmpty()) {
-                val data = args[0] as JSONObject
-                val message = data.optString("message")
+            if (!message.isNullOrBlank()) {
+                val lockChannel = NotificationChannel(
+                    LOCK_SCREEN_CHANNEL_ID,
+                    "Lock Screen Info",
+                    NotificationManager.IMPORTANCE_HIGH,
+                )
+                val notificationManager = context.getSystemService(NOTIFICATION_SERVICE) as NotificationManager
 
-                if (message.isNotBlank()) {
-                    val lockChannel = NotificationChannel(
-                        LOCK_SCREEN_CHANNEL_ID,
-                        "Lock Screen Info",
-                        NotificationManager.IMPORTANCE_HIGH,
-                    )
-                    val notificationManager = context.getSystemService(NOTIFICATION_SERVICE) as NotificationManager
-
-                    notificationManager.createNotificationChannel(lockChannel)
-                    notificationManager.notify(
-                        LOCK_SCREEN_NOTIFICATION_ID,
-                        createLockScreenNotification(context, message),
-                    )
-                }
+                notificationManager.createNotificationChannel(lockChannel)
+                notificationManager.notify(
+                    LOCK_SCREEN_NOTIFICATION_ID,
+                    createLockScreenNotification(context, message),
+                )
             }
             val devicePolicyManager = context.getSystemService(DEVICE_POLICY_SERVICE) as DevicePolicyManager
 

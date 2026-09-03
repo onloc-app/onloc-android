@@ -31,6 +31,7 @@ private const val LOCATION_SERVICE_KEY = "location"
 private const val LOCATION_UPDATES_INTERVAL_KEY = "interval"
 private const val REALTIME_KEY = "realtime"
 private const val QUALITY_KEY = "quality"
+private const val PUSH_ENDPOINT_URL_KEY = "push_endpoint_url"
 
 private const val APP_PREFERENCES = "app_preferences"
 private const val SERVICE_PREFERENCES = "service_preferences"
@@ -84,38 +85,38 @@ class ServicePreferences(private val context: Context) {
             )
     }
 
-    fun getLocationServiceStatus(): Boolean {
-        return prefs.getBoolean(LOCATION_SERVICE_KEY, false)
-    }
+    var locationServiceStatus: Boolean
+        get() = prefs.getBoolean(LOCATION_SERVICE_KEY, false)
+        set(value) {
+            prefs.edit { putBoolean(LOCATION_SERVICE_KEY, value) }
+        }
 
-    fun createLocationServiceStatus(status: Boolean) {
-        prefs.edit { putBoolean(LOCATION_SERVICE_KEY, status) }
-    }
+    var locationUpdatesInterval: Int?
+        get() {
+            val interval = prefs.getInt(LOCATION_UPDATES_INTERVAL_KEY, -1)
+            return if (interval != -1) interval else null
+        }
+        set(value) {
+            prefs.edit { putInt(LOCATION_UPDATES_INTERVAL_KEY, value ?: -1) }
+        }
 
-    fun getLocationUpdatesInterval(): Int? {
-        val interval = prefs.getInt(LOCATION_UPDATES_INTERVAL_KEY, -1)
-        return if (interval != -1) interval else null
-    }
+    var realtime: Boolean
+        get() = prefs.getBoolean(REALTIME_KEY, false)
+        set(value) {
+            prefs.edit { putBoolean(REALTIME_KEY, value) }
+        }
 
-    fun createLocationUpdatesInterval(interval: Int?) {
-        prefs.edit { putInt(LOCATION_UPDATES_INTERVAL_KEY, interval ?: -1) }
-    }
+    var quality: Int
+        get() = prefs.getInt(QUALITY_KEY, LocationRequest.QUALITY_BALANCED_POWER_ACCURACY)
+        set(value) {
+            prefs.edit { putInt(QUALITY_KEY, value) }
+        }
 
-    fun getRealTime(): Boolean {
-        return prefs.getBoolean(REALTIME_KEY, false)
-    }
-
-    fun createRealTime(realTime: Boolean) {
-        prefs.edit { putBoolean(REALTIME_KEY, realTime) }
-    }
-
-    fun getQuality(): Int {
-        return prefs.getInt(QUALITY_KEY, LocationRequest.QUALITY_BALANCED_POWER_ACCURACY)
-    }
-
-    fun createQuality(quality: Int) {
-        prefs.edit { putInt(QUALITY_KEY, quality) }
-    }
+    var pushEndpointUrl: String?
+        get() = prefs.getString(PUSH_ENDPOINT_URL_KEY, null)
+        set(value) {
+            prefs.edit { putString(PUSH_ENDPOINT_URL_KEY, value) }
+        }
 }
 
 class UserPreferences(private val context: Context) {
