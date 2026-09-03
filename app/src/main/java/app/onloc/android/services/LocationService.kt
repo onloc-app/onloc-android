@@ -58,7 +58,7 @@ class LocationService : Service() {
         if (location.accuracy >= ACCURACY_THRESHOLD) return
 
         val appPrefs = AppPreferences(this)
-        val ip = appPrefs.getServerUrl()
+        val serverUrl = appPrefs.getServerUrl()
         val selectedDeviceId = appPrefs.getDeviceId()
 
         val batteryManager = applicationContext.getSystemService(BATTERY_SERVICE) as BatteryManager
@@ -73,9 +73,9 @@ class LocationService : Service() {
         parsedLocation.battery = batteryLevel
         parsedLocation.charging = batteryCharging
 
-        if (ip != null && selectedDeviceId != null) {
+        if (serverUrl != null && selectedDeviceId != null) {
             serviceScope.launch {
-                LocationsApiService(applicationContext, ip).postLocation(parsedLocation)
+                LocationsApiService(applicationContext, serverUrl).postLocation(parsedLocation)
             }
         }
         LocationCallbackManager.callback?.invoke(location)

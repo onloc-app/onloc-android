@@ -40,14 +40,14 @@ class OfflineViewModel(application: Application) : AndroidViewModel(application)
         viewModelScope.launch {
             _state.value = OfflineState.Retrying
             val context = getApplication<Application>()
-            val ip = appPreferences.getServerUrl()
+            val url = appPreferences.getServerUrl()
 
-            if (ip == null) {
+            if (url == null) {
                 _state.value = OfflineState.LoggedOut
                 return@launch
             }
 
-            UsersApiService(context, ip).getUserInfo()
+            UsersApiService(context, url).getUserInfo()
                 .onSuccess { _state.value = OfflineState.Online }
                 .onFailure { _state.value = OfflineState.Idle(it.localizedMessage) }
         }

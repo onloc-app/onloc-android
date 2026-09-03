@@ -29,8 +29,8 @@ import io.ktor.http.contentType
 
 private const val ENDPOINT = "/api/devices"
 
-class DevicesApiService(context: Context, ip: String) {
-    private val api = ApiClient(context, ip)
+class DevicesApiService(context: Context, url: String) {
+    private val api = ApiClient(context, url)
 
     suspend fun getDevices(): Result<List<Device>> {
         try {

@@ -3,7 +3,7 @@
     <string name="app_name">Onloc</string>
     <string name="login_username_field_label">Benutzername</string>
     <string name="login_password_field_label">Passwort</string>
-    <string name="login_ip_field_label">Serveradresse</string>
+    <string name="login_url_field_label">Serveradresse</string>
     <string name="title_activity_offline">Offline Aktivität</string>
     <string name="login_found_servers_title">Gefundene Server</string>
     <string name="login_title">Onloc</string>

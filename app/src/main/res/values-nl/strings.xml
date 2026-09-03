@@ -6,7 +6,7 @@
     <string name="title_activity_offline">Offline-activiteit</string>
     <string name="login_username_field_label">Gebruikersnaam</string>
     <string name="login_password_field_label">Wachtwoord</string>
-    <string name="login_ip_field_label">URL van Website</string>
+    <string name="login_url_field_label">URL van Website</string>
     <string name="login_found_servers_button">Toon Gevonden Servers</string>
     <string name="login_found_servers_title">Gevonden Servers</string>
     <string name="login_title">Onloc</string>

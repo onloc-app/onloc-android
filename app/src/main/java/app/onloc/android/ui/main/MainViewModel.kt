@@ -38,17 +38,17 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             val context = getApplication<Application>()
             val credentials = UserPreferences(context).getUserCredentials()
-            val ip = AppPreferences(context).getServerUrl()
+            val serverUrl = AppPreferences(context).getServerUrl()
 
             val accessToken = credentials.accessToken
             val user = credentials.user
 
-            if (accessToken == null || user == null || ip == null) {
+            if (accessToken == null || user == null || serverUrl == null) {
                 _authState.value = AuthState.Unauthenticated
                 return@launch
             }
 
-            UsersApiService(context, ip).getUserInfo()
+            UsersApiService(context, serverUrl).getUserInfo()
                 .onSuccess {
                     _authState.value = AuthState.Authenticated
                 }

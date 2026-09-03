@@ -23,8 +23,8 @@ import io.ktor.client.request.get
 
 private const val ENDPOINT = "/api/status"
 
-class StatusApiService(private val context: Context, ip: String) {
-    private val api = ApiClient(context, ip)
+class StatusApiService(context: Context, url: String) {
+    private val api = ApiClient(context, url)
 
     suspend fun getStatus(): Result<Status> {
         try {

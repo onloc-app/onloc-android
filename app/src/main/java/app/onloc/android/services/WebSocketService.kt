@@ -118,18 +118,18 @@ class WebSocketService : Service() {
         if (connectivityManager.activeNetwork == null) return
 
         val appPrefs = AppPreferences(this)
-        val ip = appPrefs.getServerUrl()
+        val url = appPrefs.getServerUrl()
         val deviceId = appPrefs.getDeviceId()
 
         val userPrefs = UserPreferences(this)
         val token = userPrefs.getUserCredentials().accessToken
 
-        if (ip == null || token == null || deviceId == -1) return
+        if (url == null || token == null || deviceId == -1) return
 
         // Initialize the WebSocket
         SocketManager.disconnect()
-        SocketManager.initialize(ip, token)
-        SocketManager.onAuthFailure = { handleAuthFailure(ip) }
+        SocketManager.initialize(url, token)
+        SocketManager.onAuthFailure = { handleAuthFailure(url) }
         registerSocketListeners()
         SocketManager.connect()
 
@@ -140,7 +140,7 @@ class WebSocketService : Service() {
         )
     }
 
-    private fun handleAuthFailure(ip: String) {
+    private fun handleAuthFailure(url: String) {
         if (authRefreshing) return
         authRefreshing = true
 
@@ -148,7 +148,7 @@ class WebSocketService : Service() {
         coroutineScope.launch {
             try {
                 // Call an authenticated endpoint to let the API client refresh the access token.
-                UsersApiService(applicationContext, ip).getUserInfo()
+                UsersApiService(applicationContext, url).getUserInfo()
                 connectSocket()
             } catch (e: Exception) {
                 Log.e("onloc", e.toString())

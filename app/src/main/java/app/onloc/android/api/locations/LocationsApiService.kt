@@ -25,8 +25,8 @@ import io.ktor.http.contentType
 
 private const val ENDPOINT = "/api/locations"
 
-class LocationsApiService(context: Context, ip: String) {
-    private val api = ApiClient(context, ip)
+class LocationsApiService(context: Context, url: String) {
+    private val api = ApiClient(context, url)
 
     suspend fun postLocation(location: Location): Result<Unit> {
         try {

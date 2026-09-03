@@ -31,8 +31,8 @@ import io.ktor.http.contentType
 
 private const val ENDPOINT = "/api/auth"
 
-class AuthApiService(private val context: Context, ip: String) {
-    private val api = ApiClient(context, ip)
+class AuthApiService(private val context: Context, url: String) {
+    private val api = ApiClient(context, url)
 
     suspend fun login(request: LoginRequest): Result<LoginResponse> = safeApiCall {
         val response = api.client.post("$ENDPOINT/login") {

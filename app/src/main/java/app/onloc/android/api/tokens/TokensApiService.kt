@@ -25,8 +25,8 @@ import io.ktor.http.contentType
 
 private const val ENDPOINT = "/api/tokens"
 
-class TokensApiService(context: Context, ip: String) {
-    private val api = ApiClient(context, ip)
+class TokensApiService(context: Context, url: String) {
+    private val api = ApiClient(context, url)
 
     suspend fun deleteToken(request: DeleteTokenRequest): Result<Unit> {
         try {

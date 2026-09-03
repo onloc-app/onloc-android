@@ -97,7 +97,7 @@ class LocationViewModel(application: Application) : AndroidViewModel(application
         servicePreferences.quality = quality
     }
 
-    val storedIp: String? get() = appPreferences.getServerUrl()
+    val storedServerUrl: String? get() = appPreferences.getServerUrl()
     val user: User? get() = userPreferences.getUserCredentials().user
 
     init {
@@ -114,9 +114,9 @@ class LocationViewModel(application: Application) : AndroidViewModel(application
     }
 
     fun fetchDevices() {
-        val ip = storedIp ?: return
+        val url = storedServerUrl ?: return
         viewModelScope.launch {
-            val api = DevicesApiService(context, ip)
+            val api = DevicesApiService(context, url)
             api.getDevices()
                 .onSuccess { devices ->
                     _devices.value = devices
@@ -133,10 +133,10 @@ class LocationViewModel(application: Application) : AndroidViewModel(application
     }
 
     suspend fun fetchUsersForSharedDevices(devices: List<Device>) {
-        val ip = storedIp ?: return
+        val serverUrl = storedServerUrl ?: return
         val users = mutableMapOf<Int, User>()
         devices.forEach { device ->
-            UsersApiService(context, ip).getUser(device.userId)
+            UsersApiService(context, serverUrl).getUser(device.userId)
                 .onSuccess { user ->
                     users[device.userId] = user
                 }
@@ -145,23 +145,23 @@ class LocationViewModel(application: Application) : AndroidViewModel(application
     }
 
     fun ringDevice(id: Int) {
-        val ip = storedIp ?: return
+        val serverUrl = storedServerUrl ?: return
         viewModelScope.launch {
-            DevicesApiService(context, ip).ringDevice(id)
+            DevicesApiService(context, serverUrl).ringDevice(id)
         }
     }
 
     fun lockDevice(id: Int, message: String?) {
-        val ip = storedIp ?: return
+        val serverUrl = storedServerUrl ?: return
         viewModelScope.launch {
-            DevicesApiService(context, ip).lockDevice(id, message)
+            DevicesApiService(context, serverUrl).lockDevice(id, message)
         }
     }
 
     fun flashDevice(id: Int) {
-        val ip = storedIp ?: return
+        val serverUrl = storedServerUrl ?: return
         viewModelScope.launch {
-            DevicesApiService(context, ip).flashDevice(id)
+            DevicesApiService(context, serverUrl).flashDevice(id)
         }
     }
 
@@ -212,9 +212,9 @@ class LocationViewModel(application: Application) : AndroidViewModel(application
             ServiceManager.stopAllServices(context)
 
             val credentials = userPreferences.getUserCredentials()
-            val ip = storedIp
-            if (ip != null && credentials.refreshToken != null) {
-                val api = TokensApiService(context, ip)
+            val serverUrl = storedServerUrl
+            if (serverUrl != null && credentials.refreshToken != null) {
+                val api = TokensApiService(context, serverUrl)
                 api.deleteToken(DeleteTokenRequest(credentials.refreshToken))
             }
 

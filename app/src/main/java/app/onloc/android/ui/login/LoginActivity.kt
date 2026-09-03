@@ -293,7 +293,7 @@ fun ServerUrlScreen(viewModel: LoginViewModel, onContinue: () -> Unit, modifier:
             OutlinedTextField(
                 value = url,
                 onValueChange = { url = it },
-                label = { Text(stringResource(R.string.login_ip_field_label)) },
+                label = { Text(stringResource(R.string.login_url_field_label)) },
                 singleLine = true,
                 enabled = !loading,
                 isError = urlError != null,

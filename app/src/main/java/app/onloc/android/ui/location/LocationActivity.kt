@@ -142,7 +142,7 @@ fun LocationScreen(viewModel: LocationViewModel, modifier: Modifier = Modifier) 
     val selectedDevice by viewModel.selectedDevice.collectAsStateWithLifecycle()
     val isAuthenticated by AuthStateManager.isAuthenticated.collectAsStateWithLifecycle()
 
-    val ip by rememberSaveable { mutableStateOf(viewModel.storedIp) }
+    val serverUrl by rememberSaveable { mutableStateOf(viewModel.storedServerUrl) }
     val user by remember { mutableStateOf(viewModel.user) }
     var deviceSelectorOpened by rememberSaveable { mutableStateOf(false) }
     var settingsDialogOpened by rememberSaveable { mutableStateOf(false) }
@@ -355,7 +355,7 @@ fun LocationScreen(viewModel: LocationViewModel, modifier: Modifier = Modifier) 
                     }
                     Avatar(
                         user = viewModel.user,
-                        ip = ip,
+                        serverUrl = serverUrl,
                         onLogout = {
                             viewModel.logout()
                             context.startActivity(
@@ -489,7 +489,7 @@ fun LocationScreen(viewModel: LocationViewModel, modifier: Modifier = Modifier) 
                                 device = device,
                                 user = user,
                                 metersPerDp = cameraState.metersPerDpAtTarget,
-                                ip = ip,
+                                serverUrl = serverUrl,
                                 showProfilePicture = true,
                                 showCone = true,
                                 onClick = {

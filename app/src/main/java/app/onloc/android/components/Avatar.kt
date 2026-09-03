@@ -54,7 +54,7 @@ import coil3.compose.AsyncImage
 @Composable
 fun Avatar(
     user: User?,
-    ip: String?,
+    serverUrl: String?,
     onLogout: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -62,9 +62,9 @@ fun Avatar(
 
     @Composable
     fun AvatarIcon(filled: Boolean = false, modifier: Modifier = Modifier) {
-        if (user?.avatar != null && ip != null) {
+        if (user?.avatar != null && serverUrl != null) {
             AsyncImage(
-                model = "$ip/${user.avatar.url}",
+                model = "$serverUrl/${user.avatar.url}",
                 contentDescription = stringResource(R.string.avatar_dialog_title),
                 contentScale = ContentScale.Crop,
                 modifier = modifier.clip(CircleShape),

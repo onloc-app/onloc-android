@@ -26,8 +26,8 @@ import io.ktor.client.request.get
 
 private const val ENDPOINT = "/api/users"
 
-class UsersApiService(context: Context, ip: String) {
-    private val api = ApiClient(context, ip)
+class UsersApiService(context: Context, url: String) {
+    private val api = ApiClient(context, url)
 
     suspend fun getUsers(): Result<List<User>> {
         try {
