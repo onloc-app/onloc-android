@@ -37,7 +37,7 @@ object EventManager {
     fun registerDevice(context: Context, deviceId: Int) {
         SocketManager.emit("register-device", JSONObject().apply { put("device_id", deviceId) })
         UnifiedPush.register(context, instance = deviceId.toString())
-        ServiceManager.connectionStrategy.start(context)
+        ServiceManager.startConnection(context)
     }
 
     private fun apiUnregister(context: Context) {

@@ -60,6 +60,7 @@ class UnifiedPushService : PushService() {
                         auth = endpoint.pubKeySet?.auth,
                     )
                 apiRegister(provider)
+                Log.d("UnifiedPushService", "Registering $instance")
 
                 // Unregister the old endpoint
                 apiUnregister(this@UnifiedPushService)
@@ -86,6 +87,8 @@ class UnifiedPushService : PushService() {
         val command = json?.optString("command") ?: raw
         val lockMessage = json?.optString("message")?.takeIf { it.isNotEmpty() }
 
+        Log.d("UnifiedPushService", "Received a command: $command")
+
         when (command) {
             RING_COMMAND_EVENT -> Ring(this).execute()
             LOCK_COMMAND_EVENT -> Lock(this, lockMessage).execute()
@@ -103,7 +106,6 @@ class UnifiedPushService : PushService() {
 
     override fun onUnregistered(instance: String) {
         Log.d("UnifiedPushService", "Unregistered")
-        ServiceManager.setConnectionStrategy(this, WebSocketConnectionStrategy())
         apiUnregister(this)
     }
 

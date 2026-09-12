@@ -156,7 +156,7 @@ fun Permissions(
                 name = stringResource(R.string.permissions_ring_header),
                 description = stringResource(R.string.permissions_ring_description),
                 isGranted = notificationsGranted && doNotDisturbGranted && overlayGranted,
-                onGrant = { ServiceManager.connectionStrategy.start(context) },
+                onGrant = { ServiceManager.startConnection(context) },
             ) {
                 PermissionCard(
                     name = stringResource(R.string.permissions_notifications_label),
@@ -191,7 +191,7 @@ fun Permissions(
                 name = stringResource(R.string.permissions_lock_header),
                 description = stringResource(R.string.permissions_lock_description),
                 isGranted = notificationsGranted && adminGranted,
-                onGrant = { ServiceManager.connectionStrategy.start(context) },
+                onGrant = { ServiceManager.startConnection(context) },
             ) {
                 PermissionCard(
                     name = stringResource(R.string.permissions_notifications_label),

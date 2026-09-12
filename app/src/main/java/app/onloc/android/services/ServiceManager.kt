@@ -17,21 +17,36 @@ package app.onloc.android.services
 
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import androidx.core.content.ContextCompat
 import app.onloc.android.ServicePreferences
 import app.onloc.android.permissions.LocationPermission
 import app.onloc.android.permissions.PostNotificationPermission
 import app.onloc.android.services.connection.ConnectionStrategy
+import app.onloc.android.services.connection.UnifiedPushConnectionStrategy
 import app.onloc.android.services.connection.WebSocketConnectionStrategy
+import org.unifiedpush.android.connector.UnifiedPush
 
 object ServiceManager {
-    var connectionStrategy: ConnectionStrategy = WebSocketConnectionStrategy()
-        private set
+    private var connectionStrategy: ConnectionStrategy = WebSocketConnectionStrategy()
 
     fun setConnectionStrategy(context: Context, strategy: ConnectionStrategy) {
+        if (connectionStrategy::class == strategy::class) return
         connectionStrategy.stop(context)
         connectionStrategy = strategy
         connectionStrategy.start(context)
+    }
+
+    fun startConnection(context: Context) {
+        val strategy =
+            if (UnifiedPush.getDistributors(context).isNotEmpty()) {
+                UnifiedPushConnectionStrategy()
+            } else {
+                WebSocketConnectionStrategy()
+            }
+        Log.d("ServiceManager", "Starting connection strategy: $strategy")
+        setConnectionStrategy(context, strategy)
+        strategy.start(context)
     }
 
     fun startLocationServiceIfAllowed(context: Context) {
