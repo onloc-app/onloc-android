@@ -153,6 +153,8 @@ fun SettingsDialog(
                         style = MaterialTheme.typography.titleLarge,
                     )
 
+                    UnifiedPushWarning()
+
                     Column(
                         verticalArrangement = Arrangement.spacedBy(16.dp),
                         modifier = Modifier.fillMaxWidth(),
@@ -176,34 +178,17 @@ fun SettingsDialog(
                         }
                     }
 
+                    Text(
+                        text = stringResource(R.string.permissions_header),
+                        style = MaterialTheme.typography.titleLarge,
+                    )
+
                     Permissions(onPermissionsChange = {
                         notificationGranted = PostNotificationPermission().isGranted(context)
                         locationGranted = LocationPermission().isGranted(context)
                     })
                 }
             }
-        }
-    }
-}
-
-@Composable
-private fun SettingCard(title: String, modifier: Modifier = Modifier, content: @Composable () -> Unit) {
-    ElevatedCard(
-        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
-        modifier = modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(MaterialTheme.colorScheme.surfaceContainer),
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-        ) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleMedium,
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            content()
         }
     }
 }

@@ -17,33 +17,21 @@ package app.onloc.android.components
 
 import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Button
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -52,6 +40,8 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import app.onloc.android.R
+import app.onloc.android.components.settings.FeatureCard
+import app.onloc.android.components.settings.PermissionCard
 import app.onloc.android.permissions.AdminPermission
 import app.onloc.android.permissions.BatteryOptimizationPermission
 import app.onloc.android.permissions.DoNotDisturbPermission
@@ -103,12 +93,6 @@ fun Permissions(
         Column(
             modifier = modifier.fillMaxWidth(),
         ) {
-            Text(
-                text = stringResource(R.string.permissions_header),
-                style = MaterialTheme.typography.titleLarge,
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-
             if (!batteryOptimizationDisabled) {
                 FeatureCard(
                     name = stringResource(R.string.permissions_background_location_header),
@@ -212,90 +196,6 @@ fun Permissions(
                     },
                 )
             }
-        }
-    }
-}
-
-@Composable
-fun FeatureCard(
-    name: String,
-    description: String,
-    modifier: Modifier = Modifier,
-    isGranted: Boolean = false,
-    onGrant: () -> Unit = {},
-    permissionCards: @Composable () -> Unit,
-) {
-    val currentOnGrant by rememberUpdatedState(onGrant)
-
-    LaunchedEffect(isGranted) {
-        if (isGranted) {
-            currentOnGrant()
-        }
-    }
-
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(bottom = 16.dp),
-    ) {
-        ElevatedCard(
-            elevation = CardDefaults.cardElevation(
-                defaultElevation = 6.dp,
-            ),
-            modifier = modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(MaterialTheme.colorScheme.surfaceContainer),
-        ) {
-            Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    Text(
-                        text = name,
-                        style = MaterialTheme.typography.titleMedium,
-                    )
-                    if (isGranted) {
-                        Icon(
-                            Icons.Default.Check,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
-                        )
-                    }
-                }
-                Text(
-                    text = description,
-                    style = MaterialTheme.typography.bodyMedium,
-                )
-                permissionCards()
-            }
-        }
-    }
-}
-
-@Composable
-fun PermissionCard(
-    name: String,
-    isGranted: Boolean,
-    onGrantClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    Row(
-        modifier = modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween,
-    ) {
-        Text(text = name, style = MaterialTheme.typography.titleSmall, modifier = Modifier.weight(2f))
-        OutlinedButton(
-            onClick = onGrantClick,
-            enabled = !isGranted,
-            modifier = Modifier.weight(1f),
-        ) {
-            Text(
-                if (isGranted) {
-                    stringResource(R.string.permissions_granted_button_label)
-                } else {
-                    stringResource(R.string.permissions_grant_button_label)
-                },
-            )
         }
     }
 }

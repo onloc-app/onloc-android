@@ -46,6 +46,12 @@
     <string name="settings_dialog_interval_slider_label">Interval between uploads</string>
     <string name="settings_dialog_interval_slider_realtime_label">Use real-time updates</string>
     <string name="settings_dialog_quality_label">Location quality</string>
+    <string name="settings_dialog_unified_push_title">Save battery with UnifiedPush</string>
+    <string name="settings_dialog_unified_push_description">
+        No UnifiedPush provider is installed. Onloc is using a persistent WebSocket connection, which may use more
+        battery. Install a UnifiedPush provider to reduce battery usage.
+    </string>
+    <string name="settings_dialog_unified_push_button">Learn about UnifiedPush</string>
 
     <string name="quality_high_accuracy">High</string>
     <string name="quality_balance_power_accuracy">Balance</string>
