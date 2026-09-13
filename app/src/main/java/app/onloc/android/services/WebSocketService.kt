@@ -53,6 +53,7 @@ class WebSocketService : Service() {
     private val lockCommandEvent = "lock-command"
     private val flashCommandEvent = "flash-command"
     private val registerDeviceEvent = "register-device"
+    private val unregisterDeviceEvent = "unregister-device"
     private val locationsChangeEvent = "locations-change"
 
     private val watchdogScope = CoroutineScope(Dispatchers.IO)
@@ -184,6 +185,15 @@ class WebSocketService : Service() {
 
         networkCallback?.let {
             connectivityManager.unregisterNetworkCallback(it)
+        }
+
+        // Unregister device from the server
+        val deviceId = AppPreferences(this).getDeviceId()
+        deviceId?.let {
+            SocketManager.emit(
+                unregisterDeviceEvent,
+                JSONObject().put("device_id", it),
+            )
         }
 
         SocketManager.disconnect()

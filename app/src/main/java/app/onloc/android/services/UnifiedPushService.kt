@@ -106,6 +106,7 @@ class UnifiedPushService : PushService() {
 
     override fun onUnregistered(instance: String) {
         Log.d("UnifiedPushService", "Unregistered")
+        ServiceManager.setConnectionStrategy(this, WebSocketConnectionStrategy())
         apiUnregister(this)
     }
 
