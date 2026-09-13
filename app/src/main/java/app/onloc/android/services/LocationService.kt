@@ -38,6 +38,7 @@ import app.onloc.android.helpers.STOP_LOCATION_SERVICE_NOTIFICATION_ID
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import app.onloc.android.models.Location as OnlocLocation
 
@@ -50,6 +51,10 @@ class LocationService : Service() {
 
     private var locationManager: LocationManager? = null
     private var locationListener: LocationListener? = null
+
+    companion object {
+        var running = MutableStateFlow(false)
+    }
 
     /**
      * Launched when a location update arrives.
@@ -152,7 +157,7 @@ class LocationService : Service() {
             createStartLocationServiceNotification(this),
         )
 
-        ServiceState.locationServiceRunning.value = true
+        running.value = true
     }
 
     override fun onDestroy() {
@@ -170,7 +175,7 @@ class LocationService : Service() {
             createStopLocationServiceNotification(this),
         )
 
-        ServiceState.locationServiceRunning.value = false
+        running.value = false
     }
 
     override fun onBind(intent: Intent?): IBinder? = null

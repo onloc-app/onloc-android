@@ -56,7 +56,7 @@ import app.onloc.android.R
 import app.onloc.android.components.Permissions
 import app.onloc.android.permissions.LocationPermission
 import app.onloc.android.permissions.PostNotificationPermission
-import app.onloc.android.services.ServiceState
+import app.onloc.android.services.LocationService
 import app.onloc.android.ui.location.LocationViewModel
 
 private const val DEFAULT_SLIDER_POSITION = 15 * 60 // 15 minutes
@@ -73,7 +73,7 @@ fun SettingsDialog(
     val realTime by viewModel.realTime.collectAsStateWithLifecycle()
     val quality by viewModel.quality.collectAsStateWithLifecycle()
 
-    val locationServiceRunning by ServiceState.locationServiceRunning.collectAsState()
+    val locationServiceRunning by LocationService.running.collectAsState()
 
     var notificationGranted by remember { mutableStateOf(PostNotificationPermission().isGranted(context)) }
     var locationGranted by remember { mutableStateOf(LocationPermission().isGranted(context)) }

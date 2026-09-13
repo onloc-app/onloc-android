@@ -92,7 +92,7 @@ import app.onloc.android.models.Device
 import app.onloc.android.models.Location
 import app.onloc.android.permissions.LocationPermission
 import app.onloc.android.permissions.PostNotificationPermission
-import app.onloc.android.services.ServiceState
+import app.onloc.android.services.LocationService
 import app.onloc.android.ui.main.MainActivity
 import app.onloc.android.ui.theme.OnlocAndroidTheme
 import dev.sargunv.maplibrecompose.compose.MaplibreMap
@@ -153,7 +153,7 @@ fun LocationScreen(viewModel: LocationViewModel, modifier: Modifier = Modifier) 
     var lastGestureEnd by remember { mutableLongStateOf(0L) }
     var attributionExpanded by remember { mutableStateOf(false) }
 
-    val locationServiceRunning by ServiceState.locationServiceRunning.collectAsState()
+    val locationServiceRunning by LocationService.running.collectAsState()
 
     val coroutineScope = rememberCoroutineScope()
     val cameraState = rememberCameraState()

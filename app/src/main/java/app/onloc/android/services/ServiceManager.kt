@@ -28,8 +28,10 @@ import app.onloc.android.services.connection.WebSocketConnectionStrategy
 import org.unifiedpush.android.connector.UnifiedPush
 
 object ServiceManager {
-    private var connectionStrategy: ConnectionStrategy = WebSocketConnectionStrategy()
+    var connectionStrategy: ConnectionStrategy = WebSocketConnectionStrategy()
+        private set
 
+    @Synchronized
     fun setConnectionStrategy(context: Context, strategy: ConnectionStrategy) {
         if (connectionStrategy::class == strategy::class) return
         connectionStrategy.stop(context)
@@ -46,7 +48,7 @@ object ServiceManager {
             }
         Log.d("ServiceManager", "Starting connection strategy: $strategy")
         setConnectionStrategy(context, strategy)
-        strategy.start(context)
+        connectionStrategy.start(context)
     }
 
     fun startLocationServiceIfAllowed(context: Context) {

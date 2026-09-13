@@ -30,7 +30,6 @@ import app.onloc.android.commands.Lock
 import app.onloc.android.commands.Ring
 import app.onloc.android.helpers.NotificationFactory.createStartWebSocketServiceNotification
 import app.onloc.android.helpers.START_WEBSOCKET_SERVICE_NOTIFICATION_ID
-import app.onloc.android.services.ServiceStatus.isWebSocketServiceRunning
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
@@ -40,10 +39,6 @@ import org.json.JSONObject
 import kotlin.time.Duration.Companion.minutes
 
 private const val WATCHDOG_DELAY = 5L
-
-object ServiceStatus {
-    var isWebSocketServiceRunning = false
-}
 
 class WebSocketService : Service() {
     private lateinit var connectivityManager: ConnectivityManager
@@ -87,8 +82,6 @@ class WebSocketService : Service() {
 
         // Makes sure the socket is always connected
         startWatchdog()
-
-        ServiceState.webSocketServiceRunning.value = true
     }
 
     /**
@@ -174,14 +167,11 @@ class WebSocketService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        isWebSocketServiceRunning = true
         return START_STICKY
     }
 
     override fun onDestroy() {
         super.onDestroy()
-
-        isWebSocketServiceRunning = false
 
         networkCallback?.let {
             connectivityManager.unregisterNetworkCallback(it)
@@ -199,8 +189,6 @@ class WebSocketService : Service() {
         SocketManager.disconnect()
         watchdogScope.cancel()
         coroutineScope.cancel()
-
-        ServiceState.webSocketServiceRunning.value = false
     }
 
     override fun onBind(intent: Intent?): IBinder? = null
