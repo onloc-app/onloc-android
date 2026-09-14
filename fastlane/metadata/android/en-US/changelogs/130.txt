@@ -1,0 +1,3 @@
+- Improved the login flow with a clearer two-step process and more reliable server detection
+- Added UnifiedPush support and improved push connection handling, including reconnect and cleanup behavior
+- Improved location service behavior and fixed various connection and stability issues
