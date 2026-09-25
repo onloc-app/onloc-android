@@ -99,4 +99,7 @@
     <string name="quality_high_accuracy">Hoog</string>
     <string name="quality_balance_power_accuracy">Acculading</string>
     <string name="quality_low_power">Laag</string>
+    <string name="settings_dialog_unified_push_title">Bespaar batterij met UnifiedPush</string>
+    <string name="settings_dialog_unified_push_description">Geen UnifiedPush-provider geïnstalleerd. Onloc gebruikt een persistente WebSocket-verbinding, wat meer batterij kan verbruiken. Installeer een UnifiedPush-provider om het batterijverbruik te verminderen.</string>
+    <string name="settings_dialog_unified_push_button">Meer informatie over UnifiedPush</string>
 </resources>
