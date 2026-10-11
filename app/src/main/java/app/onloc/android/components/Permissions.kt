@@ -93,7 +93,7 @@ fun Permissions(
         ) {
             if (!batteryOptimizationDisabled) {
                 FeatureCard(
-                    name = stringResource(R.string.permissions_background_location_header),
+                    name = stringResource(R.string.permissions_battery_optimization_header),
                     description = stringResource(R.string.permissions_battery_optimization_description),
                     modifier = Modifier.border(
                         width = 1.dp,
