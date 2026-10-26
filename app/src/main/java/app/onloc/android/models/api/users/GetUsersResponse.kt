@@ -19,6 +19,4 @@ import app.onloc.android.models.User
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class GetUsersResponse(
-    val users: List<User>,
-)
+data class GetUsersResponse(val users: List<User>)

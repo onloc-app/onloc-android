@@ -19,6 +19,4 @@ import app.onloc.android.models.Device
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class GetSharedDevicesResponse(
-    val devices: List<Device>,
-)
+data class GetSharedDevicesResponse(val devices: List<Device>)

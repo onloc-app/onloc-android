@@ -27,12 +27,11 @@ private const val LOCAL_NETWORK_REQUEST_CODE = 2
 private const val MINIMUM_API_VERSION = 37
 
 class LocalNetworkAccessPermission : Permission {
-    override fun isGranted(context: Context): Boolean {
-        return Build.VERSION.SDK_INT < MINIMUM_API_VERSION || ContextCompat.checkSelfPermission(
+    override fun isGranted(context: Context): Boolean =
+        Build.VERSION.SDK_INT < MINIMUM_API_VERSION || ContextCompat.checkSelfPermission(
             context,
             Manifest.permission.ACCESS_LOCAL_NETWORK,
         ) == PERMISSION_GRANTED
-    }
 
     override fun request(activity: Activity) {
         if (Build.VERSION.SDK_INT < MINIMUM_API_VERSION) return

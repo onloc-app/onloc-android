@@ -129,7 +129,13 @@ class LoginActivity : ComponentActivity() {
                     }
 
                     val navController = rememberNavController()
-                    LoginNavHost(navController, viewModel)
+                    LoginNavHost(
+                        navController = navController,
+                        initialStoredUrl = viewModel.storedUrl,
+                        loginState = loginState,
+                        onStoredUrlChange = { viewModel.storedUrl = it },
+                        onLogin = viewModel::login,
+                    )
                 }
             }
         }
@@ -137,7 +143,15 @@ class LoginActivity : ComponentActivity() {
 }
 
 @Composable
-private fun LoginNavHost(navController: NavHostController, viewModel: LoginViewModel) {
+private fun LoginNavHost(
+    navController: NavHostController,
+    initialStoredUrl: String,
+    loginState: LoginState,
+    onStoredUrlChange: (String) -> Unit,
+    onLogin: (String, String) -> Unit,
+) {
+    var storedUrl by rememberSaveable { mutableStateOf(initialStoredUrl) }
+
     NavHost(
         navController = navController,
         startDestination = LoginRoutes.SERVER_URL,
@@ -168,13 +182,19 @@ private fun LoginNavHost(navController: NavHostController, viewModel: LoginViewM
     ) {
         composable(LoginRoutes.SERVER_URL) {
             ServerUrlScreen(
-                viewModel = viewModel,
+                storedUrl = storedUrl,
+                onStoredUrlChange = {
+                    storedUrl = it
+                    onStoredUrlChange(it)
+                },
                 onContinue = { navController.navigate(route = LoginRoutes.CREDENTIALS) },
             )
         }
         composable(LoginRoutes.CREDENTIALS) {
             CredentialsScreen(
-                viewModel = viewModel,
+                loginState = loginState,
+                storedUrl = storedUrl,
+                onLogin = onLogin,
                 onBack = { navController.popBackStack() },
             )
         }
@@ -182,13 +202,18 @@ private fun LoginNavHost(navController: NavHostController, viewModel: LoginViewM
 }
 
 @Composable
-fun ServerUrlScreen(viewModel: LoginViewModel, onContinue: () -> Unit, modifier: Modifier = Modifier) {
+fun ServerUrlScreen(
+    storedUrl: String,
+    onStoredUrlChange: (String) -> Unit,
+    onContinue: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val activity = LocalActivity.current
     val cs = rememberCoroutineScope()
 
-    var url by rememberSaveable { mutableStateOf(viewModel.storedUrl) }
+    var url by rememberSaveable { mutableStateOf(storedUrl) }
     var urlError by rememberSaveable { mutableStateOf<String?>(null) }
     val urlRequiredMessage = stringResource(R.string.login_url_required)
     val invalidUrlMessage = stringResource(R.string.login_invalid_url)
@@ -255,7 +280,7 @@ fun ServerUrlScreen(viewModel: LoginViewModel, onContinue: () -> Unit, modifier:
                 StatusApiService(context, url).getStatus()
                     .onSuccess {
                         generalError = null
-                        viewModel.storedUrl = url
+                        onStoredUrlChange(url)
                         onContinue()
                     }
                     .onFailure { e ->
@@ -384,9 +409,13 @@ fun ServerUrlScreen(viewModel: LoginViewModel, onContinue: () -> Unit, modifier:
 }
 
 @Composable
-fun CredentialsScreen(viewModel: LoginViewModel, onBack: () -> Unit, modifier: Modifier = Modifier) {
-    val loginState by viewModel.loginState.collectAsStateWithLifecycle()
-
+fun CredentialsScreen(
+    loginState: LoginState,
+    storedUrl: String,
+    onLogin: (String, String) -> Unit,
+    onBack: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     var username by rememberSaveable { mutableStateOf("") }
     var usernameError by rememberSaveable { mutableStateOf<String?>(null) }
     val usernameRequiredMessage = stringResource(R.string.login_username_required)
@@ -416,7 +445,7 @@ fun CredentialsScreen(viewModel: LoginViewModel, onBack: () -> Unit, modifier: M
         }
 
         if (isValid) {
-            viewModel.login(username, password)
+            onLogin(username, password)
         }
     }
 
@@ -448,7 +477,7 @@ fun CredentialsScreen(viewModel: LoginViewModel, onBack: () -> Unit, modifier: M
                         style = MaterialTheme.typography.bodyMedium,
                     )
                     Text(
-                        text = viewModel.storedUrl,
+                        text = storedUrl,
                         style = MaterialTheme.typography.titleLarge,
                         color = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.padding(bottom = 8.dp),

@@ -1,4 +1,5 @@
 import org.gradle.kotlin.dsl.detektPlugins
+import dev.detekt.gradle.extensions.FailOnSeverity
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
@@ -66,9 +67,10 @@ kotlin {
 }
 
 detekt {
-    toolVersion = "1.23.8"
+    toolVersion = "2.0.0-alpha.6"
     config.setFrom(file("config/detekt/detekt.yml"))
     buildUponDefaultConfig = true
+    failOnSeverity.set(FailOnSeverity.Info)
 }
 
 dependencies {

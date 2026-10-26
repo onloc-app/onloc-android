@@ -49,10 +49,7 @@ import app.onloc.android.permissions.PostNotificationPermission
 import app.onloc.android.services.ServiceManager
 
 @Composable
-fun Permissions(
-    modifier: Modifier = Modifier,
-    onPermissionsChange: () -> Unit = {},
-) {
+fun Permissions(modifier: Modifier = Modifier, onPermissionsChange: () -> Unit = {}) {
     val context = LocalContext.current
     val activity = LocalActivity.current
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -88,9 +85,7 @@ fun Permissions(
     }
 
     if (activity != null) {
-        Column(
-            modifier = modifier.fillMaxWidth(),
-        ) {
+        Column(modifier = modifier.fillMaxWidth()) {
             if (!batteryOptimizationDisabled) {
                 FeatureCard(
                     name = stringResource(R.string.permissions_battery_optimization_header),

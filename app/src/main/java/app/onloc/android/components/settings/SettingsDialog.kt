@@ -47,36 +47,37 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.zIndex
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.onloc.android.R
 import app.onloc.android.components.Permissions
 import app.onloc.android.permissions.LocationPermission
 import app.onloc.android.permissions.PostNotificationPermission
 import app.onloc.android.services.LocationService
-import app.onloc.android.ui.location.LocationViewModel
 
 private const val DEFAULT_SLIDER_POSITION = 15 * 60 // 15 minutes
 
 @Composable
 fun SettingsDialog(
-    viewModel: LocationViewModel,
+    hasSelectedDevice: Boolean,
+    locationUpdateInterval: Int?,
+    realTime: Boolean,
+    quality: Int,
+    onStartLocationService: () -> Unit,
+    onStopLocationService: () -> Unit,
+    onToggleRealTime: (Boolean) -> Unit,
+    onLocationUpdateIntervalChange: (Int?) -> Unit,
+    onQualityChange: (Int) -> Unit,
     onDismissRequest: () -> Unit,
 ) {
     val context = LocalContext.current
-
-    val selectedDevice by viewModel.selectedDevice.collectAsStateWithLifecycle()
-    val locationUpdateInterval by viewModel.locationUpdateInterval.collectAsStateWithLifecycle()
-    val realTime by viewModel.realTime.collectAsStateWithLifecycle()
-    val quality by viewModel.quality.collectAsStateWithLifecycle()
 
     val locationServiceRunning by LocationService.running.collectAsState()
 
     var notificationGranted by remember { mutableStateOf(PostNotificationPermission().isGranted(context)) }
     var locationGranted by remember { mutableStateOf(LocationPermission().isGranted(context)) }
 
-    val canStartLocationService = selectedDevice != null && notificationGranted && locationGranted
+    val canStartLocationService = hasSelectedDevice && notificationGranted && locationGranted
     val serviceStatus = when {
-        selectedDevice == null -> stringResource(R.string.main_service_status_no_selection)
+        !hasSelectedDevice -> stringResource(R.string.main_service_status_no_selection)
         !notificationGranted -> stringResource(R.string.main_service_status_missing_permissions)
         else -> ""
     }
@@ -130,9 +131,9 @@ fun SettingsDialog(
                                 checked = locationServiceRunning,
                                 onCheckedChange = {
                                     if (locationServiceRunning) {
-                                        viewModel.stopLocationService()
+                                        onStopLocationService()
                                     } else {
-                                        viewModel.startLocationService()
+                                        onStartLocationService()
                                     }
                                 },
                                 enabled = canStartLocationService,
@@ -159,15 +160,15 @@ fun SettingsDialog(
                             IntervalPicker(
                                 value = locationUpdateInterval ?: DEFAULT_SLIDER_POSITION,
                                 realTime = realTime,
-                                onToggleRealTime = { viewModel.setRealTime(it) },
+                                onToggleRealTime = onToggleRealTime,
                                 enabled = !locationServiceRunning,
-                                onChange = { viewModel.setLocationUpdateInterval(it) },
+                                onChange = onLocationUpdateIntervalChange,
                             )
                         }
                         SettingCard(title = stringResource(R.string.settings_dialog_quality_label)) {
                             QualityPicker(
                                 quality = quality,
-                                onQualityChange = { viewModel.setQuality(it) },
+                                onQualityChange = onQualityChange,
                                 modifier = Modifier.fillMaxWidth(),
                                 enabled = !locationServiceRunning,
                             )

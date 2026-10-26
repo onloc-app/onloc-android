@@ -53,16 +53,11 @@ import app.onloc.android.models.User
 import coil3.compose.AsyncImage
 
 @Composable
-fun Avatar(
-    user: User?,
-    serverUrl: String?,
-    onLogout: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
+fun Avatar(user: User?, serverUrl: String?, onLogout: () -> Unit, modifier: Modifier = Modifier) {
     var accountDialogOpened by rememberSaveable { mutableStateOf(false) }
 
     @Composable
-    fun AvatarIcon(filled: Boolean = false, modifier: Modifier = Modifier) {
+    fun AvatarIcon(modifier: Modifier = Modifier, filled: Boolean = false) {
         if (user?.avatar != null && serverUrl != null) {
             AsyncImage(
                 model = "$serverUrl/${user.avatar.url}",

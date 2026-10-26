@@ -31,12 +31,7 @@ import androidx.compose.ui.unit.dp
 import app.onloc.android.models.Device
 
 @Composable
-fun DeviceRow(
-    device: Device,
-    selected: Boolean,
-    onSelect: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
+fun DeviceRow(device: Device, selected: Boolean, onSelect: () -> Unit, modifier: Modifier = Modifier) {
     Row(
         modifier = modifier
             .fillMaxWidth()

@@ -1,31 +1,31 @@
 [versions]
 agp = "9.1.1"
-coil = "3.6.0"
+coil = "3.6.3"
 connector = "3.3.5"
-detekt = "0.6.4"
-detektPlugin = "1.23.8"
-kotlin = "2.4.10"
-coreKtx = "1.19.0"
+detekt = "0.6.8"
+detektPlugin = "2.0.0-alpha.6"
+kotlin = "2.4.21"
+coreKtx = "1.19.1"
 junit = "4.13.2"
 junitVersion = "1.3.0"
 espressoCore = "3.7.0"
-ktorClientLogging = "3.5.2"
+ktorClientLogging = "3.6.0"
 lifecycleRuntimeKtx = "2.11.0"
 activityCompose = "1.13.0"
-navigationCompose = "2.10.0"
-composeBom = "2026.08.00"
+navigationCompose = "2.10.2"
+composeBom = "2026.09.00"
 materialIconsExtendedAndroid = "1.7.8"
-okhttp = "5.5.0"
+okhttp = "5.5.1"
 appcompat = "1.8.0"
 material = "1.14.0"
 activity = "1.13.0"
 constraintlayout = "2.2.2"
 securityCrypto = "1.1.0"
 socketIoClient = "2.1.2"
-workRuntimeKtx = "2.11.2"
+workRuntimeKtx = "2.12.0"
 material3 = "1.4.0"
-ktor = "3.5.2"
-kotlinSerialization = "2.4.10"
+ktor = "3.6.0"
+kotlinSerialization = "2.4.21"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -38,7 +38,7 @@ coil-network-okhttp = { module = "io.coil-kt.coil3:coil-network-okhttp", version
 coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" }
 connector = { module = "org.unifiedpush.android:connector", version.ref = "connector" }
 detekt-compose = { module = "io.nlopez.compose.rules:detekt", version.ref = "detekt" }
-detekt-formatting = { module = "io.gitlab.arturbosch.detekt:detekt-formatting", version.ref = "detektPlugin" }
+detekt-formatting = { module = "dev.detekt:detekt-rules-ktlint-wrapper", version.ref = "detektPlugin" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
@@ -73,6 +73,5 @@ ktor-client-auth = { module = "io.ktor:ktor-client-auth", version.ref = "ktor" }
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
-detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detektPlugin" }
+detekt = { id = "dev.detekt", version.ref = "detektPlugin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlinSerialization" }
-

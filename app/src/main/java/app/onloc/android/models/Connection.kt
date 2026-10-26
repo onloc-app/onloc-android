@@ -38,6 +38,4 @@ data class Connection(
 )
 
 @Keep
-data class ConnectionResponse(
-    val connections: List<Connection>,
-)
+data class ConnectionResponse(val connections: List<Connection>)

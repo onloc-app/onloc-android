@@ -46,6 +46,7 @@ fun OnlocAndroidTheme(
         }
 
         darkTheme -> DarkColorScheme
+
         else -> LightColorScheme
     }
 

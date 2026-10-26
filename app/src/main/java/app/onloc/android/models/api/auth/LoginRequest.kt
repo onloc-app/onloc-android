@@ -18,7 +18,4 @@ package app.onloc.android.models.api.auth
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class LoginRequest(
-    val username: String,
-    val password: String,
-)
+data class LoginRequest(val username: String, val password: String)

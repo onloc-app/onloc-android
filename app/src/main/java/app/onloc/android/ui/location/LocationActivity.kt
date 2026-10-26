@@ -140,6 +140,9 @@ fun LocationScreen(viewModel: LocationViewModel, modifier: Modifier = Modifier) 
     val sharedDeviceUsers by viewModel.sharedDeviceUsers.collectAsStateWithLifecycle()
     val currentLocation by viewModel.currentLocation.collectAsStateWithLifecycle()
     val selectedDevice by viewModel.selectedDevice.collectAsStateWithLifecycle()
+    val locationUpdateInterval by viewModel.locationUpdateInterval.collectAsStateWithLifecycle()
+    val realTime by viewModel.realTime.collectAsStateWithLifecycle()
+    val quality by viewModel.quality.collectAsStateWithLifecycle()
     val isAuthenticated by AuthStateManager.isAuthenticated.collectAsStateWithLifecycle()
 
     val serverUrl by rememberSaveable { mutableStateOf(viewModel.storedServerUrl) }
@@ -397,16 +400,25 @@ fun LocationScreen(viewModel: LocationViewModel, modifier: Modifier = Modifier) 
                         user = sharedDeviceUsers[device.userId],
                     )
                 }
-                Spacer(modifier = modifier.height(32.dp))
+                Spacer(modifier = Modifier.height(32.dp))
             }
         },
     ) {
         Box {
             // Settings dialog
             if (settingsDialogOpened) {
-                SettingsDialog(viewModel) {
-                    settingsDialogOpened = false
-                }
+                SettingsDialog(
+                    hasSelectedDevice = selectedDevice != null,
+                    locationUpdateInterval = locationUpdateInterval,
+                    realTime = realTime,
+                    quality = quality,
+                    onStartLocationService = { viewModel.startLocationService() },
+                    onStopLocationService = { viewModel.stopLocationService() },
+                    onToggleRealTime = viewModel::setRealTime,
+                    onLocationUpdateIntervalChange = viewModel::setLocationUpdateInterval,
+                    onQualityChange = viewModel::setQuality,
+                    onDismissRequest = { settingsDialogOpened = false },
+                )
             }
 
             DeviceSelector(

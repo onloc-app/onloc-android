@@ -15,8 +15,4 @@
 
 package app.onloc.android.models
 
-data class Server(
-    val name: String,
-    val address: String,
-    val port: Int,
-)
+data class Server(val name: String, val address: String, val port: Int)

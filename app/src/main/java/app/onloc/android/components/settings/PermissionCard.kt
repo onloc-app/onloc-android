@@ -28,12 +28,7 @@ import androidx.compose.ui.res.stringResource
 import app.onloc.android.R
 
 @Composable
-fun PermissionCard(
-    name: String,
-    isGranted: Boolean,
-    onGrantClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
+fun PermissionCard(name: String, isGranted: Boolean, onGrantClick: () -> Unit, modifier: Modifier = Modifier) {
     Row(
         modifier = modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,

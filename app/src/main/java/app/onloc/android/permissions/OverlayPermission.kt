@@ -22,9 +22,7 @@ import android.provider.Settings
 import androidx.core.net.toUri
 
 class OverlayPermission : Permission {
-    override fun isGranted(context: Context): Boolean {
-        return Settings.canDrawOverlays(context)
-    }
+    override fun isGranted(context: Context): Boolean = Settings.canDrawOverlays(context)
 
     override fun request(activity: Activity) {
         val intent = Intent(

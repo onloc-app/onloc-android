@@ -53,7 +53,7 @@ fun FeatureCard(
     }
 
     Box(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(bottom = 16.dp),
     ) {
@@ -61,7 +61,7 @@ fun FeatureCard(
             elevation = CardDefaults.cardElevation(
                 defaultElevation = 6.dp,
             ),
-            modifier = modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(MaterialTheme.colorScheme.surfaceContainer),
         ) {
             Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {

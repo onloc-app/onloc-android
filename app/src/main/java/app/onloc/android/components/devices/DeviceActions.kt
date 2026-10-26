@@ -146,12 +146,7 @@ fun DeviceActions(
 }
 
 @Composable
-private fun ActionButton(
-    label: String,
-    imageVector: ImageVector,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
+private fun ActionButton(label: String, imageVector: ImageVector, onClick: () -> Unit, modifier: Modifier = Modifier) {
     Button(
         onClick = onClick,
         modifier = modifier,

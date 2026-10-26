@@ -19,6 +19,4 @@ import app.onloc.android.models.Device
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class GetDeviceResponse(
-    val device: Device,
-)
+data class GetDeviceResponse(val device: Device)

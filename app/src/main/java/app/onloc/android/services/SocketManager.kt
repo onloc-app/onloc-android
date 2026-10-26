@@ -87,7 +87,5 @@ object SocketManager {
         socket?.off(event)
     }
 
-    fun isConnected(): Boolean {
-        return socket?.connected() == true
-    }
+    fun isConnected(): Boolean = socket?.connected() == true
 }

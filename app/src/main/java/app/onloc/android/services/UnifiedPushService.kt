@@ -68,7 +68,7 @@ class UnifiedPushService : PushService() {
                 // Save to app's settings
                 pref.pushEndpointUrl = endpoint.url
             } catch (e: Exception) {
-                e.printStackTrace()
+                Log.e("UnifiedPushService", "Failed to register push endpoint", e)
                 UnifiedPush.unregister(this@UnifiedPushService, instance)
             }
         }
@@ -93,7 +93,7 @@ class UnifiedPushService : PushService() {
             RING_COMMAND_EVENT -> Ring(this).execute()
             LOCK_COMMAND_EVENT -> Lock(this, lockMessage).execute()
             FLASH_COMMAND_EVENT -> Flash(this).execute()
-            "ping" -> {} // Ignore
+            "ping" -> Unit
             else -> Log.w("UnifiedPushService", "Unknown command $command for device $instance")
         }
     }

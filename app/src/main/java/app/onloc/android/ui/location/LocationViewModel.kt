@@ -67,8 +67,8 @@ class LocationViewModel(application: Application) : AndroidViewModel(application
     private val _currentLocation = MutableStateFlow<Location?>(null)
     val currentLocation: StateFlow<Location?> = _currentLocation.asStateFlow()
 
-    private val _selectedDeviceId = MutableStateFlow(appPreferences.getDeviceId())
-    val selectedDevice: StateFlow<Device?> = combine(_selectedDeviceId, _devices) { id, devices ->
+    private val selectedDeviceId = MutableStateFlow(appPreferences.getDeviceId())
+    val selectedDevice: StateFlow<Device?> = combine(selectedDeviceId, _devices) { id, devices ->
         id?.let { devices.find { d -> d.id == id } }
     }.stateIn(
         scope = viewModelScope,
@@ -109,7 +109,7 @@ class LocationViewModel(application: Application) : AndroidViewModel(application
 
     fun fetchSelectedDevice() {
         appPreferences.getDeviceId()?.let { deviceId ->
-            _selectedDeviceId.value = deviceId
+            selectedDeviceId.value = deviceId
         }
     }
 
@@ -166,13 +166,13 @@ class LocationViewModel(application: Application) : AndroidViewModel(application
     }
 
     fun selectDevice(id: Int?) {
-        val previousId = _selectedDeviceId.value
+        val previousId = selectedDeviceId.value
 
         previousId?.let { EventManager.unregisterDevice(context, it) }
 
         appPreferences.createDeviceId(id)
 
-        _selectedDeviceId.value = id
+        selectedDeviceId.value = id
 
         id?.let { EventManager.registerDevice(context, it) }
     }
@@ -221,7 +221,7 @@ class LocationViewModel(application: Application) : AndroidViewModel(application
             userPreferences.deleteUserCredentials()
             appPreferences.deleteDeviceId()
 
-            _selectedDeviceId.value?.let { EventManager.unregisterDevice(context, it) }
+            selectedDeviceId.value?.let { EventManager.unregisterDevice(context, it) }
 
             AuthStateManager.onLoggedOut()
         }
@@ -229,10 +229,10 @@ class LocationViewModel(application: Application) : AndroidViewModel(application
 
     private fun observeLocationCallback() {
         LocationCallbackManager.callback = { location ->
-            if (_selectedDeviceId.value != null && location != null) {
+            if (selectedDeviceId.value != null && location != null) {
                 _currentLocation.value = Location.fromAndroidLocation(
                     0,
-                    _selectedDeviceId.value!!,
+                    selectedDeviceId.value!!,
                     location,
                 )
             }

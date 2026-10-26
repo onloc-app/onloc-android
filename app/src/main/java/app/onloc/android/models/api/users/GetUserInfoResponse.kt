@@ -19,6 +19,4 @@ import app.onloc.android.models.User
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class GetUserInfoResponse(
-    val user: User,
-)
+data class GetUserInfoResponse(val user: User)

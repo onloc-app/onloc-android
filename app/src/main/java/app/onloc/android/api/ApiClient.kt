@@ -39,10 +39,7 @@ import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 import java.util.concurrent.TimeUnit
 
-class ApiClient(
-    context: Context,
-    baseUrl: String,
-) {
+class ApiClient(context: Context, baseUrl: String) {
     private val userPreferences = UserPreferences(context.applicationContext)
 
     val client = HttpClient(OkHttp) {

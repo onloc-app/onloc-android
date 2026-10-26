@@ -18,6 +18,7 @@ package app.onloc.android.commands
 import android.content.Context
 import android.content.Context.CAMERA_SERVICE
 import android.hardware.camera2.CameraManager
+import android.util.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -45,7 +46,7 @@ class Flash(val context: Context) : Command {
                     delay(FLASH_DELAY.milliseconds)
                 }
             } catch (e: IllegalArgumentException) {
-                e.printStackTrace()
+                Log.e("Flash", "Failed to control the camera flash", e)
             }
         }
     }
