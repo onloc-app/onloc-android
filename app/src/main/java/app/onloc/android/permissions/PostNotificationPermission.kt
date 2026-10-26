@@ -26,10 +26,11 @@ import androidx.core.content.ContextCompat
 private const val NOTIFICATION_REQUEST_CODE = 0
 
 class PostNotificationPermission : Permission {
-    override fun isGranted(context: Context): Boolean = Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU || ContextCompat.checkSelfPermission(
-        context,
-        Manifest.permission.POST_NOTIFICATIONS,
-    ) == PERMISSION_GRANTED
+    override fun isGranted(context: Context): Boolean =
+        Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU || ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.POST_NOTIFICATIONS,
+        ) == PERMISSION_GRANTED
 
     override fun request(activity: Activity) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
