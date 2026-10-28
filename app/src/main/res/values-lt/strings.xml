@@ -23,42 +23,21 @@
     <string name="permissions_header">Ypatybės ir leidimai</string>
     <string name="settings_dialog_interval_slider_label">Intervalas tarp išsiuntimų</string>
     <string name="settings_dialog_interval_slider_realtime_label">Naudoti tikralaikius atnaujinimus</string>
-    <plurals name="interval_picker_seconds">
-        <item quantity="one">Sekundė</item>
-        <item quantity="few">Sekundės</item>
-        <item quantity="many">Sekundžių</item>
-        <item quantity="other">Sekundžių</item>
-    </plurals>
-    <plurals name="interval_picker_minutes">
-        <item quantity="one">Minutė</item>
-        <item quantity="few">Minutės</item>
-        <item quantity="many">Minučių</item>
-        <item quantity="other">Minučių</item>
-    </plurals>
-    <plurals name="interval_picker_hours">
-        <item quantity="one">Valanda</item>
-        <item quantity="few">Valandos</item>
-        <item quantity="many">Valandų</item>
-        <item quantity="other">Valandų</item>
-    </plurals>
-    <plurals name="interval_picker_days">
-        <item quantity="one">Diena</item>
-        <item quantity="few">Dienos</item>
-        <item quantity="many">Dienų</item>
-        <item quantity="other">Dienų</item>
-    </plurals>
-    <string name="permissions_background_location_description">Leidžia programėlei bendrinti jūsų įrenginio vietovę su serveriu netgi tada, kai programėlė nenaudojama.</string>
+    <string name="permissions_background_location_description">Leidžia programėlei bendrinti jūsų
+        įrenginio vietovę su serveriu netgi tada, kai programėlė nenaudojama.</string>
     <string name="permissions_notifications_label">Pranešimai</string>
     <string name="permissions_grant_button_label">Suteikti</string>
     <string name="permissions_granted_button_label">Suteiktas</string>
     <string name="permissions_lock_header">Užrakinti įrenginį</string>
-    <string name="permissions_lock_description">Leidžia programėlei nuotoliniu būdu užrakinti įrenginį tuo atveju, jeigu jis pamestas ar pavogtas.</string>
+    <string name="permissions_lock_description">Leidžia programėlei nuotoliniu būdu užrakinti
+        įrenginį tuo atveju, jeigu jis pamestas ar pavogtas.</string>
     <string name="login_found_servers_button">Rodyti rastus serverius</string>
     <string name="login_found_servers_title">Rasti serveriai</string>
     <string name="main_device_button_label">Pasirinkti įrenginį</string>
     <string name="title_activity_location">Vietovės veikla</string>
     <string name="title_activity_login">Prisijungimo veikla</string>
-    <string name="main_location_service_stopped">Vietovės paslauga sustabdyta. Jūsų duomenys nėra išsiunčiami.</string>
+    <string name="main_location_service_stopped">Vietovės paslauga sustabdyta. Jūsų duomenys nėra
+        išsiunčiami.</string>
     <string name="device_actions_lock">Užrakinti</string>
     <string name="main_location_service_switch_label">Vietovės paslauga</string>
     <string name="permissions_location_label">Vietovė</string>
@@ -69,7 +48,8 @@
     <string name="service_websocket_channel_name">WebSocket paslauga</string>
     <string name="device_actions_navigate">Sukurti maršrutą</string>
     <string name="permissions_overlay_label">Rodyti virš kitų programėlių</string>
-    <string name="permissions_ring_description">Programėlė klausysis komandų iš serverio ir skambės, kai jai bus nurodyta.</string>
+    <string name="permissions_ring_description">Programėlė klausysis komandų iš serverio ir skambės,
+        kai jai bus nurodyta.</string>
     <string name="service_websocket_start_notification_title">Klausomasi komandų</string>
     <string name="service_websocket_start_notification_description">Įrenginys atsakys į komandas</string>
 </resources>

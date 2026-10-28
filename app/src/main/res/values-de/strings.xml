@@ -23,26 +23,11 @@
     <string name="permissions_header">Funktionen und Berechtigungen</string>
     <string name="settings_dialog_interval_slider_label">Intervall zwischen Uploads</string>
     <string name="settings_dialog_interval_slider_realtime_label">Echtzeit-Updates verwenden</string>
-    <plurals name="interval_picker_seconds">
-        <item quantity="one">Sekunde</item>
-        <item quantity="other">Sekunden</item>
-    </plurals>
-    <plurals name="interval_picker_minutes">
-        <item quantity="one">Minute</item>
-        <item quantity="other">Minuten</item>
-    </plurals>
-    <plurals name="interval_picker_hours">
-        <item quantity="one">Stunde</item>
-        <item quantity="other">Stunden</item>
-    </plurals>
-    <plurals name="interval_picker_days">
-        <item quantity="one">Tag</item>
-        <item quantity="other">Tage</item>
-    </plurals>
     <string name="offline_title">Verbindung zum Server wurde unterbrochen</string>
     <string name="offline_retry_button_label">Erneut versuchen</string>
     <string name="offline_logout_button_label">Abmelden</string>
-    <string name="permissions_background_location_description">Erlaubt der App, den Gerätestandort mit dem Server auszutauschen, während sie im Hintergrund läuft.</string>
+    <string name="permissions_background_location_description">Erlaubt der App, den Gerätestandort
+        mit dem Server auszutauschen, während sie im Hintergrund läuft.</string>
     <string name="permissions_notifications_label">Benachrichtigungen</string>
     <string name="permissions_location_label">Standort</string>
     <string name="title_activity_location">Standortaktivität</string>
@@ -53,10 +38,12 @@
     <string name="permissions_granted_button_label">Erlaubt</string>
     <string name="permissions_admin_label">Geräteadmin</string>
     <string name="permissions_lock_header">Gerät sperren</string>
-    <string name="permissions_lock_description">Erlaubt der App, das Gerät über Fernzugriff zu sperren, falls es verloren gegangen ist oder gestohlen wurde.</string>
+    <string name="permissions_lock_description">Erlaubt der App, das Gerät über Fernzugriff zu
+        sperren, falls es verloren gegangen ist oder gestohlen wurde.</string>
     <string name="service_location_channel_name">Standortdienst</string>
     <string name="service_location_start_notification_title">Standortdienst Gestartet</string>
-    <string name="service_location_start_notification_description">Dein Standort wird im Hintergund verfolgt</string>
+    <string name="service_location_start_notification_description">Dein Standort wird im Hintergund
+        verfolgt</string>
     <string name="service_location_stop_notification_title">Standortdienst Gestoppt</string>
     <string name="service_location_stop_notification_description">Der Standortdienst wurde gestoppt</string>
     <string name="service_location_enable_gps">GPS muss aktiviert sein</string>
@@ -69,7 +56,8 @@
     <string name="permissions_background_location_header">Standortabfrage im Hintergrund zulassen</string>
     <string name="permissions_do_not_disturb_label">Zugriff im Modus „Bitte nicht stören“</string>
     <string name="permissions_overlay_label">Über anderen Apps anzeigen</string>
-    <string name="permissions_ring_description">Die App wartet auf Befehle durch den Server und klingelt, wenn sie darum gebeten wird.</string>
+    <string name="permissions_ring_description">Die App wartet auf Befehle durch den Server und
+        klingelt, wenn sie darum gebeten wird.</string>
     <string name="service_websocket_channel_name">WebSocket-Dienst</string>
     <string name="login_enable_network_discovery">Aktivieren Sie die Netzwerkerkennung</string>
     <string name="login_continue_button">Weiter</string>
@@ -77,7 +65,8 @@
     <string name="login_username_required">Bitte geben Sie ihren Nutzernamen ein</string>
     <string name="login_password_required">Bitte geben Sie ihr Passwort ein</string>
     <string name="login_selected_server">Gewählter Server</string>
-    <string name="main_location_service_stopped">Der Ortungsdienst wurde gestoppt. Ihre Daten werden nicht hochgeladen.</string>
+    <string name="main_location_service_stopped">Der Ortungsdienst wurde gestoppt. Ihre Daten werden
+        nicht hochgeladen.</string>
     <string name="device_actions_ring">Klingeln</string>
     <string name="device_actions_lock">Sperren</string>
     <string name="device_actions_flash">Blinken</string>
@@ -86,7 +75,10 @@
     <string name="quality_balance_power_accuracy">Ausgewogen</string>
     <string name="quality_high_accuracy">Hoch</string>
     <string name="quality_low_power">Niedrig</string>
-    <string name="permissions_battery_optimization_description">Die aktivierte Batterieoptimierung kann die App ungewollt stoppen, während sie im Hintergrund läuft. Dadurch werden die Kernfunktionen der App wie die Standortverfolgung im Hintergrund und die Fernsteuerung unterbrochen.</string>
+    <string name="permissions_battery_optimization_description">Die aktivierte Batterieoptimierung
+        kann die App ungewollt stoppen, während sie im Hintergrund läuft. Dadurch werden die
+        Kernfunktionen der App wie die Standortverfolgung im Hintergrund und die Fernsteuerung
+        unterbrochen.</string>
     <string name="permissions_disable_button_label">Deaktivieren</string>
     <string name="device_info_battery_level">Akkustand</string>
     <string name="value_false">Falsch</string>

@@ -17,8 +17,10 @@ package app.onloc.android.components
 
 import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement.spacedBy
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
@@ -85,7 +87,7 @@ fun Permissions(modifier: Modifier = Modifier, onPermissionsChange: () -> Unit =
     }
 
     if (activity != null) {
-        Column(modifier = modifier.fillMaxWidth()) {
+        Column(modifier = modifier.fillMaxWidth().padding(bottom = 16.dp), verticalArrangement = spacedBy(16.dp)) {
             if (!batteryOptimizationDisabled) {
                 FeatureCard(
                     name = stringResource(R.string.permissions_battery_optimization_header),

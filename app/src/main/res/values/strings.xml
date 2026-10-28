@@ -28,7 +28,8 @@
     <string name="main_title">Onloc</string>
     <string name="main_service_status_no_selection">No device selected</string>
     <string name="main_service_status_missing_permissions">Required permissions missing</string>
-    <string name="main_location_service_stopped">Location service stopped. Your data is not being uploaded.</string>
+    <string name="main_location_service_stopped">Location service stopped. Your data is not being
+        uploaded.</string>
     <string name="main_device_button_label">Select a device</string>
     <string name="avatar_dialog_title">Account</string>
     <string name="avatar_logout_button_label">Logout</string>
@@ -48,7 +49,8 @@
     <string name="settings_dialog_quality_label">Location quality</string>
     <string name="settings_dialog_unified_push_title">Save battery with UnifiedPush</string>
     <string name="settings_dialog_unified_push_description">
-        No UnifiedPush provider is installed. Onloc is using a persistent WebSocket connection, which may use more
+        No UnifiedPush provider is installed. Onloc is using a persistent WebSocket connection,
+        which may use more
         battery. Install a UnifiedPush provider to reduce battery usage.
     </string>
     <string name="settings_dialog_unified_push_button">Learn about UnifiedPush</string>
@@ -56,27 +58,6 @@
     <string name="quality_high_accuracy">High</string>
     <string name="quality_balance_power_accuracy">Balance</string>
     <string name="quality_low_power">Low</string>
-
-    <plurals name="interval_picker_seconds">
-        <item quantity="one">Second</item>
-        <item quantity="many">Seconds</item>
-        <item quantity="other">Seconds</item>
-    </plurals>
-    <plurals name="interval_picker_minutes">
-        <item quantity="one">Minute</item>
-        <item quantity="many">Minutes</item>
-        <item quantity="other">Minutes</item>
-    </plurals>
-    <plurals name="interval_picker_hours">
-        <item quantity="one">Hour</item>
-        <item quantity="many">Hours</item>
-        <item quantity="other">Hours</item>
-    </plurals>
-    <plurals name="interval_picker_days">
-        <item quantity="one">Day</item>
-        <item quantity="many">Days</item>
-        <item quantity="other">Days</item>
-    </plurals>
 
     <!-- Offline -->
     <string name="offline_title">Connection to the server was lost</string>
@@ -86,7 +67,8 @@
     <!-- Permissions -->
     <string name="permissions_background_location_header">Background Location</string>
     <string name="permissions_background_location_description">
-        Allows the app to share your device\'s location with the server even when the app is not in use.
+        Allows the app to share your device\'s location with the server even when the app is not in
+        use.
     </string>
     <string name="permissions_notifications_label">Notifications</string>
     <string name="permissions_location_label">Location</string>
@@ -100,11 +82,14 @@
     <string name="permissions_granted_button_label">Granted</string>
     <string name="permissions_admin_label">Device Admin</string>
     <string name="permissions_lock_header">Lock Device</string>
-    <string name="permissions_lock_description">Allows the app to remotely lock your device if it is lost or stolen.
+    <string name="permissions_lock_description">Allows the app to remotely lock your device if it is
+        lost or stolen.
     </string>
     <string name="permissions_battery_optimization_header">Disable Battery Optimization</string>
-    <string name="permissions_battery_optimization_description">Battery optimization can stop the app while it\'s
-        working in the background. This will stop the core functionalities of the app such as background location
+    <string name="permissions_battery_optimization_description">Battery optimization can stop the
+        app while it\'s
+        working in the background. This will stop the core functionalities of the app such as
+        background location
         tracking and remote control.
     </string>
     <string name="permissions_disable_button_label">Disable</string>
@@ -112,7 +97,8 @@
     <!-- Services -->
     <string name="service_location_channel_name">Location Service</string>
     <string name="service_location_start_notification_title">Location Service Started</string>
-    <string name="service_location_start_notification_description">Tracking your location in the background</string>
+    <string name="service_location_start_notification_description">Tracking your location in the
+        background</string>
     <string name="service_location_stop_notification_title">Location Service Stopped</string>
     <string name="service_location_stop_notification_description">
         The location tracking service has been stopped
@@ -121,7 +107,8 @@
 
     <string name="service_websocket_channel_name">WebSocket Service</string>
     <string name="service_websocket_start_notification_title">Listening for commands</string>
-    <string name="service_websocket_start_notification_description">The device will respond to commands</string>
+    <string name="service_websocket_start_notification_description">The device will respond to
+        commands</string>
 
     <string name="service_ringer_channel_name">Ring</string>
     <string name="service_ringer_start_notification_title">Ringing…</string>

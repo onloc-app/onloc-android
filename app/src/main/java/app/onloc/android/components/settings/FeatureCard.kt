@@ -52,11 +52,7 @@ fun FeatureCard(
         }
     }
 
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(bottom = 16.dp),
-    ) {
+    Box(modifier = modifier.fillMaxWidth()) {
         ElevatedCard(
             elevation = CardDefaults.cardElevation(
                 defaultElevation = 6.dp,
