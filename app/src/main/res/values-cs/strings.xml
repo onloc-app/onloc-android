@@ -90,4 +90,7 @@
     <string name="device_info_latest_location">Poslední umístění</string>
     <string name="value_true">Pravda</string>
     <string name="value_false">Nepravda</string>
+    <string name="settings_dialog_unified_push_title">Šetřete baterii s UnifiedPush</string>
+    <string name="settings_dialog_unified_push_description">Nemáte nainstalovanou aplikaci, která by podporovala UnifiedPush. Onloc používá trvalé WebSocket spojeni, které může spotřebovat více baterie. Nainstalujte si poskytovatele UnifiedPush, abyste šetřili baterii.</string>
+    <string name="settings_dialog_unified_push_button">Dozvědět se více o UnifiedPush</string>
 </resources>
