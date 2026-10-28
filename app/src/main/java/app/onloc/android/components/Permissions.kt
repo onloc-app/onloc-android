@@ -26,7 +26,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -37,7 +36,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import app.onloc.android.R
 import app.onloc.android.components.settings.FeatureCard
@@ -66,24 +65,14 @@ fun Permissions(modifier: Modifier = Modifier, onPermissionsChange: () -> Unit =
     val currentOnPermissionsChange by rememberUpdatedState(onPermissionsChange)
 
     // Watch when the app comes back on to see if permissions changed.
-    DisposableEffect(lifecycleOwner) {
-        val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_RESUME) {
-                batteryOptimizationDisabled = BatteryOptimizationPermission().isGranted(context)
-                notificationsGranted = PostNotificationPermission().isGranted(context)
-                locationGranted = LocationPermission().isGranted(context)
-                doNotDisturbGranted = DoNotDisturbPermission().isGranted(context)
-                overlayGranted = OverlayPermission().isGranted(context)
-                adminGranted = AdminPermission().isGranted(context)
-                currentOnPermissionsChange()
-            }
-        }
-
-        lifecycleOwner.lifecycle.addObserver(observer)
-
-        onDispose {
-            lifecycleOwner.lifecycle.removeObserver(observer)
-        }
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
+        batteryOptimizationDisabled = BatteryOptimizationPermission().isGranted(context)
+        notificationsGranted = PostNotificationPermission().isGranted(context)
+        locationGranted = LocationPermission().isGranted(context)
+        doNotDisturbGranted = DoNotDisturbPermission().isGranted(context)
+        overlayGranted = OverlayPermission().isGranted(context)
+        adminGranted = AdminPermission().isGranted(context)
+        currentOnPermissionsChange()
     }
 
     if (activity != null) {

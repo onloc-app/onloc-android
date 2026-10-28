@@ -81,7 +81,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
@@ -245,18 +245,8 @@ fun ServerUrlScreen(
     }
 
     // Watch when the app comes back on to see if permissions changed.
-    DisposableEffect(lifecycleOwner) {
-        val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_RESUME) {
-                localNetworkAccessGranted = LocalNetworkAccessPermission().isGranted(context)
-            }
-        }
-
-        lifecycleOwner.lifecycle.addObserver(observer)
-
-        onDispose {
-            lifecycleOwner.lifecycle.removeObserver(observer)
-        }
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
+        localNetworkAccessGranted = LocalNetworkAccessPermission().isGranted(context)
     }
 
     // Makes sure the server is reachable before the login step

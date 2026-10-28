@@ -18,6 +18,7 @@ package app.onloc.android.ui.location
 import android.Manifest
 import android.app.Application
 import android.content.Context
+import android.location.LocationListener
 import android.location.LocationManager
 import android.location.LocationRequest
 import androidx.annotation.RequiresPermission
@@ -35,7 +36,6 @@ import app.onloc.android.models.Location
 import app.onloc.android.models.User
 import app.onloc.android.models.api.tokens.DeleteTokenRequest
 import app.onloc.android.services.EventManager
-import app.onloc.android.services.LocationCallbackManager
 import app.onloc.android.services.ServiceManager
 import app.onloc.android.services.SocketEventBus
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -103,7 +103,6 @@ class LocationViewModel(application: Application) : AndroidViewModel(application
     init {
         fetchDevices()
         fetchSelectedDevice()
-        observeLocationCallback()
         observeLocationsChange()
     }
 
@@ -185,26 +184,32 @@ class LocationViewModel(application: Application) : AndroidViewModel(application
         ServiceManager.stopLocationService(context)
     }
 
+    private val locationListener = LocationListener {
+        _currentLocation.value = Location.fromAndroidLocation(
+            id = -1,
+            deviceId = -1,
+            location = it,
+        )
+    }
+
     @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
-    fun grabCurrentLocation() {
+    fun startTrackingCurrentLocation() {
         val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
         val request = LocationRequest.Builder(0)
             .setQuality(LocationRequest.QUALITY_HIGH_ACCURACY)
             .build()
-        locationManager.getCurrentLocation(
+
+        locationManager.requestLocationUpdates(
             LocationManager.FUSED_PROVIDER,
             request,
-            null,
             context.mainExecutor,
-        ) {
-            if (it != null) {
-                _currentLocation.value = Location.fromAndroidLocation(
-                    id = -1,
-                    deviceId = -1,
-                    location = it,
-                )
-            }
-        }
+            locationListener,
+        )
+    }
+
+    fun stopTrackingCurrentLocation() {
+        val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        locationManager.removeUpdates(locationListener)
     }
 
     fun logout() {
@@ -224,18 +229,6 @@ class LocationViewModel(application: Application) : AndroidViewModel(application
             selectedDeviceId.value?.let { EventManager.unregisterDevice(context, it) }
 
             AuthStateManager.onLoggedOut()
-        }
-    }
-
-    private fun observeLocationCallback() {
-        LocationCallbackManager.callback = { location ->
-            if (selectedDeviceId.value != null && location != null) {
-                _currentLocation.value = Location.fromAndroidLocation(
-                    0,
-                    selectedDeviceId.value!!,
-                    location,
-                )
-            }
         }
     }
 
