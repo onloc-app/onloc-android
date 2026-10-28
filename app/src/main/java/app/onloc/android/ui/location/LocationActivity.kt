@@ -166,6 +166,7 @@ fun LocationScreen(viewModel: LocationViewModel, modifier: Modifier = Modifier) 
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
+                notificationGranted = PostNotificationPermission().isGranted(context)
                 locationGranted = LocationPermission().isGranted(context)
             }
         }

@@ -77,8 +77,8 @@ class LocationViewModel(application: Application) : AndroidViewModel(application
     )
 
     private val _locationUpdateInterval = MutableStateFlow(servicePreferences.locationUpdatesInterval)
-    val locationUpdateInterval: StateFlow<Int?> = _locationUpdateInterval.asStateFlow()
-    fun setLocationUpdateInterval(interval: Int?) {
+    val locationUpdateInterval: StateFlow<Int> = _locationUpdateInterval.asStateFlow()
+    fun setLocationUpdateInterval(interval: Int) {
         _locationUpdateInterval.value = interval
         servicePreferences.locationUpdatesInterval = interval
     }

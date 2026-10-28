@@ -74,6 +74,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -301,7 +302,11 @@ fun ServerUrlScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Image(painterResource(R.drawable.foreground), null)
+                Image(
+                    painterResource(R.drawable.foreground),
+                    contentDescription = null,
+                    colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onBackground)
+                )
                 Column(horizontalAlignment = Alignment.Start) {
                     Text(
                         text = stringResource(R.string.login_title),

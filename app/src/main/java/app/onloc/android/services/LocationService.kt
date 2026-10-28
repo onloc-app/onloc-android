@@ -109,9 +109,7 @@ class LocationService : Service() {
         val realTime = servicePrefs.realtime
         val quality = servicePrefs.quality
 
-        if (!realTime && interval == null) return
-
-        val finalInterval = if (!realTime) interval!! * SECOND else 2L * SECOND
+        val finalInterval = if (!realTime) interval * SECOND else 2L * SECOND
         val minDistance = if (!realTime) 0f else REAL_TIME_MIN_DISTANCE
 
         val lm = getSystemService<LocationManager>()

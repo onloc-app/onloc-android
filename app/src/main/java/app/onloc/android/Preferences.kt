@@ -91,13 +91,10 @@ class ServicePreferences(private val context: Context) {
             prefs.edit { putBoolean(LOCATION_SERVICE_KEY, value) }
         }
 
-    var locationUpdatesInterval: Int?
-        get() {
-            val interval = prefs.getInt(LOCATION_UPDATES_INTERVAL_KEY, -1)
-            return if (interval != -1) interval else null
-        }
+    var locationUpdatesInterval: Int
+        get() = prefs.getInt(LOCATION_UPDATES_INTERVAL_KEY, 15 * 60)
         set(value) {
-            prefs.edit { putInt(LOCATION_UPDATES_INTERVAL_KEY, value ?: -1) }
+            prefs.edit { putInt(LOCATION_UPDATES_INTERVAL_KEY, value) }
         }
 
     var realtime: Boolean
