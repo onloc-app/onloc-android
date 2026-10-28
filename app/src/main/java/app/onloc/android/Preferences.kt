@@ -21,7 +21,7 @@ import androidx.core.content.edit
 import app.onloc.android.models.User
 import com.google.gson.Gson
 
-private const val DEPRACATED_IP_KEY = "ip"
+private const val DEPRECATED_IP_KEY = "ip"
 private const val SERVER_URL_KEY = "server_url"
 private const val DEVICE_ID_KEY = "device_id"
 private const val ACCESS_TOKEN_KEY = "access_token"
@@ -37,6 +37,8 @@ private const val APP_PREFERENCES = "app_preferences"
 private const val SERVICE_PREFERENCES = "service_preferences"
 private const val USER_PREFERENCES = "user_preferences"
 
+private const val DEFAULT_UPDATES_INTERVAL = 15 * 60
+
 class AppPreferences(private val context: Context) {
     private val prefs by lazy {
         context.createDeviceProtectedStorageContext()
@@ -49,10 +51,10 @@ class AppPreferences(private val context: Context) {
     fun getServerUrl(): String? {
         // Switch to new key if coming from a version before v1.2.8
         // Remove in future updates
-        val ip = prefs.getString(DEPRACATED_IP_KEY, null)
+        val ip = prefs.getString(DEPRECATED_IP_KEY, null)
         if (ip != null) {
             createServerUrl(ip)
-            prefs.edit { remove(DEPRACATED_IP_KEY) }
+            prefs.edit { remove(DEPRECATED_IP_KEY) }
         }
 
         return prefs.getString(SERVER_URL_KEY, null)
@@ -92,7 +94,7 @@ class ServicePreferences(private val context: Context) {
         }
 
     var locationUpdatesInterval: Int
-        get() = prefs.getInt(LOCATION_UPDATES_INTERVAL_KEY, 15 * 60)
+        get() = prefs.getInt(LOCATION_UPDATES_INTERVAL_KEY, DEFAULT_UPDATES_INTERVAL)
         set(value) {
             prefs.edit { putInt(LOCATION_UPDATES_INTERVAL_KEY, value) }
         }

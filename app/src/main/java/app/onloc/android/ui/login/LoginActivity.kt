@@ -305,7 +305,7 @@ fun ServerUrlScreen(
                 Image(
                     painterResource(R.drawable.foreground),
                     contentDescription = null,
-                    colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onBackground)
+                    colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onBackground),
                 )
                 Column(horizontalAlignment = Alignment.Start) {
                     Text(
