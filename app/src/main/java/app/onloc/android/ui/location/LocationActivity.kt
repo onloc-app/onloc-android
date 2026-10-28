@@ -446,7 +446,7 @@ fun LocationScreen(viewModel: LocationViewModel, modifier: Modifier = Modifier) 
                 currentLocation?.let { currentLocation ->
                     val longitude = currentLocation.longitude
                     val latitude = currentLocation.latitude
-                    val accuracy = currentLocation.accuracy.toDouble()
+                    val accuracy = currentLocation.accuracy?.toDouble()
 
                     LocationPuck(
                         id = 0,

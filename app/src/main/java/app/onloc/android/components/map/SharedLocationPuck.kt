@@ -69,7 +69,7 @@ fun SharedLocationPuck(
     onClick: () -> Unit = {},
     onLongClick: () -> Unit = {},
 ) {
-    val accuracy = location.accuracy.toDouble()
+    val accuracy = location.accuracy?.toDouble()
     val name = device.name
     val color = device.color?.let { Color(it.toColorInt()) } ?: stringToColor(device.name)
 
@@ -95,13 +95,15 @@ fun SharedLocationPuck(
         ),
     )
 
-    CircleLayer(
-        id = "location-accuracy-$id",
-        source = markerSource,
-        radius = const((accuracy / metersPerDp).dp),
-        opacity = const(ACCURACY_OPACITY),
-        color = const(color),
-    )
+    if (accuracy != null) {
+        CircleLayer(
+            id = "location-accuracy-$id",
+            source = markerSource,
+            radius = const((accuracy / metersPerDp).dp),
+            opacity = const(ACCURACY_OPACITY),
+            color = const(color),
+        )
+    }
     if (showProfilePicture && serverUrl != null && user.avatar?.url != null) {
         val painter = rememberAsyncImagePainter(
             model = ImageRequest.Builder(LocalContext.current).data("$serverUrl/${user.avatar.url}")
