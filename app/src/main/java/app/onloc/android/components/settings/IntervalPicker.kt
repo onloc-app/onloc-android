@@ -15,6 +15,9 @@
 
 package app.onloc.android.components.settings
 
+import android.icu.number.NumberFormatter
+import android.icu.text.MeasureFormat
+import android.icu.util.MeasureUnit
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -33,7 +36,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -45,7 +48,7 @@ private data class TimeStep(
     val bounds: IntRange,
     val steps: Int,
     val stepSize: Int,
-    val pluralResId: Int,
+    val unit: MeasureUnit,
 )
 
 private val timeSteps = arrayOf(
@@ -54,28 +57,28 @@ private val timeSteps = arrayOf(
         bounds = 5..60,
         steps = 12 - 2,
         stepSize = 5,
-        pluralResId = R.plurals.interval_picker_seconds,
+        unit = MeasureUnit.SECOND,
     ),
     TimeStep(
         multiplier = 60,
         bounds = 5..60,
         steps = 12 - 2,
         stepSize = 5,
-        pluralResId = R.plurals.interval_picker_minutes,
+        unit = MeasureUnit.MINUTE,
     ),
     TimeStep(
         multiplier = 3600,
         bounds = 1..24,
         steps = 24 - 2,
         stepSize = 1,
-        pluralResId = R.plurals.interval_picker_hours,
+        unit = MeasureUnit.HOUR,
     ),
     TimeStep(
         multiplier = 86400,
         bounds = 1..7,
         steps = 7 - 2,
         stepSize = 1,
-        pluralResId = R.plurals.interval_picker_days,
+        unit = MeasureUnit.DAY,
     ),
 )
 
@@ -95,6 +98,14 @@ fun IntervalPicker(
         }.coerceAtLeast(0)
     }
     var selectedOption by remember { mutableStateOf(timeSteps[bestOptionIndex]) }
+    val locale = LocalLocale.current.platformLocale
+    val measureFormat = remember(locale) {
+        MeasureFormat.getInstance(locale, MeasureFormat.FormatWidth.WIDE)
+    }
+    val numberFormatter = remember(locale) {
+        NumberFormatter.withLocale(locale)
+            .unitWidth(NumberFormatter.UnitWidth.FULL_NAME)
+    }
 
     Column(modifier = modifier) {
         MultiChoiceSegmentedButtonRow {
@@ -110,7 +121,7 @@ fun IntervalPicker(
                         onChange(timeStep.bounds.first * timeStep.multiplier)
                     },
                     label = {
-                        Text(pluralStringResource(timeStep.pluralResId, value / selectedOption.multiplier))
+                        Text(measureFormat.getUnitDisplayName(timeStep.unit))
                     },
                     enabled = enabled && !realTime,
                     icon = {},
@@ -134,9 +145,10 @@ fun IntervalPicker(
             enabled = enabled && !realTime,
         )
         Text(
-            text = "${(value / selectedOption.multiplier)} ${
-                pluralStringResource(selectedOption.pluralResId, value / selectedOption.multiplier)
-            }",
+            text = numberFormatter
+                .unit(selectedOption.unit)
+                .format(value / selectedOption.multiplier)
+                .toString(),
         )
 
         Row(

@@ -39,7 +39,7 @@ fun LocationPuck(
     id: Int,
     longitude: Double,
     latitude: Double,
-    accuracy: Double,
+    accuracy: Double?,
     color: Color,
     metersPerDp: Double,
     useCurrentBearing: Boolean = false,
@@ -69,13 +69,15 @@ fun LocationPuck(
         )
     }
 
-    CircleLayer(
-        id = "location-accuracy-$id",
-        source = markerSource,
-        radius = const((accuracy / metersPerDp).dp),
-        opacity = const(ACCURACY_OPACITY),
-        color = const(color),
-    )
+    if (accuracy != null) {
+        CircleLayer(
+            id = "location-accuracy-$id",
+            source = markerSource,
+            radius = const((accuracy / metersPerDp).dp),
+            opacity = const(ACCURACY_OPACITY),
+            color = const(color),
+        )
+    }
     CircleLayer(
         id = "location-puck-$id",
         source = markerSource,
@@ -104,7 +106,7 @@ fun LocationPuck(
     onClick: () -> Unit = {},
     onLongClick: () -> Unit = {},
 ) {
-    val accuracy = location.accuracy.toDouble()
+    val accuracy = location.accuracy?.toDouble()
     val name = device.name
     val color = device.color?.let { Color(it.toColorInt()) } ?: stringToColor(device.name)
 

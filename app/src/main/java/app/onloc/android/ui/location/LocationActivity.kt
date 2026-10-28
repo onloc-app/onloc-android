@@ -57,8 +57,8 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -75,8 +75,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.LifecycleEventEffect
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.onloc.android.R
 import app.onloc.android.api.AuthStateManager
@@ -133,7 +133,6 @@ class LocationActivity : ComponentActivity() {
 @Composable
 fun LocationScreen(viewModel: LocationViewModel, modifier: Modifier = Modifier) {
     val context = LocalContext.current
-    val lifecycleOwner = LocalLifecycleOwner.current
 
     val devices by viewModel.devices.collectAsStateWithLifecycle()
     val sharedDevices by viewModel.sharedDevices.collectAsStateWithLifecycle()
@@ -163,36 +162,26 @@ fun LocationScreen(viewModel: LocationViewModel, modifier: Modifier = Modifier) 
     val styleState = rememberStyleState()
 
     // Watch when the app comes back on to see if permissions changed.
-    DisposableEffect(lifecycleOwner) {
-        val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_RESUME) {
-                locationGranted = LocationPermission().isGranted(context)
-            }
-        }
-
-        lifecycleOwner.lifecycle.addObserver(observer)
-
-        onDispose {
-            lifecycleOwner.lifecycle.removeObserver(observer)
-        }
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
+        notificationGranted = PostNotificationPermission().isGranted(context)
+        locationGranted = LocationPermission().isGranted(context)
     }
 
-    // Grab the device's location on launch.
-    LaunchedEffect(Unit) {
-        if (locationGranted) {
-            viewModel.grabCurrentLocation()
-        }
+    // Start/stop tracking location.
+    LifecycleResumeEffect(locationGranted) {
+        if (locationGranted) viewModel.startTrackingCurrentLocation()
+        onPauseOrDispose { viewModel.stopTrackingCurrentLocation() }
     }
 
     // Moves the camera to see this device's location on the map.
-    fun goToCurrentLocation() {
+    fun goToCurrentLocation(forceZoom: Boolean = true) {
         currentLocation?.let {
             val cameraPosition = CameraPosition(
                 target = Position(
                     it.longitude,
                     it.latitude,
                 ),
-                zoom = 16.0,
+                zoom = if (forceZoom) 16.0 else cameraState.position.zoom,
             )
             coroutineScope.launch {
                 cameraState.animateTo(finalPosition = cameraPosition)
@@ -201,6 +190,9 @@ fun LocationScreen(viewModel: LocationViewModel, modifier: Modifier = Modifier) 
             focusedDevice = null
         }
     }
+
+    // Stay on current location if activated.
+    SideEffect(currentLocation) { if (onCurrentLocation) goToCurrentLocation(false) }
 
     // Changes the view of the map to see all available devices.
     fun fitMapBounds(positions: List<Position>) {
@@ -446,7 +438,7 @@ fun LocationScreen(viewModel: LocationViewModel, modifier: Modifier = Modifier) 
                 currentLocation?.let { currentLocation ->
                     val longitude = currentLocation.longitude
                     val latitude = currentLocation.latitude
-                    val accuracy = currentLocation.accuracy.toDouble()
+                    val accuracy = currentLocation.accuracy?.toDouble()
 
                     LocationPuck(
                         id = 0,
@@ -568,10 +560,7 @@ fun LocationScreen(viewModel: LocationViewModel, modifier: Modifier = Modifier) 
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.align(Alignment.TopEnd)) {
                     DisappearingCompassButton(cameraState = cameraState)
                     ElevatedButton(
-                        onClick = {
-                            viewModel.grabCurrentLocation()
-                            goToCurrentLocation()
-                        },
+                        onClick = ::goToCurrentLocation,
                         modifier = Modifier
                             .height(48.dp)
                             .width(48.dp),

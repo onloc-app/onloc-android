@@ -26,11 +26,11 @@ data class Location(
     @SerialName("device_id")
     val deviceId: Int,
 
-    val accuracy: Float,
-    val altitude: Double,
+    val accuracy: Float? = null,
+    val altitude: Double? = null,
 
     @SerialName("altitude_accuracy")
-    val altitudeAccuracy: Float,
+    val altitudeAccuracy: Float? = null,
 
     val latitude: Double,
     val longitude: Double,

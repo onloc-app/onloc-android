@@ -1,4 +1,4 @@
-name: Detekt
+name: Code Quality
 
 on:
   push:
@@ -8,7 +8,6 @@ on:
 
 jobs:
   build:
-    name: Detekt
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6.0.1
@@ -21,3 +20,6 @@ jobs:
 
       - name: Run Detekt
         run: ./gradlew detekt
+
+      - name: Run Lint
+        run: ./gradlew lint

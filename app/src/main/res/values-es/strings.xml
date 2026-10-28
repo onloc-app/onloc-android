@@ -5,51 +5,38 @@
     <string name="main_settings_header">Ajustes</string>
     <string name="permissions_header">Características y Permisos</string>
     <string name="settings_dialog_interval_slider_label">Interval entre subidas</string>
-    <string name="settings_dialog_interval_slider_realtime_label">Utilice actualizaciones en tiempo real</string>
-    <plurals name="interval_picker_seconds">
-        <item quantity="one">Segundo</item>
-        <item quantity="many">Segundos</item>
-        <item quantity="other">Segundos</item>
-    </plurals>
-    <plurals name="interval_picker_minutes">
-        <item quantity="one">Minuto</item>
-        <item quantity="many">Minutos</item>
-        <item quantity="other">Minutos</item>
-    </plurals>
-    <plurals name="interval_picker_hours">
-        <item quantity="one">Hora</item>
-        <item quantity="many">Horas</item>
-        <item quantity="other">Horas</item>
-    </plurals>
-    <plurals name="interval_picker_days">
-        <item quantity="one">Día</item>
-        <item quantity="many">Días</item>
-        <item quantity="other">Días</item>
-    </plurals>
+    <string name="settings_dialog_interval_slider_realtime_label">Utilice actualizaciones en tiempo
+        real</string>
     <string name="offline_title">Se perdió la conexión con el servidor</string>
     <string name="offline_retry_button_label">Reintentar</string>
     <string name="offline_logout_button_label">Cerrar sesión</string>
     <string name="permissions_background_location_header">Ubicación del fondo</string>
-    <string name="permissions_background_location_description">Permite que la aplicación comparta la ubicación del dispositivo con el servidor incluso cuando la aplicación no esté en uso.</string>
+    <string name="permissions_background_location_description">Permite que la aplicación comparta la
+        ubicación del dispositivo con el servidor incluso cuando la aplicación no esté en uso.</string>
     <string name="permissions_notifications_label">Notificaciones</string>
     <string name="permissions_location_label">Ubicación</string>
     <string name="permissions_do_not_disturb_label">No perturbar el acceso</string>
     <string name="permissions_overlay_label">Mostrar sobre otras aplicaciones</string>
     <string name="permissions_ring_header">Anillo sobre el aire</string>
-    <string name="permissions_ring_description">La aplicación escuchará los comandos del servidor y el anillo cuando se lo ordene.</string>
+    <string name="permissions_ring_description">La aplicación escuchará los comandos del servidor y
+        el anillo cuando se lo ordene.</string>
     <string name="permissions_grant_button_label">Conceder</string>
     <string name="permissions_granted_button_label">Concedido</string>
     <string name="permissions_admin_label">Administrador del dispositivo</string>
     <string name="permissions_lock_header">Bloquear dispositivo</string>
-    <string name="permissions_lock_description">Permite que la aplicación cierre remotamente el dispositivo si se pierde o se roba.</string>
+    <string name="permissions_lock_description">Permite que la aplicación cierre remotamente el
+        dispositivo si se pierde o se roba.</string>
     <string name="service_location_channel_name">Servicio de localización</string>
     <string name="service_location_start_notification_title">Servicio de ubicación Empezó</string>
-    <string name="service_location_start_notification_description">Seguimiento de su ubicación en el fondo</string>
+    <string name="service_location_start_notification_description">Seguimiento de su ubicación en el
+        fondo</string>
     <string name="service_location_stop_notification_title">Servicio de ubicación detenido</string>
-    <string name="service_location_stop_notification_description">Se ha detenido el servicio de localización</string>
+    <string name="service_location_stop_notification_description">Se ha detenido el servicio de
+        localización</string>
     <string name="service_location_enable_gps">Es necesario activar el GPS</string>
     <string name="service_websocket_start_notification_title">Escuchando órdenes</string>
-    <string name="service_websocket_start_notification_description">El dispositivo responderá a los comandos</string>
+    <string name="service_websocket_start_notification_description">El dispositivo responderá a los
+        comandos</string>
     <string name="service_ringer_channel_name">Anillo</string>
     <string name="service_ringer_start_notification_title">Anillo…</string>
     <string name="service_ringer_start_notification_description">El dispositivo está sonando</string>

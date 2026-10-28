@@ -53,18 +53,16 @@ import app.onloc.android.permissions.LocationPermission
 import app.onloc.android.permissions.PostNotificationPermission
 import app.onloc.android.services.LocationService
 
-private const val DEFAULT_SLIDER_POSITION = 15 * 60 // 15 minutes
-
 @Composable
 fun SettingsDialog(
     hasSelectedDevice: Boolean,
-    locationUpdateInterval: Int?,
+    locationUpdateInterval: Int,
     realTime: Boolean,
     quality: Int,
     onStartLocationService: () -> Unit,
     onStopLocationService: () -> Unit,
     onToggleRealTime: (Boolean) -> Unit,
-    onLocationUpdateIntervalChange: (Int?) -> Unit,
+    onLocationUpdateIntervalChange: (Int) -> Unit,
     onQualityChange: (Int) -> Unit,
     onDismissRequest: () -> Unit,
 ) {
@@ -158,7 +156,7 @@ fun SettingsDialog(
                     ) {
                         SettingCard(title = stringResource(R.string.settings_dialog_interval_slider_label)) {
                             IntervalPicker(
-                                value = locationUpdateInterval ?: DEFAULT_SLIDER_POSITION,
+                                value = locationUpdateInterval,
                                 realTime = realTime,
                                 onToggleRealTime = onToggleRealTime,
                                 enabled = !locationServiceRunning,
