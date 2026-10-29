@@ -83,7 +83,6 @@ class LocationService : Service() {
                 LocationsApiService(applicationContext, serverUrl).postLocation(parsedLocation)
             }
         }
-        LocationCallbackManager.callback?.invoke(location)
     }
 
     /**
@@ -177,8 +176,4 @@ class LocationService : Service() {
     }
 
     override fun onBind(intent: Intent?): IBinder? = null
-}
-
-object LocationCallbackManager {
-    var callback: ((Location?) -> Unit)? = null
 }

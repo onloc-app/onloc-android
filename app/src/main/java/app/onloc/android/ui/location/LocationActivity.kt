@@ -58,7 +58,6 @@ import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -191,9 +190,6 @@ fun LocationScreen(viewModel: LocationViewModel, modifier: Modifier = Modifier) 
         }
     }
 
-    // Stay on current location if activated.
-    SideEffect(currentLocation) { if (onCurrentLocation) goToCurrentLocation(false) }
-
     // Changes the view of the map to see all available devices.
     fun fitMapBounds(positions: List<Position>) {
         if (positions.isNotEmpty()) {
@@ -313,6 +309,25 @@ fun LocationScreen(viewModel: LocationViewModel, modifier: Modifier = Modifier) 
     LaunchedEffect(sheetState.currentValue) {
         if (sheetState.currentValue == SheetValue.Hidden) {
             focusedDevice = null
+        }
+    }
+
+    // Stay on current location if activated.
+    LaunchedEffect(currentLocation) { if (onCurrentLocation) goToCurrentLocation(false) }
+
+    // Fit bounds only when the devices on the map change.
+    var previousPositionsCount by rememberSaveable { mutableIntStateOf(0) }
+    LaunchedEffect(allPositions.size) {
+        if (allPositions.size != previousPositionsCount) {
+            fitMapBounds(allPositions)
+        }
+        previousPositionsCount = allPositions.size
+    }
+
+    // Stay on the focused location.
+    LaunchedEffect(allPositions) {
+        focusedDevice?.latestLocation?.let { location ->
+            goToLocation(location)
         }
     }
 
@@ -503,25 +518,6 @@ fun LocationScreen(viewModel: LocationViewModel, modifier: Modifier = Modifier) 
                                 onLongClick = { openNavigationApp(location) },
                             )
                         }
-                    }
-                }
-
-                // Fit bounds only when the devices on the map change.
-                var previousPositionsCount by rememberSaveable { mutableIntStateOf(0) }
-                LaunchedEffect(allPositions.size) {
-                    if (allPositions.size != previousPositionsCount) {
-                        fitMapBounds(allPositions)
-                    }
-                    previousPositionsCount = allPositions.size
-                }
-
-                // Stay on the focused location.
-                LaunchedEffect(allPositions) {
-                    if (onCurrentLocation) {
-                        goToCurrentLocation()
-                    }
-                    focusedDevice?.latestLocation?.let { location ->
-                        goToLocation(location)
                     }
                 }
             }
