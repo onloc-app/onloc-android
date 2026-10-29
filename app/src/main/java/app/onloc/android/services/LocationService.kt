@@ -38,13 +38,11 @@ import app.onloc.android.helpers.START_LOCATION_SERVICE_NOTIFICATION_ID
 import app.onloc.android.helpers.STOP_LOCATION_SERVICE_NOTIFICATION_ID
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.minutes
-import kotlin.time.Duration.Companion.seconds
 import kotlin.time.Instant
 import app.onloc.android.models.Location as OnlocLocation
 

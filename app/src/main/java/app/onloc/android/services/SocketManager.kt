@@ -15,7 +15,6 @@
 
 package app.onloc.android.services
 
-import android.util.Log
 import io.socket.client.IO
 import io.socket.client.Socket
 import okhttp3.OkHttpClient
