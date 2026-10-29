@@ -59,7 +59,6 @@ object SocketManager {
 
             // Handle connection errors such as an expired token
             socket!!.on(Socket.EVENT_CONNECT_ERROR) {
-                Log.w("onloc", "Connection error")
                 onAuthFailure?.invoke()
             }
         }

@@ -28,11 +28,11 @@ private const val ENDPOINT = "/api/locations"
 class LocationsApiService(context: Context, url: String) {
     private val api = ApiClient(context, url)
 
-    suspend fun postLocation(location: Location): Result<Unit> {
+    suspend fun postLocation(locations: Array<Location>): Result<Unit> {
         try {
             api.client.post(ENDPOINT) {
                 contentType(ContentType.Application.Json)
-                setBody(location)
+                setBody(mapOf("locations" to locations))
             }
             return Result.success(Unit)
         } catch (e: Exception) {

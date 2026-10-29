@@ -88,7 +88,6 @@ class WebSocketService : Service() {
      * Attached the command listeners to the socket.
      */
     private fun registerSocketListeners() {
-        // Configure commands
         SocketManager.on(ringCommandEvent) { Ring(this).execute() }
         SocketManager.on(lockCommandEvent) { args ->
             val data = args[0] as JSONObject
@@ -97,7 +96,6 @@ class WebSocketService : Service() {
         }
         SocketManager.on(flashCommandEvent) { Flash(this).execute() }
 
-        // React to new locations from devices
         SocketManager.on(locationsChangeEvent) {
             watchdogScope.launch {
                 SocketEventBus.emitLocationsChanged()

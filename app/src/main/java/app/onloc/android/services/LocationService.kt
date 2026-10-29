@@ -26,6 +26,7 @@ import android.location.LocationManager
 import android.location.LocationRequest
 import android.os.BatteryManager
 import android.os.IBinder
+import android.util.Log
 import androidx.core.app.ActivityCompat
 import androidx.core.content.getSystemService
 import app.onloc.android.AppPreferences
@@ -40,6 +41,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlin.time.Clock
+import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Duration.Companion.seconds
+import kotlin.time.Instant
 import app.onloc.android.models.Location as OnlocLocation
 
 private const val SECOND = 1000L
@@ -56,6 +62,28 @@ class LocationService : Service() {
         var running = MutableStateFlow(false)
     }
 
+    private val locationQueue = mutableListOf<OnlocLocation>()
+    private var queueStart: Instant? = null
+
+    /**
+     * Sends the location queue to the server.
+     */
+    private fun flushQueue() {
+        val serverUrl = AppPreferences(this).getServerUrl() ?: return
+
+        queueStart = null
+
+        serviceScope.launch {
+            val result = LocationsApiService(applicationContext, serverUrl).postLocation(locationQueue.toTypedArray())
+
+            withContext(Dispatchers.Main) {
+                result
+                    .onSuccess { locationQueue.clear() }
+                    .onFailure { Log.e("LocationService", "Failed to upload location batch", it) }
+            }
+        }
+    }
+
     /**
      * Launched when a location update arrives.
      */
@@ -66,21 +94,32 @@ class LocationService : Service() {
         val serverUrl = appPrefs.getServerUrl()
         val selectedDeviceId = appPrefs.getDeviceId()
 
+        if (serverUrl == null || selectedDeviceId == null) return
+
         val batteryManager = applicationContext.getSystemService(BATTERY_SERVICE) as BatteryManager
         val batteryLevel: Int = batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY)
         val batteryCharging: Boolean = batteryManager.isCharging
 
         val parsedLocation = OnlocLocation.fromAndroidLocation(
             0,
-            selectedDeviceId ?: 0,
+            selectedDeviceId,
             location,
         )
         parsedLocation.battery = batteryLevel
         parsedLocation.charging = batteryCharging
 
-        if (serverUrl != null && selectedDeviceId != null) {
+        val realTime = ServicePreferences(this).realtime
+
+        if (realTime) {
+            val now = Clock.System.now()
+            if (queueStart == null) queueStart = now
+
+            locationQueue.add(parsedLocation)
+
+            if (now - queueStart!! >= 15.minutes) flushQueue()
+        } else {
             serviceScope.launch {
-                LocationsApiService(applicationContext, serverUrl).postLocation(parsedLocation)
+                LocationsApiService(applicationContext, serverUrl).postLocation(arrayOf(parsedLocation))
             }
         }
     }
@@ -161,10 +200,9 @@ class LocationService : Service() {
         super.onDestroy()
 
         stopLocationUpdates()
+        flushQueue()
         stopForegroundService()
-        serviceScope.cancel()
 
-        // Send a notification
         val notificationManager =
             getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.notify(
