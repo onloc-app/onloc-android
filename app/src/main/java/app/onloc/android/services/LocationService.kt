@@ -72,7 +72,7 @@ class LocationService : Service() {
         queueStart = null
 
         serviceScope.launch {
-            val result = LocationsApiService(applicationContext, serverUrl).postLocation(locationQueue.toTypedArray())
+            val result = LocationsApiService(applicationContext, serverUrl).postLocations(locationQueue.toTypedArray())
 
             withContext(Dispatchers.Main) {
                 result
@@ -117,7 +117,7 @@ class LocationService : Service() {
             if (now - queueStart!! >= 15.minutes) flushQueue()
         } else {
             serviceScope.launch {
-                LocationsApiService(applicationContext, serverUrl).postLocation(arrayOf(parsedLocation))
+                LocationsApiService(applicationContext, serverUrl).postLocation(parsedLocation)
             }
         }
     }

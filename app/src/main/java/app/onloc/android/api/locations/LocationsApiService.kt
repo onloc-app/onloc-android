@@ -18,6 +18,9 @@ package app.onloc.android.api.locations
 import android.content.Context
 import app.onloc.android.api.ApiClient
 import app.onloc.android.models.Location
+import app.onloc.android.models.api.locations.PostLocationResponse
+import app.onloc.android.models.api.locations.PostLocationsResponse
+import io.ktor.client.call.body
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
@@ -28,13 +31,25 @@ private const val ENDPOINT = "/api/locations"
 class LocationsApiService(context: Context, url: String) {
     private val api = ApiClient(context, url)
 
-    suspend fun postLocation(locations: Array<Location>): Result<Unit> {
+    suspend fun postLocation(location: Location): Result<Location> {
         try {
-            api.client.post(ENDPOINT) {
+            val response: PostLocationResponse = api.client.post(ENDPOINT) {
+                contentType(ContentType.Application.Json)
+                setBody(location)
+            }.body()
+            return Result.success(response.location)
+        } catch (e: Exception) {
+            return Result.failure(e)
+        }
+    }
+
+    suspend fun postLocations(locations: Array<Location>): Result<Array<Location>> {
+        try {
+            val response: PostLocationsResponse = api.client.post("$ENDPOINT/batch") {
                 contentType(ContentType.Application.Json)
                 setBody(mapOf("locations" to locations))
-            }
-            return Result.success(Unit)
+            }.body()
+            return Result.success(response.locations)
         } catch (e: Exception) {
             return Result.failure(e)
         }
