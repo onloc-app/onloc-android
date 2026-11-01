@@ -23,6 +23,7 @@ import android.net.NetworkRequest
 import android.os.IBinder
 import android.util.Log
 import app.onloc.android.AppPreferences
+import app.onloc.android.Event
 import app.onloc.android.UserPreferences
 import app.onloc.android.api.users.UsersApiService
 import app.onloc.android.commands.Flash
@@ -43,13 +44,6 @@ private const val WATCHDOG_DELAY = 5L
 class WebSocketService : Service() {
     private lateinit var connectivityManager: ConnectivityManager
     private var networkCallback: ConnectivityManager.NetworkCallback? = null
-
-    private val ringCommandEvent = "ring-command"
-    private val lockCommandEvent = "lock-command"
-    private val flashCommandEvent = "flash-command"
-    private val registerDeviceEvent = "register-device"
-    private val unregisterDeviceEvent = "unregister-device"
-    private val locationsChangeEvent = "locations-change"
 
     private val watchdogScope = CoroutineScope(Dispatchers.IO)
     private val coroutineScope = CoroutineScope(Dispatchers.IO)
@@ -88,18 +82,24 @@ class WebSocketService : Service() {
      * Attached the command listeners to the socket.
      */
     private fun registerSocketListeners() {
-        SocketManager.on(ringCommandEvent) { Ring(this).execute() }
-        SocketManager.on(lockCommandEvent) { args ->
+        SocketManager.on(Event.RING_COMMAND.value) { Ring(this).execute() }
+        SocketManager.on(Event.LOCK_COMMAND.value) { args ->
             val data = args[0] as JSONObject
             val message = data.optString("message")
             Lock(this, message).execute()
         }
-        SocketManager.on(flashCommandEvent) { Flash(this).execute() }
+        SocketManager.on(Event.FLASH_COMMAND.value) { Flash(this).execute() }
 
-        SocketManager.on(locationsChangeEvent) {
+        SocketManager.on(Event.LOCATIONS_CHANGE.value) {
             watchdogScope.launch {
                 SocketEventBus.emitLocationsChanged()
             }
+        }
+
+        SocketManager.on(Event.USER_WATCHING.value) { args ->
+            val data = args[0] as JSONObject
+            val isWatching = data.optBoolean("is_watching")
+            LocationService.isUserWatching = isWatching
         }
     }
 
@@ -127,7 +127,7 @@ class WebSocketService : Service() {
 
         // Register device with the server
         SocketManager.emit(
-            registerDeviceEvent,
+            Event.REGISTER_DEVICE.value,
             JSONObject().put("device_id", deviceId),
         )
     }
@@ -177,7 +177,7 @@ class WebSocketService : Service() {
         val deviceId = AppPreferences(this).getDeviceId()
         deviceId?.let {
             SocketManager.emit(
-                unregisterDeviceEvent,
+                Event.UNREGISTER_DEVICE.value,
                 JSONObject().put("device_id", it),
             )
         }

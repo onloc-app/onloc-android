@@ -18,6 +18,7 @@ package app.onloc.android.services
 import android.content.Context
 import android.util.Log
 import app.onloc.android.AppPreferences
+import app.onloc.android.Event
 import app.onloc.android.ServicePreferences
 import app.onloc.android.api.unifiedpush.UnifiedPushApiService
 import app.onloc.android.commands.Flash
@@ -34,10 +35,6 @@ import org.unifiedpush.android.connector.FailedReason
 import org.unifiedpush.android.connector.PushService
 import org.unifiedpush.android.connector.data.PushEndpoint
 import org.unifiedpush.android.connector.data.PushMessage
-
-private const val RING_COMMAND_EVENT = "ring-command"
-private const val LOCK_COMMAND_EVENT = "lock-command"
-private const val FLASH_COMMAND_EVENT = "flash-command"
 
 class UnifiedPushService : PushService() {
     val pref = ServicePreferences(this)
@@ -71,14 +68,17 @@ class UnifiedPushService : PushService() {
 
         val command = json?.optString("command") ?: raw
         val lockMessage = json?.optString("message")?.takeIf { it.isNotEmpty() }
+        val isUserWatching = json?.optBoolean("is_watching") ?: false
 
         Log.d("UnifiedPushService", "Received a command: $command")
 
-        when (command) {
-            RING_COMMAND_EVENT -> Ring(this).execute()
-            LOCK_COMMAND_EVENT -> Lock(this, lockMessage).execute()
-            FLASH_COMMAND_EVENT -> Flash(this).execute()
-            "ping" -> Unit
+        when (Event.fromValue(command)) {
+            Event.RING_COMMAND -> Ring(this).execute()
+            Event.LOCK_COMMAND -> Lock(this, lockMessage).execute()
+            Event.FLASH_COMMAND -> Flash(this).execute()
+            Event.LOCATIONS_CHANGE -> cs.launch { SocketEventBus.emitLocationsChanged() }
+            Event.USER_WATCHING -> LocationService.isUserWatching = isUserWatching
+            Event.PING -> Unit
             else -> Log.w("UnifiedPushService", "Unknown command $command for device $instance")
         }
     }

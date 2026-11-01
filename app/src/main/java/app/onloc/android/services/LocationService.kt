@@ -58,6 +58,7 @@ class LocationService : Service() {
 
     companion object {
         var running = MutableStateFlow(false)
+        var isUserWatching = false
     }
 
     private val locationQueue = mutableListOf<OnlocLocation>()
@@ -114,7 +115,7 @@ class LocationService : Service() {
 
             locationQueue.add(parsedLocation)
 
-            if (now - queueStart!! >= 15.minutes) flushQueue()
+            if (now - queueStart!! >= 15.minutes || isUserWatching) flushQueue()
         } else {
             serviceScope.launch {
                 LocationsApiService(applicationContext, serverUrl).postLocation(parsedLocation)

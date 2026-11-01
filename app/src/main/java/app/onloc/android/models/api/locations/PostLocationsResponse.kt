@@ -16,7 +16,9 @@
 package app.onloc.android.models.api.locations
 
 import app.onloc.android.models.Location
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class PostLocationsResponse(val locations: Array<Location>) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
