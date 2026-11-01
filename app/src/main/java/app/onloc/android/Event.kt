@@ -23,7 +23,7 @@ enum class Event(val value: String) {
     UNREGISTER_DEVICE("unregister-device"),
     LOCATIONS_CHANGE("locations-change"),
     USER_WATCHING("user-watching"),
-    PING("ping");
+    PING("ping"), ;
 
     companion object {
         fun fromValue(value: String): Event? = entries.find { it.value == value }
