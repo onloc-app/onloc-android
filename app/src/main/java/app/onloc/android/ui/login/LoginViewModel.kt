@@ -48,7 +48,7 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
                 .onSuccess { loginResponse ->
                     val (accessToken, refreshToken, user) = loginResponse
                     userPreferences.createUserCredentials(accessToken to refreshToken, user)
-                    AuthStateManager.onLoggedIn()
+                    AuthStateManager.onLoggedIn(context)
                     _loginState.value = LoginState.Success
                 }
                 .onFailure { e ->

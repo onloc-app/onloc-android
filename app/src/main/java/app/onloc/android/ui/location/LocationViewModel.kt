@@ -35,7 +35,7 @@ import app.onloc.android.models.Device
 import app.onloc.android.models.Location
 import app.onloc.android.models.User
 import app.onloc.android.models.api.tokens.DeleteTokenRequest
-import app.onloc.android.services.EventManager
+import app.onloc.android.services.DeviceConnectionManager
 import app.onloc.android.services.ServiceManager
 import app.onloc.android.services.SocketEventBus
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -165,15 +165,8 @@ class LocationViewModel(application: Application) : AndroidViewModel(application
     }
 
     fun selectDevice(id: Int?) {
-        val previousId = selectedDeviceId.value
-
-        previousId?.let { EventManager.unregisterDevice(context, it) }
-
-        appPreferences.createDeviceId(id)
-
+        DeviceConnectionManager.selectDevice(context, id)
         selectedDeviceId.value = id
-
-        id?.let { EventManager.registerDevice(context, it) }
     }
 
     fun startLocationService() {
@@ -226,9 +219,7 @@ class LocationViewModel(application: Application) : AndroidViewModel(application
             userPreferences.deleteUserCredentials()
             appPreferences.deleteDeviceId()
 
-            selectedDeviceId.value?.let { EventManager.unregisterDevice(context, it) }
-
-            AuthStateManager.onLoggedOut()
+            AuthStateManager.onLoggedOut(context)
         }
     }
 

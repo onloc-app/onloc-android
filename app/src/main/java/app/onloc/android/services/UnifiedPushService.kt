@@ -23,7 +23,6 @@ import app.onloc.android.api.unifiedpush.UnifiedPushApiService
 import app.onloc.android.commands.Flash
 import app.onloc.android.commands.Lock
 import app.onloc.android.commands.Ring
-import app.onloc.android.models.UnifiedPushProvider
 import app.onloc.android.services.connection.UnifiedPushConnectionStrategy
 import app.onloc.android.services.connection.WebSocketConnectionStrategy
 import kotlinx.coroutines.CoroutineScope
@@ -33,7 +32,6 @@ import org.json.JSONException
 import org.json.JSONObject
 import org.unifiedpush.android.connector.FailedReason
 import org.unifiedpush.android.connector.PushService
-import org.unifiedpush.android.connector.UnifiedPush
 import org.unifiedpush.android.connector.data.PushEndpoint
 import org.unifiedpush.android.connector.data.PushMessage
 
@@ -49,29 +47,16 @@ class UnifiedPushService : PushService() {
     override fun onNewEndpoint(endpoint: PushEndpoint, instance: String) {
         ServiceManager.setConnectionStrategy(this, UnifiedPushConnectionStrategy())
 
-        cs.launch {
-            try {
-                val provider =
-                    UnifiedPushProvider(
-                        id = 0,
-                        deviceId = instance.toInt(),
-                        endpointUrl = endpoint.url,
-                        pubKey = endpoint.pubKeySet?.pubKey,
-                        auth = endpoint.pubKeySet?.auth,
-                    )
-                apiRegister(provider)
-                Log.d("UnifiedPushService", "Registering $instance")
+        val deviceId = AppPreferences(this).getDeviceId()
+        DeviceConnectionManager.syncPushRegistration(
+            context = this,
+            deviceId = deviceId,
+            endpointUrl = endpoint.url,
+            pubKey = endpoint.pubKeySet?.pubKey,
+            auth = endpoint.pubKeySet?.auth,
+        )
 
-                // Unregister the old endpoint
-                apiUnregister(this@UnifiedPushService)
-
-                // Save to app's settings
-                pref.pushEndpointUrl = endpoint.url
-            } catch (e: Exception) {
-                Log.e("UnifiedPushService", "Failed to register push endpoint", e)
-                UnifiedPush.unregister(this@UnifiedPushService, instance)
-            }
-        }
+        pref.pushEndpointUrl = endpoint.url
     }
 
     override fun onMessage(message: PushMessage, instance: String) {
@@ -110,16 +95,10 @@ class UnifiedPushService : PushService() {
         apiUnregister(this)
     }
 
-    private fun apiRegister(provider: UnifiedPushProvider) {
-        val serverUrl = AppPreferences(this).getServerUrl() ?: return
-        val api = UnifiedPushApiService(this, serverUrl)
-        cs.launch { api.register(provider) }
-    }
-
     private fun apiUnregister(context: Context) {
         val serverUrl = AppPreferences(context).getServerUrl() ?: return
         val endpointUrl = ServicePreferences(context).pushEndpointUrl ?: return
         val api = UnifiedPushApiService(context, serverUrl)
-        EventManager.cs.launch { api.unregister(endpointUrl) }
+        cs.launch { api.unregister(endpointUrl) }
     }
 }

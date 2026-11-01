@@ -51,6 +51,10 @@ object ServiceManager {
         connectionStrategy.start(context)
     }
 
+    fun stopConnection(context: Context) {
+        connectionStrategy.stop(context)
+    }
+
     fun startLocationServiceIfAllowed(context: Context) {
         val servicePreferences = ServicePreferences(context)
 
@@ -73,6 +77,6 @@ object ServiceManager {
 
     fun stopAllServices(context: Context) {
         stopLocationService(context)
-        connectionStrategy.stop(context)
+        stopConnection(context)
     }
 }

@@ -15,6 +15,8 @@
 
 package app.onloc.android.api
 
+import android.content.Context
+import app.onloc.android.services.ServiceManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -23,11 +25,13 @@ object AuthStateManager {
     private val _isAuthenticated = MutableStateFlow(true)
     val isAuthenticated: StateFlow<Boolean> = _isAuthenticated.asStateFlow()
 
-    fun onLoggedOut() {
-        _isAuthenticated.value = false
+    fun onLoggedIn(context: Context) {
+        _isAuthenticated.value = true
+        ServiceManager.startConnection(context)
     }
 
-    fun onLoggedIn() {
-        _isAuthenticated.value = true
+    fun onLoggedOut(context: Context) {
+        _isAuthenticated.value = false
+        ServiceManager.stopConnection(context)
     }
 }

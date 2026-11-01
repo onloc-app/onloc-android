@@ -61,7 +61,7 @@ class OfflineViewModel(application: Application) : AndroidViewModel(application)
             appPreferences.deleteDeviceId()
 
             _state.value = OfflineState.LoggedOut
-            AuthStateManager.onLoggedOut()
+            AuthStateManager.onLoggedOut(context)
         }
     }
 }

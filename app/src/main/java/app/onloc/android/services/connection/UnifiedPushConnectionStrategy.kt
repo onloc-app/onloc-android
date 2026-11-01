@@ -31,10 +31,7 @@ class UnifiedPushConnectionStrategy : ConnectionStrategy {
             if (UnifiedPush.getSavedDistributor(context).isNullOrEmpty()) {
                 UnifiedPush.saveDistributor(context, distributors[0])
             }
-            val deviceId = AppPreferences(context).getDeviceId()
-            deviceId?.let {
-                UnifiedPush.register(context, instance = deviceId.toString())
-            }
+            UnifiedPush.register(context)
         }
     }
 
@@ -52,9 +49,6 @@ class UnifiedPushConnectionStrategy : ConnectionStrategy {
             }
         }
 
-        val deviceId = appPreferences.getDeviceId()
-        deviceId?.let {
-            UnifiedPush.unregister(context, instance = deviceId.toString())
-        }
+        UnifiedPush.unregister(context)
     }
 }
