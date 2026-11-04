@@ -59,6 +59,7 @@ import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
@@ -87,7 +88,6 @@ import app.onloc.android.components.map.LocationPuck
 import app.onloc.android.components.map.MapAttribution
 import app.onloc.android.components.map.SharedLocationPuck
 import app.onloc.android.components.settings.SettingsDialog
-import app.onloc.android.models.Device
 import app.onloc.android.models.Location
 import app.onloc.android.permissions.LocationPermission
 import app.onloc.android.permissions.PostNotificationPermission
@@ -148,7 +148,8 @@ fun LocationScreen(viewModel: LocationViewModel, modifier: Modifier = Modifier) 
     var deviceSelectorOpened by rememberSaveable { mutableStateOf(false) }
     var settingsDialogOpened by rememberSaveable { mutableStateOf(false) }
     var onCurrentLocation by remember { mutableStateOf(false) }
-    var focusedDevice by remember { mutableStateOf<Device?>(null) }
+    var focusedDeviceId by remember { mutableStateOf<Int?>(null) }
+    val focusedDevice by remember { derivedStateOf { (devices + sharedDevices).find { it.id == focusedDeviceId } } }
     var notificationGranted by remember { mutableStateOf(PostNotificationPermission().isGranted(context)) }
     var locationGranted by remember { mutableStateOf(LocationPermission().isGranted(context)) }
     var lastGestureEnd by remember { mutableLongStateOf(0L) }
@@ -172,21 +173,27 @@ fun LocationScreen(viewModel: LocationViewModel, modifier: Modifier = Modifier) 
         onPauseOrDispose { viewModel.stopTrackingCurrentLocation() }
     }
 
+    // Moves the camera to a specific location on the map.
+    fun goToLocation(location: Location, forceZoom: Boolean = true) {
+        coroutineScope.launch {
+            cameraState.animateTo(
+                CameraPosition(
+                    target = Position(
+                        location.longitude,
+                        location.latitude,
+                    ),
+                    zoom = if (forceZoom) 16.0 else cameraState.position.zoom,
+                ),
+            )
+        }
+    }
+
     // Moves the camera to see this device's location on the map.
     fun goToCurrentLocation(forceZoom: Boolean = true) {
         currentLocation?.let {
-            val cameraPosition = CameraPosition(
-                target = Position(
-                    it.longitude,
-                    it.latitude,
-                ),
-                zoom = if (forceZoom) 16.0 else cameraState.position.zoom,
-            )
-            coroutineScope.launch {
-                cameraState.animateTo(finalPosition = cameraPosition)
-            }
+            goToLocation(it, forceZoom)
             onCurrentLocation = true
-            focusedDevice = null
+            focusedDeviceId = null
         }
     }
 
@@ -223,22 +230,7 @@ fun LocationScreen(viewModel: LocationViewModel, modifier: Modifier = Modifier) 
                 }
             }
             onCurrentLocation = false
-            focusedDevice = null
-        }
-    }
-
-    // Moves the camera to a specific location on the map.
-    fun goToLocation(location: Location) {
-        coroutineScope.launch {
-            cameraState.animateTo(
-                CameraPosition(
-                    target = Position(
-                        location.longitude,
-                        location.latitude,
-                    ),
-                    zoom = 16.0,
-                ),
-            )
+            focusedDeviceId = null
         }
     }
 
@@ -263,7 +255,7 @@ fun LocationScreen(viewModel: LocationViewModel, modifier: Modifier = Modifier) 
             val now = currentTimeMillis()
             if (now - lastGestureEnd > MAP_MOVE_BUFFER) {
                 onCurrentLocation = false
-                focusedDevice = null
+                focusedDeviceId = null
                 lastGestureEnd = now
             }
         }
@@ -298,7 +290,7 @@ fun LocationScreen(viewModel: LocationViewModel, modifier: Modifier = Modifier) 
 
     // Change the bottom sheet's visibility based on the focus device
     LaunchedEffect(focusedDevice) {
-        if (focusedDevice == null) {
+        if (focusedDeviceId == null) {
             sheetState.hide()
         } else {
             sheetState.show()
@@ -308,7 +300,7 @@ fun LocationScreen(viewModel: LocationViewModel, modifier: Modifier = Modifier) 
     // Unfocus device when sheet is closed
     LaunchedEffect(sheetState.currentValue) {
         if (sheetState.currentValue == SheetValue.Hidden) {
-            focusedDevice = null
+            focusedDeviceId = null
         }
     }
 
@@ -325,11 +317,7 @@ fun LocationScreen(viewModel: LocationViewModel, modifier: Modifier = Modifier) 
     }
 
     // Stay on the focused location.
-    LaunchedEffect(allPositions) {
-        focusedDevice?.latestLocation?.let { location ->
-            goToLocation(location)
-        }
-    }
+    LaunchedEffect(allPositions) { focusedDevice?.latestLocation?.let { goToLocation(it, false) } }
 
     BottomSheetScaffold(
         modifier = modifier,
@@ -491,7 +479,7 @@ fun LocationScreen(viewModel: LocationViewModel, modifier: Modifier = Modifier) 
                                             ),
                                         )
                                     }
-                                    focusedDevice = device
+                                    focusedDeviceId = device.id
                                 },
                                 onLongClick = { openNavigationApp(location) },
                             )
@@ -513,7 +501,7 @@ fun LocationScreen(viewModel: LocationViewModel, modifier: Modifier = Modifier) 
                                 showCone = true,
                                 onClick = {
                                     goToLocation(location)
-                                    focusedDevice = device
+                                    focusedDeviceId = device.id
                                 },
                                 onLongClick = { openNavigationApp(location) },
                             )

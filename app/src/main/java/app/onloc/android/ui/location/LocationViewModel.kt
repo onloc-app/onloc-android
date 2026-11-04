@@ -21,10 +21,12 @@ import android.content.Context
 import android.location.LocationListener
 import android.location.LocationManager
 import android.location.LocationRequest
+import android.util.Log
 import androidx.annotation.RequiresPermission
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import app.onloc.android.AppPreferences
+import app.onloc.android.Event
 import app.onloc.android.ServicePreferences
 import app.onloc.android.UserPreferences
 import app.onloc.android.api.AuthStateManager
@@ -37,7 +39,9 @@ import app.onloc.android.models.User
 import app.onloc.android.models.api.tokens.DeleteTokenRequest
 import app.onloc.android.services.DeviceConnectionManager
 import app.onloc.android.services.ServiceManager
-import app.onloc.android.services.SocketEventBus
+import app.onloc.android.services.SocketManager
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -51,6 +55,7 @@ const val TIMEOUT = 5000L
 @Suppress("TooManyFunctions")
 class LocationViewModel(application: Application) : AndroidViewModel(application) {
     private val context = getApplication<Application>()
+    private val coroutineScope = CoroutineScope(Dispatchers.IO)
     private val appPreferences = AppPreferences(context)
     private val servicePreferences = ServicePreferences(context)
     private val userPreferences = UserPreferences(context)
@@ -103,7 +108,37 @@ class LocationViewModel(application: Application) : AndroidViewModel(application
     init {
         fetchDevices()
         fetchSelectedDevice()
-        observeLocationsChange()
+        connectSocket()
+    }
+
+    override fun onCleared() {
+        SocketManager.disconnect()
+    }
+
+    private fun connectSocket() {
+        val url = appPreferences.getServerUrl()
+        val token = userPreferences.getUserCredentials().accessToken
+
+        if (url == null || token == null) return
+
+        SocketManager.disconnect()
+        SocketManager.initialize(url, token)
+        SocketManager.onAuthFailure = { handleAuthFailure(url) }
+        SocketManager.on(Event.LOCATIONS_CHANGE.value) { fetchDevices() }
+        SocketManager.connect()
+    }
+
+    private fun handleAuthFailure(url: String) {
+        SocketManager.disconnect()
+        coroutineScope.launch {
+            try {
+                // Call an authenticated endpoint to let the API client refresh the access token.
+                UsersApiService(context, url).getUserInfo()
+                connectSocket()
+            } catch (e: Exception) {
+                Log.e("onloc", e.toString())
+            }
+        }
     }
 
     fun fetchSelectedDevice() {
@@ -121,12 +156,15 @@ class LocationViewModel(application: Application) : AndroidViewModel(application
                     _devices.value = devices
                 }
                 .onFailure {
-                    it.printStackTrace()
+                    Log.e("onloc", "Failed to fetch devices", it)
                 }
             api.getSharedDevices()
                 .onSuccess { sharedDevices ->
                     _sharedDevices.value = sharedDevices
                     fetchUsersForSharedDevices(sharedDevices)
+                }
+                .onFailure {
+                    Log.e("onloc", "Failed to fetch shared devices", it)
                 }
         }
     }
@@ -220,14 +258,6 @@ class LocationViewModel(application: Application) : AndroidViewModel(application
             appPreferences.deleteDeviceId()
 
             AuthStateManager.onLoggedOut(context)
-        }
-    }
-
-    private fun observeLocationsChange() {
-        viewModelScope.launch {
-            SocketEventBus.locationsChanged.collect {
-                fetchDevices()
-            }
         }
     }
 }

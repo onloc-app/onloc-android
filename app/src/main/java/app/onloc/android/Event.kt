@@ -21,7 +21,9 @@ enum class Event(val value: String) {
     FLASH_COMMAND("flash-command"),
     REGISTER_DEVICE("register-device"),
     UNREGISTER_DEVICE("unregister-device"),
+    CONNECTIONS_CHANGE("connections-change"),
     LOCATIONS_CHANGE("locations-change"),
+    ADMIN_LOCATIONS_CHANGE("admin-locations-change"),
     USER_WATCHING("user-watching"),
     PING("ping"), ;
 

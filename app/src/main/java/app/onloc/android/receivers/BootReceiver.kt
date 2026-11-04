@@ -39,7 +39,7 @@ class BootReceiver : BroadcastReceiver() {
                 ServiceManager.startLocationServiceIfAllowed(context)
             }
 
-            ServiceManager.startConnection(context)
+            ServiceManager.startUnifiedPushConnection(context)
         }
     }
 }

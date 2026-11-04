@@ -36,16 +36,15 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import app.onloc.android.R
-import app.onloc.android.services.ServiceManager
-import app.onloc.android.services.connection.WebSocketConnectionStrategy
+import org.unifiedpush.android.connector.UnifiedPush
 
 private const val UNIFIED_PUSH_URL = "https://unifiedpush.org/"
 
 @Composable
 fun UnifiedPushWarning(modifier: Modifier = Modifier) {
-    if (ServiceManager.connectionStrategy !is WebSocketConnectionStrategy) return
-
     val context = LocalContext.current
+
+    if (UnifiedPush.getDistributors(context).isNotEmpty()) return
 
     ElevatedCard(
         elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),

@@ -17,42 +17,43 @@ package app.onloc.android.services
 
 import android.content.Context
 import android.content.Intent
-import android.util.Log
 import androidx.core.content.ContextCompat
+import app.onloc.android.AppPreferences
 import app.onloc.android.ServicePreferences
+import app.onloc.android.api.unifiedpush.UnifiedPushApiService
 import app.onloc.android.permissions.LocationPermission
 import app.onloc.android.permissions.PostNotificationPermission
-import app.onloc.android.services.connection.ConnectionStrategy
-import app.onloc.android.services.connection.UnifiedPushConnectionStrategy
-import app.onloc.android.services.connection.WebSocketConnectionStrategy
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.unifiedpush.android.connector.UnifiedPush
 
 object ServiceManager {
-    var connectionStrategy: ConnectionStrategy = WebSocketConnectionStrategy()
-        private set
-
-    @Synchronized
-    fun setConnectionStrategy(context: Context, strategy: ConnectionStrategy) {
-        if (connectionStrategy::class == strategy::class) return
-        connectionStrategy.stop(context)
-        connectionStrategy = strategy
-        connectionStrategy.start(context)
-    }
-
-    fun startConnection(context: Context) {
-        val strategy =
-            if (UnifiedPush.getDistributors(context).isNotEmpty()) {
-                UnifiedPushConnectionStrategy()
-            } else {
-                WebSocketConnectionStrategy()
+    fun startUnifiedPushConnection(context: Context) {
+        val distributors = UnifiedPush.getDistributors(context)
+        if (distributors.isNotEmpty()) {
+            if (UnifiedPush.getSavedDistributor(context).isNullOrEmpty()) {
+                UnifiedPush.saveDistributor(context, distributors[0])
             }
-        Log.d("ServiceManager", "Starting connection strategy: $strategy")
-        setConnectionStrategy(context, strategy)
-        connectionStrategy.start(context)
+            UnifiedPush.register(context)
+        }
     }
 
-    fun stopConnection(context: Context) {
-        connectionStrategy.stop(context)
+    fun stopUnifiedPushConnection(context: Context) {
+        val appPreferences = AppPreferences(context)
+        val servicePreferences = ServicePreferences(context)
+
+        val serverUrl = appPreferences.getServerUrl()
+        serverUrl?.let {
+            val api = UnifiedPushApiService(context, serverUrl)
+            servicePreferences.pushEndpointUrl?.let { endpointUrl ->
+                CoroutineScope(Dispatchers.IO).launch {
+                    api.unregister(endpointUrl)
+                }
+            }
+        }
+
+        UnifiedPush.unregister(context)
     }
 
     fun startLocationServiceIfAllowed(context: Context) {
@@ -77,6 +78,6 @@ object ServiceManager {
 
     fun stopAllServices(context: Context) {
         stopLocationService(context)
-        stopConnection(context)
+        stopUnifiedPushConnection(context)
     }
 }

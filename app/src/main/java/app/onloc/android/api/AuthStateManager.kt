@@ -27,11 +27,11 @@ object AuthStateManager {
 
     fun onLoggedIn(context: Context) {
         _isAuthenticated.value = true
-        ServiceManager.startConnection(context)
+        ServiceManager.startUnifiedPushConnection(context)
     }
 
     fun onLoggedOut(context: Context) {
         _isAuthenticated.value = false
-        ServiceManager.stopConnection(context)
+        ServiceManager.stopUnifiedPushConnection(context)
     }
 }

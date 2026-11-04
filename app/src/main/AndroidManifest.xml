@@ -80,12 +80,6 @@
                 android:exported="false"
                 android:foregroundServiceType="location">
         </service>
-        <service
-                android:name=".services.WebSocketService"
-                android:directBootAware="true"
-                android:exported="false"
-                android:foregroundServiceType="mediaPlayback">
-        </service>
         <service android:name=".services.UnifiedPushService"
                  android:exported="false"
                  android:directBootAware="true">

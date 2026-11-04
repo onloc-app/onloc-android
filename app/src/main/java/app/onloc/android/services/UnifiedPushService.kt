@@ -24,8 +24,6 @@ import app.onloc.android.api.unifiedpush.UnifiedPushApiService
 import app.onloc.android.commands.Flash
 import app.onloc.android.commands.Lock
 import app.onloc.android.commands.Ring
-import app.onloc.android.services.connection.UnifiedPushConnectionStrategy
-import app.onloc.android.services.connection.WebSocketConnectionStrategy
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -42,8 +40,6 @@ class UnifiedPushService : PushService() {
     val cs = CoroutineScope(Dispatchers.IO)
 
     override fun onNewEndpoint(endpoint: PushEndpoint, instance: String) {
-        ServiceManager.setConnectionStrategy(this, UnifiedPushConnectionStrategy())
-
         val deviceId = AppPreferences(this).getDeviceId()
         DeviceConnectionManager.syncPushRegistration(
             context = this,
@@ -76,7 +72,6 @@ class UnifiedPushService : PushService() {
             Event.RING_COMMAND -> Ring(this).execute()
             Event.LOCK_COMMAND -> Lock(this, lockMessage).execute()
             Event.FLASH_COMMAND -> Flash(this).execute()
-            Event.LOCATIONS_CHANGE -> cs.launch { SocketEventBus.emitLocationsChanged() }
             Event.USER_WATCHING -> LocationService.isUserWatching = isUserWatching
             Event.PING -> Unit
             else -> Log.w("UnifiedPushService", "Unknown command $command for device $instance")
@@ -85,13 +80,11 @@ class UnifiedPushService : PushService() {
 
     override fun onRegistrationFailed(reason: FailedReason, instance: String) {
         Log.w("UnifiedPushService", "Registration failed: $reason")
-        ServiceManager.setConnectionStrategy(this, WebSocketConnectionStrategy())
         apiUnregister(this)
     }
 
     override fun onUnregistered(instance: String) {
         Log.d("UnifiedPushService", "Unregistered")
-        ServiceManager.setConnectionStrategy(this, WebSocketConnectionStrategy())
         apiUnregister(this)
     }
 
