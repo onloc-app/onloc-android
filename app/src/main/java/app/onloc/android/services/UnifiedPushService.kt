@@ -73,7 +73,6 @@ class UnifiedPushService : PushService() {
             Event.LOCK_COMMAND -> Lock(this, lockMessage).execute()
             Event.FLASH_COMMAND -> Flash(this).execute()
             Event.USER_WATCHING -> LocationService.isUserWatching = isUserWatching
-            Event.PING -> Unit
             else -> Log.w("UnifiedPushService", "Unknown command $command for device $instance")
         }
     }

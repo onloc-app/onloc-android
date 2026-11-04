@@ -24,8 +24,7 @@ enum class Event(val value: String) {
     CONNECTIONS_CHANGE("connections-change"),
     LOCATIONS_CHANGE("locations-change"),
     ADMIN_LOCATIONS_CHANGE("admin-locations-change"),
-    USER_WATCHING("user-watching"),
-    PING("ping"), ;
+    USER_WATCHING("user-watching"), ;
 
     companion object {
         fun fromValue(value: String): Event? = entries.find { it.value == value }
