@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Onloc</string>
+    <string name="login_username_field_label">Nazwa użytkownika</string>
+    <string name="login_password_field_label">Hasło</string>
+    <string name="login_url_field_label">URL serwera</string>
+    <string name="login_found_servers_button">Pokaż znalezione serwery</string>
+    <string name="login_found_servers_title">Znalezione serwery</string>
+    <string name="login_title">Onloc</string>
+    <string name="login_description">Zaloguj do instancji</string>
+    <string name="login_submit_button_label">Zaloguj</string>
+    <string name="login_error_invalid_credentials">Nieprawidłowe poświadczenia</string>
+    <string name="login_error_server">Błąd serwera (%1$d)</string>
+    <string name="login_continue_button">Kontynuuj</string>
+    <string name="login_url_required">URL jest wymagany</string>
+    <string name="login_invalid_url">Niepoprawny URL</string>
+    <string name="login_username_required">Nazwa użytkownika wymagana</string>
+    <string name="login_password_required">Hasło wymagane</string>
+    <string name="login_selected_server">Wybrany serwer</string>
+    <string name="main_title">Onloc</string>
+    <string name="main_service_status_no_selection">Nie wybrano urządzenia</string>
+    <string name="main_service_status_missing_permissions">Brak wymaganych uprawnień</string>
+    <string name="main_location_service_stopped">Usługa lokalizacji zatrzymana. Twoje dane nie są wysyłane.</string>
+    <string name="main_device_button_label">Wybierz urządzenie</string>
+    <string name="avatar_dialog_title">Konto</string>
+    <string name="avatar_logout_button_label">Wyloguj</string>
+    <string name="main_location_service_switch_label">Usługa lokalizacji</string>
+    <string name="main_settings_header">Ustawienia</string>
+    <string name="permissions_header">Funkcje i uprawnienia</string>
+    <string name="generic_close_button">Zamknij</string>
+    <string name="settings_dialog_interval_slider_label">Interwał pomiędzy przesyłaniami</string>
+    <string name="settings_dialog_interval_slider_realtime_label">Aktualizuj w czasie rzeczywistym</string>
+    <string name="settings_dialog_unified_push_title">Oszczędzaj akumulator z UnifiedPush</string>
+</resources>
