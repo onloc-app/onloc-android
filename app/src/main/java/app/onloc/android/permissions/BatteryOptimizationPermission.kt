@@ -23,6 +23,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.PowerManager
 import android.provider.Settings
+import androidx.core.net.toUri
 
 class BatteryOptimizationPermission : Permission {
     override fun isGranted(context: Context): Boolean {
@@ -34,16 +35,13 @@ class BatteryOptimizationPermission : Permission {
         return powerManager.isIgnoringBatteryOptimizations(context.packageName) || adminPermission.isGranted(context)
     }
 
-    @SuppressLint("BatteryLife")
+    @SuppressLint("BatteryLife", "UseKtx")
     override fun request(activity: Activity) {
-        try {
-            val intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)
-            activity.startActivity(intent)
-        } catch (_: ActivityNotFoundException) {
-            val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                data = Uri.fromParts("package", activity.packageName, null)
-            }
-            activity.startActivity(intent)
+        val packageName = activity.packageName
+        val intent = Intent().apply {
+            setAction(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)
+            setData("package:$packageName".toUri())
         }
+        activity.startActivity(intent)
     }
 }
