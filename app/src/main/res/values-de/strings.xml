@@ -73,7 +73,7 @@
     <string name="device_actions_navigate">Route erstellen</string>
     <string name="settings_dialog_unified_push_button">Erfahre mehr über UnifiedPush</string>
     <string name="quality_balance_power_accuracy">Ausgewogen</string>
-    <string name="quality_high_accuracy">Hoch</string>
+    <string name="quality_high_accuracy">Hohe Genauigkeit</string>
     <string name="quality_low_power">Niedrig</string>
     <string name="permissions_battery_optimization_description">Die aktivierte Batterieoptimierung
         kann die App ungewollt stoppen, während sie im Hintergrund läuft. Dadurch werden die
@@ -84,10 +84,14 @@
     <string name="value_false">Falsch</string>
     <string name="login_url_required">Bitte geben Sie die URL ein</string>
     <string name="device_sheet_actions_title">Aktionen</string>
-    <string name="settings_dialog_quality_label">Standort Qualität</string>
-    <string name="settings_dialog_unified_push_title">Akkusparen durch UnifiedPush</string>
-    <string name="permissions_battery_optimization_header">Batterieoptimierung deaktivieren</string>
+    <string name="settings_dialog_quality_label">Ortungs Qualität</string>
+    <string name="settings_dialog_unified_push_title">Mit UnifiedPush den Akku schonen</string>
+    <string name="permissions_battery_optimization_header">Deaktivieren Sie sie Batterieoptimierung</string>
     <string name="device_sheet_information_title">Info</string>
     <string name="device_info_charging">Lädt</string>
     <string name="device_info_latest_location">Letzter Standort</string>
+    <string name="settings_dialog_unified_push_description">Auf ihrem Gerät ist kein UnifiedPush Provider installiert. In diesem Fall startet Onloc eine WebSocket Verbindung, die einen höheren Akkuverbrauch zur Folge haben kann. Installieren Sie einen UnifiedPush Provider um den Akkuverbrauch zu minimieren.</string>
+    <string name="permissions_ring_header">Starte Klingeln</string>
+    <string name="device_info_owner">Eigentümer</string>
+    <string name="value_true">Korrekt</string>
 </resources>
