@@ -38,6 +38,7 @@ import app.onloc.android.models.Location
 import app.onloc.android.models.User
 import app.onloc.android.models.api.tokens.DeleteTokenRequest
 import app.onloc.android.services.DeviceConnectionManager
+import app.onloc.android.services.LocationService
 import app.onloc.android.services.ServiceManager
 import app.onloc.android.services.SocketManager
 import kotlinx.coroutines.CoroutineScope
@@ -86,6 +87,7 @@ class LocationViewModel(application: Application) : AndroidViewModel(application
     fun setLocationUpdateInterval(interval: Int) {
         _locationUpdateInterval.value = interval
         servicePreferences.locationUpdatesInterval = interval
+        restartLocationServiceIfRunning()
     }
 
     private val _realTime = MutableStateFlow(servicePreferences.realtime)
@@ -93,6 +95,7 @@ class LocationViewModel(application: Application) : AndroidViewModel(application
     fun setRealTime(realTime: Boolean) {
         _realTime.value = realTime
         servicePreferences.realtime = realTime
+        restartLocationServiceIfRunning()
     }
 
     private val _quality = MutableStateFlow(servicePreferences.quality)
@@ -100,6 +103,7 @@ class LocationViewModel(application: Application) : AndroidViewModel(application
     fun setQuality(quality: Int) {
         _quality.value = quality
         servicePreferences.quality = quality
+        restartLocationServiceIfRunning()
     }
 
     val storedServerUrl: String? get() = appPreferences.getServerUrl()
@@ -205,6 +209,10 @@ class LocationViewModel(application: Application) : AndroidViewModel(application
     fun selectDevice(id: Int?) {
         DeviceConnectionManager.selectDevice(context, id)
         selectedDeviceId.value = id
+    }
+
+    private fun restartLocationServiceIfRunning() {
+        if (LocationService.running.value) ServiceManager.startLocationServiceIfAllowed(context)
     }
 
     fun startLocationService() {

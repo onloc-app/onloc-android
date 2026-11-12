@@ -184,15 +184,26 @@ class LocationService : Service() {
         stopSelf()
     }
 
-    override fun onCreate() {
-        super.onCreate()
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        val started = runCatching {
+            startForeground(
+                START_LOCATION_SERVICE_NOTIFICATION_ID,
+                createStartLocationServiceNotification(this),
+            )
+        }
+        // Android doesn't allow a location FGS to start from the background, e.g. when it restarts a killed service
+        if (started.isFailure) {
+            Log.e("LocationService", "Couldn't start in foreground", started.exceptionOrNull())
+            stopSelf()
+            return START_NOT_STICKY
+        }
+
+        // Called again when the settings change, so drop the old request
+        stopLocationUpdates()
         requestLocation()
-        startForeground(
-            START_LOCATION_SERVICE_NOTIFICATION_ID,
-            createStartLocationServiceNotification(this),
-        )
 
         running.value = true
+        return START_STICKY
     }
 
     override fun onDestroy() {
