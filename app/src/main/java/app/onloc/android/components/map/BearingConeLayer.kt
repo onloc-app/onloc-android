@@ -36,7 +36,7 @@ private const val OPACITY_DURATION = 300
 
 @Composable
 fun BearingConeLayer(
-    id: Int,
+    id: String,
     longitude: Double,
     latitude: Double,
     bearing: Float,

@@ -38,7 +38,7 @@ class UsersApiService(context: Context, url: String) {
         }
     }
 
-    suspend fun getUser(id: Int): Result<User> {
+    suspend fun getUser(id: String): Result<User> {
         try {
             val response: GetUserResponse = api.client.get("$ENDPOINT/$id").body()
             return Result.success(response.user)

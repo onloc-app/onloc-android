@@ -32,7 +32,7 @@ import io.github.dellisd.spatialk.geojson.Position
 
 @Composable
 fun DeviceNameLayer(
-    id: Int,
+    id: String,
     longitude: Double,
     latitude: Double,
     name: String,

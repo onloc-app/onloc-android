@@ -20,10 +20,10 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class Device(
-    val id: Int,
+    val id: String,
 
     @SerialName("user_id")
-    val userId: Int,
+    val userId: String,
 
     val name: String,
 

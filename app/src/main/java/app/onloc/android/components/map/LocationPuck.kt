@@ -36,7 +36,7 @@ private const val ACCURACY_OPACITY = 0.5f
 
 @Composable
 fun LocationPuck(
-    id: Int,
+    id: String,
     longitude: Double,
     latitude: Double,
     accuracy: Double?,
@@ -98,7 +98,7 @@ fun LocationPuck(
 
 @Composable
 fun LocationPuck(
-    id: Int,
+    id: String,
     location: Location,
     device: Device,
     metersPerDp: Double,

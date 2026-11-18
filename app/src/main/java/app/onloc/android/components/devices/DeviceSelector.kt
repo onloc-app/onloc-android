@@ -29,10 +29,10 @@ import app.onloc.android.models.Device
 @Composable
 fun DeviceSelector(
     devices: List<Device>,
-    selectedDeviceId: Int?,
+    selectedDeviceId: String?,
     opened: Boolean,
     onClose: () -> Unit,
-    onDeviceSelect: (id: Int) -> Unit,
+    onDeviceSelect: (id: String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)

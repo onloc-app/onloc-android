@@ -148,7 +148,7 @@ fun LocationScreen(viewModel: LocationViewModel, modifier: Modifier = Modifier) 
     var deviceSelectorOpened by rememberSaveable { mutableStateOf(false) }
     var settingsDialogOpened by rememberSaveable { mutableStateOf(false) }
     var onCurrentLocation by remember { mutableStateOf(false) }
-    var focusedDeviceId by remember { mutableStateOf<Int?>(null) }
+    var focusedDeviceId by remember { mutableStateOf<String?>(null) }
     val focusedDevice by remember { derivedStateOf { (devices + sharedDevices).find { it.id == focusedDeviceId } } }
     var notificationGranted by remember { mutableStateOf(PostNotificationPermission().isGranted(context)) }
     var locationGranted by remember { mutableStateOf(LocationPermission().isGranted(context)) }
@@ -444,7 +444,7 @@ fun LocationScreen(viewModel: LocationViewModel, modifier: Modifier = Modifier) 
                     val accuracy = currentLocation.accuracy?.toDouble()
 
                     LocationPuck(
-                        id = 0,
+                        id = "",
                         longitude = longitude,
                         latitude = latitude,
                         accuracy = accuracy,

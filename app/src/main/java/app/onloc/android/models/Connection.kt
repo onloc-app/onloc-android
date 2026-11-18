@@ -20,13 +20,13 @@ import com.google.gson.annotations.SerializedName
 
 @Keep
 data class Connection(
-    val id: Int,
+    val id: String,
 
     @SerializedName("requester_id")
-    val requesterId: Int,
+    val requesterId: String,
 
     @SerializedName("addressee_id")
-    val addresseeId: Int,
+    val addresseeId: String,
 
     val status: String,
 

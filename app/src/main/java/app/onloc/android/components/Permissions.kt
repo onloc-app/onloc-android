@@ -53,7 +53,6 @@ import app.onloc.android.services.ServiceManager
 fun Permissions(modifier: Modifier = Modifier, onPermissionsChange: () -> Unit = {}) {
     val context = LocalContext.current
     val activity = LocalActivity.current
-    val lifecycleOwner = LocalLifecycleOwner.current
 
     var batteryOptimizationDisabled by remember { mutableStateOf(BatteryOptimizationPermission().isGranted(context)) }
     var notificationsGranted by remember { mutableStateOf(PostNotificationPermission().isGranted(context)) }

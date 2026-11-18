@@ -64,13 +64,21 @@ class AppPreferences(private val context: Context) {
         prefs.edit { putString(SERVER_URL_KEY, url) }
     }
 
-    fun getDeviceId(): Int? {
-        val id = prefs.getInt(DEVICE_ID_KEY, -1)
-        return if (id != -1) id else null
+    fun getDeviceId(): String? {
+        // Switch to string device ids
+        try {
+            val oldId = prefs.getInt(DEVICE_ID_KEY, -1)
+            if (oldId != -1) {
+                createDeviceId(oldId.toString())
+            }
+        } catch (_: Exception) {}
+
+        return prefs.getString(DEVICE_ID_KEY, null)
     }
 
-    fun createDeviceId(id: Int?) {
-        prefs.edit { putInt(DEVICE_ID_KEY, id ?: -1) }
+
+    fun createDeviceId(id: String?) {
+        prefs.edit { putString(DEVICE_ID_KEY, id) }
     }
 
     fun deleteDeviceId() {

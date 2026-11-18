@@ -16,5 +16,7 @@
 package app.onloc.android.models.api.locations
 
 import app.onloc.android.models.Location
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class PostLocationResponse(val location: Location)

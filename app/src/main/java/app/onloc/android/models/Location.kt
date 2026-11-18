@@ -21,10 +21,10 @@ import java.time.Instant
 
 @Serializable
 data class Location(
-    val id: Int,
+    val id: String,
 
     @SerialName("device_id")
-    val deviceId: Int,
+    val deviceId: String,
 
     val accuracy: Float? = null,
     val altitude: Double? = null,
@@ -55,7 +55,7 @@ data class Location(
     val updatedAt: String? = null,
 ) {
     companion object {
-        fun fromAndroidLocation(id: Int, deviceId: Int, location: android.location.Location): Location {
+        fun fromAndroidLocation(id: String, deviceId: String, location: android.location.Location): Location {
             val formattedTime = Instant.ofEpochMilli(location.time).toString()
 
             return Location(

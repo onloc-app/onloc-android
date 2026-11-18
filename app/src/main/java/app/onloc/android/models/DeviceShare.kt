@@ -20,16 +20,16 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class DeviceShare(
-    val id: Int,
+    val id: String,
 
     @SerialName("user_id")
-    val userId: Int,
+    val userId: String,
 
     @SerialName("connection_id")
-    val connectionId: Int,
+    val connectionId: String,
 
     @SerialName("device_id")
-    val deviceId: Int,
+    val deviceId: String,
 
     @SerialName("can_ring")
     val canRing: Boolean,

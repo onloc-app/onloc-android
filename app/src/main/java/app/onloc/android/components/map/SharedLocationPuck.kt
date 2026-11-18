@@ -58,7 +58,7 @@ private val FOREGROUND_SHARED_ICON_OFFSET = offset(0.dp, (-1.5).dp)
 
 @Composable
 fun SharedLocationPuck(
-    id: Int,
+    id: String,
     location: Location,
     device: Device,
     user: User,

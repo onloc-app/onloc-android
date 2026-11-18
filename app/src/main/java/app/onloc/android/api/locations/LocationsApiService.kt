@@ -16,6 +16,7 @@
 package app.onloc.android.api.locations
 
 import android.content.Context
+import android.util.Log
 import app.onloc.android.api.ApiClient
 import app.onloc.android.models.Location
 import app.onloc.android.models.api.locations.PostLocationResponse
@@ -23,6 +24,7 @@ import app.onloc.android.models.api.locations.PostLocationsResponse
 import io.ktor.client.call.body
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
+import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 

@@ -66,8 +66,8 @@ class LocationViewModel(application: Application) : AndroidViewModel(application
     private val _sharedDevices = MutableStateFlow<List<Device>>(emptyList())
     val sharedDevices: StateFlow<List<Device>> = _sharedDevices.asStateFlow()
 
-    private val _sharedDeviceUsers = MutableStateFlow<Map<Int, User>>(emptyMap())
-    val sharedDeviceUsers: StateFlow<Map<Int, User>> = _sharedDeviceUsers.asStateFlow()
+    private val _sharedDeviceUsers = MutableStateFlow<Map<String, User>>(emptyMap())
+    val sharedDeviceUsers: StateFlow<Map<String, User>> = _sharedDeviceUsers.asStateFlow()
 
     private val _currentLocation = MutableStateFlow<Location?>(null)
     val currentLocation: StateFlow<Location?> = _currentLocation.asStateFlow()
@@ -171,7 +171,7 @@ class LocationViewModel(application: Application) : AndroidViewModel(application
 
     suspend fun fetchUsersForSharedDevices(devices: List<Device>) {
         val serverUrl = storedServerUrl ?: return
-        val users = mutableMapOf<Int, User>()
+        val users = mutableMapOf<String, User>()
         devices.forEach { device ->
             UsersApiService(context, serverUrl).getUser(device.userId)
                 .onSuccess { user ->
@@ -181,28 +181,28 @@ class LocationViewModel(application: Application) : AndroidViewModel(application
         _sharedDeviceUsers.value = users
     }
 
-    fun ringDevice(id: Int) {
+    fun ringDevice(id: String) {
         val serverUrl = storedServerUrl ?: return
         viewModelScope.launch {
             DevicesApiService(context, serverUrl).ringDevice(id)
         }
     }
 
-    fun lockDevice(id: Int, message: String?) {
+    fun lockDevice(id: String, message: String?) {
         val serverUrl = storedServerUrl ?: return
         viewModelScope.launch {
             DevicesApiService(context, serverUrl).lockDevice(id, message)
         }
     }
 
-    fun flashDevice(id: Int) {
+    fun flashDevice(id: String) {
         val serverUrl = storedServerUrl ?: return
         viewModelScope.launch {
             DevicesApiService(context, serverUrl).flashDevice(id)
         }
     }
 
-    fun selectDevice(id: Int?) {
+    fun selectDevice(id: String?) {
         DeviceConnectionManager.selectDevice(context, id)
         selectedDeviceId.value = id
     }
@@ -217,8 +217,8 @@ class LocationViewModel(application: Application) : AndroidViewModel(application
 
     private val locationListener = LocationListener {
         _currentLocation.value = Location.fromAndroidLocation(
-            id = -1,
-            deviceId = -1,
+            id = "",
+            deviceId = "",
             location = it,
         )
     }

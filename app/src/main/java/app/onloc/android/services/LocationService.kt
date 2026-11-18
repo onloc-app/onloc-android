@@ -100,7 +100,7 @@ class LocationService : Service() {
         val batteryCharging: Boolean = batteryManager.isCharging
 
         val parsedLocation = OnlocLocation.fromAndroidLocation(
-            0,
+            "",
             selectedDeviceId,
             location,
         )
@@ -118,7 +118,9 @@ class LocationService : Service() {
             if (now - queueStart!! >= 15.minutes || isUserWatching) flushQueue()
         } else {
             serviceScope.launch {
-                LocationsApiService(applicationContext, serverUrl).postLocation(parsedLocation)
+                LocationsApiService(applicationContext, serverUrl).postLocation(parsedLocation).onFailure {
+                    Log.e("LocationService", "Failed to upload location", it)
+                }
             }
         }
     }

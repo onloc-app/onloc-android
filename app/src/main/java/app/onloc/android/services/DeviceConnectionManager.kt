@@ -30,7 +30,7 @@ import org.json.JSONObject
 object DeviceConnectionManager {
     private val cs = CoroutineScope(Dispatchers.IO)
 
-    fun selectDevice(context: Context, deviceId: Int?) {
+    fun selectDevice(context: Context, deviceId: String?) {
         val appPreferences = AppPreferences(context)
         val previousDeviceId = appPreferences.getDeviceId()
 
@@ -56,20 +56,20 @@ object DeviceConnectionManager {
 
     fun syncPushRegistration(
         context: Context,
-        deviceId: Int?,
+        deviceId: String?,
         endpointUrl: String,
         pubKey: String? = null,
         auth: String? = null,
     ) {
         val serverUrl = AppPreferences(context).getServerUrl() ?: return
-        val userId = UserPreferences(context).getUserCredentials().user?.id ?: 0
+        val userId = UserPreferences(context).getUserCredentials().user?.id ?: ""
 
         cs.launch {
             try {
                 val api = UnifiedPushApiService(context, serverUrl)
                 val provider =
                     UnifiedPushProvider(
-                        id = 0,
+                        id = "",
                         userId = userId,
                         deviceId = deviceId,
                         endpointUrl = endpointUrl,

@@ -50,7 +50,7 @@ class DevicesApiService(context: Context, url: String) {
         }
     }
 
-    suspend fun ringDevice(id: Int): Result<Unit> {
+    suspend fun ringDevice(id: String): Result<Unit> {
         try {
             api.client.post("$ENDPOINT/$id/ring")
             return Result.success(Unit)
@@ -59,7 +59,7 @@ class DevicesApiService(context: Context, url: String) {
         }
     }
 
-    suspend fun lockDevice(id: Int, message: String?): Result<Unit> {
+    suspend fun lockDevice(id: String, message: String?): Result<Unit> {
         try {
             api.client.post("$ENDPOINT/$id/lock") {
                 if (message != null) {
@@ -73,7 +73,7 @@ class DevicesApiService(context: Context, url: String) {
         }
     }
 
-    suspend fun flashDevice(id: Int): Result<Unit> {
+    suspend fun flashDevice(id: String): Result<Unit> {
         try {
             api.client.post("$ENDPOINT/$id/flash")
             return Result.success(Unit)

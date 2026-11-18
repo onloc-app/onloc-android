@@ -20,9 +20,9 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class UnifiedPushProvider(
-    val id: Int,
-    @SerialName("user_id") val userId: Int,
-    @SerialName("device_id") val deviceId: Int? = null,
+    val id: String,
+    @SerialName("user_id") val userId: String,
+    @SerialName("device_id") val deviceId: String? = null,
     @SerialName("endpoint_url") val endpointUrl: String,
     @SerialName("pub_key") val pubKey: String? = null,
     val auth: String? = null,
