@@ -76,7 +76,6 @@ class AppPreferences(private val context: Context) {
         return prefs.getString(DEVICE_ID_KEY, null)
     }
 
-
     fun createDeviceId(id: String?) {
         prefs.edit { putString(DEVICE_ID_KEY, id) }
     }
