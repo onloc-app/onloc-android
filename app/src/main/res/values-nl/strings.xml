@@ -64,15 +64,7 @@
     <string name="settings_dialog_interval_slider_realtime_label">Gebruik realtime updates</string>
     <string name="permissions_ring_header">Laat Apparaat Afgaan</string>
     <string name="service_location_stop_notification_description">De locatievolgservice is stopgezet</string>
-    <string name="service_location_enable_gps">GPS moet zijn ingeschakeld</string>
-    <string name="service_websocket_channel_name">WebSocket-service</string>
-    <string name="service_websocket_start_notification_title">Luisteren naar commando\'s</string>
-    <string name="service_websocket_start_notification_description">Het apparaat zal reageren op
-        commando\'s</string>
-    <string name="service_ringer_channel_name">Bel</string>
-    <string name="service_ringer_start_notification_title">Laat afgaan…</string>
-    <string name="service_ringer_start_notification_description">Het apparaat gaat af</string>
-    <string name="service_websocket_lock_screen_notification_title">Informatie</string>
+    <string name="lock_screen_notification_title">Informatie</string>
     <string name="device_info_battery_level">Batterijniveau</string>
     <string name="device_info_charging">Laadt op</string>
     <string name="device_info_owner">Eigenaar</string>

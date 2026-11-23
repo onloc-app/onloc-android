@@ -64,13 +64,5 @@
     <string name="service_location_stop_notification_description">
         Отслеживание местоположения прекращено
     </string>
-    <string name="service_location_enable_gps">Необходимо включить GPS</string>
-    <string name="service_websocket_channel_name">Служба WebSocket</string>
-    <string name="service_websocket_start_notification_title">Ожидание команд</string>
-    <string name="service_websocket_start_notification_description">Устройство будет отвечать на
-        команды</string>
-    <string name="service_ringer_channel_name">Сигнал</string>
-    <string name="service_ringer_start_notification_title">Подача сигнала</string>
-    <string name="service_ringer_start_notification_description">Устройство подает звуковой сигнал</string>
-    <string name="service_websocket_lock_screen_notification_title">Информация</string>
+    <string name="lock_screen_notification_title">Информация</string>
 </resources>

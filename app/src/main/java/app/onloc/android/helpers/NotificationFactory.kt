@@ -29,21 +29,14 @@ import app.onloc.android.receivers.NotificationDismissedReceiver
 const val LOCK_SCREEN_CHANNEL_ID = "lock_screen_channel"
 const val LOCK_SCREEN_NOTIFICATION_ID = 9999
 
-const val WEBSOCKET_SERVICE_CHANNEL_ID = "websocket_service_channel"
-const val START_WEBSOCKET_SERVICE_NOTIFICATION_ID = 2001
-
 const val LOCATION_SERVICE_CHANNEL_ID = "location_service_channel"
 const val START_LOCATION_SERVICE_NOTIFICATION_ID = 1001
 const val STOP_LOCATION_SERVICE_NOTIFICATION_ID = 1002
-
-const val RINGER_SERVICE_CHANNEL_ID = "ringer_service_channel"
 
 /**
  * Creates various notifications used around the app
  */
 object NotificationFactory {
-    //region WebSocket Service
-
     /**
      * Creates the notification displayed on the lock screen when device gets locked remotely.
      */
@@ -59,7 +52,7 @@ object NotificationFactory {
         )
         return NotificationCompat.Builder(context, LOCK_SCREEN_CHANNEL_ID)
             .setSmallIcon(android.R.drawable.ic_menu_info_details)
-            .setContentTitle(context.getString(R.string.service_websocket_lock_screen_notification_title))
+            .setContentTitle(context.getString(R.string.lock_screen_notification_title))
             .setContentText(message)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
@@ -67,29 +60,6 @@ object NotificationFactory {
             .setDeleteIntent(pendingIntent)
             .build()
     }
-
-    /**
-     * Creates the notification displayed when the app starts listening to commands from the server using WebSockets.
-     */
-    fun createStartWebSocketServiceNotification(context: Context): Notification {
-        val channelId = WEBSOCKET_SERVICE_CHANNEL_ID
-        val channelName = context.getString(R.string.service_websocket_channel_name)
-        val channel = NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_MIN)
-
-        val notificationManager = context.getSystemService(NOTIFICATION_SERVICE) as NotificationManager
-        notificationManager.createNotificationChannel(channel)
-
-        return NotificationCompat.Builder(context, channelId)
-            .setContentTitle(context.getString(R.string.service_websocket_start_notification_title))
-            .setContentText(context.getString(R.string.service_websocket_start_notification_description))
-            .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
-            .setPriority(NotificationCompat.PRIORITY_HIGH)
-            .build()
-    }
-
-    //endregion
-
-    //region Location service
 
     /**
      * Creates the notification displayed when the location service starts.
@@ -131,29 +101,4 @@ object NotificationFactory {
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .build()
     }
-
-    //endregion
-
-    //region Ringer service
-
-    /**
-     * Creates the notification displayed when the ringer service starts.
-     */
-    fun createStartRingerServiceNotification(context: Context): Notification {
-        val channelId = RINGER_SERVICE_CHANNEL_ID
-        val channelName = context.getString(R.string.service_ringer_channel_name)
-        val channel = NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_HIGH)
-
-        val notificationManager = context.getSystemService(NOTIFICATION_SERVICE) as NotificationManager
-        notificationManager.createNotificationChannel(channel)
-
-        return NotificationCompat.Builder(context, channelId)
-            .setContentTitle(context.getString(R.string.service_ringer_start_notification_title))
-            .setContentText(context.getString(R.string.service_ringer_start_notification_description))
-            .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
-            .setPriority(NotificationCompat.PRIORITY_HIGH)
-            .build()
-    }
-
-    //endregion
 }

@@ -1,0 +1,5 @@
+New backend! The whole API has been rebuilt from scratch using NestJS because the old one was filled with bugs and became so heavy it was hard to maintain.
+
+This update adapts the app to this new backends and brings a couple of changes:
+- When using real-time location updates, unless someone is currently watching your device, updates will be stored in batches and sent every 15 minutes.
+- UnifiedPush now registers user wide instead of per device.

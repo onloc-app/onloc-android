@@ -46,19 +46,12 @@
         verfolgt</string>
     <string name="service_location_stop_notification_title">Standortdienst Gestoppt</string>
     <string name="service_location_stop_notification_description">Der Standortdienst wurde gestoppt</string>
-    <string name="service_location_enable_gps">GPS muss aktiviert sein</string>
-    <string name="service_websocket_start_notification_title">Auf Befehle warten</string>
-    <string name="service_websocket_start_notification_description">Das Gerät reagiert auf Befehle</string>
-    <string name="service_ringer_channel_name">Klingelton</string>
-    <string name="service_ringer_start_notification_title">Klingelt…</string>
-    <string name="service_ringer_start_notification_description">Gerät klingelt</string>
-    <string name="service_websocket_lock_screen_notification_title">Information</string>
+    <string name="lock_screen_notification_title">Information</string>
     <string name="permissions_background_location_header">Standortabfrage im Hintergrund zulassen</string>
     <string name="permissions_do_not_disturb_label">Zugriff im Modus „Bitte nicht stören“</string>
     <string name="permissions_overlay_label">Über anderen Apps anzeigen</string>
     <string name="permissions_ring_description">Die App wartet auf Befehle durch den Server und
         klingelt, wenn sie darum gebeten wird.</string>
-    <string name="service_websocket_channel_name">WebSocket-Dienst</string>
     <string name="login_enable_network_discovery">Aktivieren Sie die Netzwerkerkennung</string>
     <string name="login_continue_button">Weiter</string>
     <string name="login_invalid_url">Ungültige URL</string>

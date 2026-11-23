@@ -33,14 +33,7 @@
     <string name="service_location_stop_notification_title">Servicio de ubicación detenido</string>
     <string name="service_location_stop_notification_description">Se ha detenido el servicio de
         localización</string>
-    <string name="service_location_enable_gps">Es necesario activar el GPS</string>
-    <string name="service_websocket_start_notification_title">Escuchando órdenes</string>
-    <string name="service_websocket_start_notification_description">El dispositivo responderá a los
-        comandos</string>
-    <string name="service_ringer_channel_name">Anillo</string>
-    <string name="service_ringer_start_notification_title">Anillo…</string>
-    <string name="service_ringer_start_notification_description">El dispositivo está sonando</string>
-    <string name="service_websocket_lock_screen_notification_title">Información</string>
+    <string name="lock_screen_notification_title">Información</string>
     <string name="app_name">Onloc</string>
     <string name="title_activity_location">Actividad de localización</string>
     <string name="title_activity_login">Actividad de inicio</string>
@@ -62,5 +55,4 @@
     <string name="main_device_button_label">Seleccione un dispositivo</string>
     <string name="avatar_dialog_title">Cuenta</string>
     <string name="avatar_logout_button_label">Cerrar sesión</string>
-    <string name="service_websocket_channel_name">Servicio WebSocket</string>
 </resources>
