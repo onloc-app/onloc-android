@@ -29,7 +29,8 @@
     <string name="main_service_status_no_selection">No device selected</string>
     <string name="main_service_status_missing_permissions">Required permissions missing</string>
     <string name="main_location_service_stopped">Location service stopped. Your data is not being
-        uploaded.</string>
+        uploaded.
+    </string>
     <string name="main_device_button_label">Select a device</string>
     <string name="avatar_dialog_title">Account</string>
     <string name="avatar_logout_button_label">Logout</string>
@@ -47,13 +48,6 @@
     <string name="settings_dialog_interval_slider_label">Interval between uploads</string>
     <string name="settings_dialog_interval_slider_realtime_label">Use real-time updates</string>
     <string name="settings_dialog_quality_label">Location quality</string>
-    <string name="settings_dialog_unified_push_title">Save battery with UnifiedPush</string>
-    <string name="settings_dialog_unified_push_description">
-        No UnifiedPush provider is installed. Onloc is using a persistent WebSocket connection,
-        which may use more
-        battery. Install a UnifiedPush provider to reduce battery usage.
-    </string>
-    <string name="settings_dialog_unified_push_button">Learn about UnifiedPush</string>
 
     <string name="quality_high_accuracy">High</string>
     <string name="quality_balance_power_accuracy">Balance</string>
@@ -80,11 +74,16 @@
     </string>
     <string name="permissions_grant_button_label">Grant</string>
     <string name="permissions_granted_button_label">Granted</string>
+    <string name="permissions_learn_more_button_label">Learn more</string>
+    <string name="permissions_registered_button_label">Registered</string>
     <string name="permissions_admin_label">Device Admin</string>
     <string name="permissions_lock_header">Lock Device</string>
     <string name="permissions_lock_description">Allows the app to remotely lock your device if it is
         lost or stolen.
     </string>
+    <string name="permissions_flash_header">Flash Device</string>
+    <string name="permissions_flash_description">Toggles the flashlight for a short period.</string>
+    <string name="permissions_unified_push_label">Unified Push</string>
     <string name="permissions_battery_optimization_header">Disable Battery Optimization</string>
     <string name="permissions_battery_optimization_description">Battery optimization can stop the
         app while it\'s
@@ -98,7 +97,8 @@
     <string name="service_location_channel_name">Location Service</string>
     <string name="service_location_start_notification_title">Location Service Started</string>
     <string name="service_location_start_notification_description">Tracking your location in the
-        background</string>
+        background
+    </string>
     <string name="service_location_stop_notification_title">Location Service Stopped</string>
     <string name="service_location_stop_notification_description">
         The location tracking service has been stopped

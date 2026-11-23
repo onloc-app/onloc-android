@@ -30,5 +30,4 @@
     <string name="generic_close_button">Zamknij</string>
     <string name="settings_dialog_interval_slider_label">Interwał pomiędzy przesyłaniami</string>
     <string name="settings_dialog_interval_slider_realtime_label">Aktualizuj w czasie rzeczywistym</string>
-    <string name="settings_dialog_unified_push_title">Oszczędzaj akumulator z UnifiedPush</string>
 </resources>

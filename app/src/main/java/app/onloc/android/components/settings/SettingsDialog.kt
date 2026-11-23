@@ -148,8 +148,6 @@ fun SettingsDialog(
                         style = MaterialTheme.typography.titleLarge,
                     )
 
-                    UnifiedPushWarning()
-
                     Column(
                         verticalArrangement = Arrangement.spacedBy(16.dp),
                         modifier = Modifier.fillMaxWidth(),

@@ -34,7 +34,7 @@ fun PermissionCard(name: String, isGranted: Boolean, onGrantClick: () -> Unit, m
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
-        Text(text = name, style = MaterialTheme.typography.titleSmall, modifier = Modifier.weight(2f))
+        Text(text = name, style = MaterialTheme.typography.titleSmall, modifier = Modifier.weight(1.5f))
         OutlinedButton(
             onClick = onGrantClick,
             enabled = !isGranted,

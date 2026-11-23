@@ -40,6 +40,7 @@ import androidx.lifecycle.compose.LifecycleEventEffect
 import app.onloc.android.R
 import app.onloc.android.components.settings.FeatureCard
 import app.onloc.android.components.settings.PermissionCard
+import app.onloc.android.components.settings.UnifiedPushCard
 import app.onloc.android.permissions.AdminPermission
 import app.onloc.android.permissions.BatteryOptimizationPermission
 import app.onloc.android.permissions.DoNotDisturbPermission
@@ -47,6 +48,7 @@ import app.onloc.android.permissions.LocationPermission
 import app.onloc.android.permissions.OverlayPermission
 import app.onloc.android.permissions.PostNotificationPermission
 import app.onloc.android.services.ServiceManager
+import org.unifiedpush.android.connector.UnifiedPush
 
 @Composable
 fun Permissions(modifier: Modifier = Modifier, onPermissionsChange: () -> Unit = {}) {
@@ -59,6 +61,7 @@ fun Permissions(modifier: Modifier = Modifier, onPermissionsChange: () -> Unit =
     var doNotDisturbGranted by remember { mutableStateOf(DoNotDisturbPermission().isGranted(context)) }
     var overlayGranted by remember { mutableStateOf(OverlayPermission().isGranted(context)) }
     var adminGranted by remember { mutableStateOf(AdminPermission().isGranted(context)) }
+    var hasUnifiedPushProvider by remember { mutableStateOf(UnifiedPush.getDistributors(context).isNotEmpty()) }
 
     val currentOnPermissionsChange by rememberUpdatedState(onPermissionsChange)
 
@@ -70,11 +73,14 @@ fun Permissions(modifier: Modifier = Modifier, onPermissionsChange: () -> Unit =
         doNotDisturbGranted = DoNotDisturbPermission().isGranted(context)
         overlayGranted = OverlayPermission().isGranted(context)
         adminGranted = AdminPermission().isGranted(context)
+        hasUnifiedPushProvider = UnifiedPush.getDistributors(context).isNotEmpty()
         currentOnPermissionsChange()
     }
 
     if (activity != null) {
-        Column(modifier = modifier.fillMaxWidth().padding(bottom = 16.dp), verticalArrangement = spacedBy(16.dp)) {
+        Column(modifier = modifier
+            .fillMaxWidth()
+            .padding(bottom = 16.dp), verticalArrangement = spacedBy(16.dp)) {
             if (!batteryOptimizationDisabled) {
                 FeatureCard(
                     name = stringResource(R.string.permissions_battery_optimization_header),
@@ -121,9 +127,10 @@ fun Permissions(modifier: Modifier = Modifier, onPermissionsChange: () -> Unit =
             FeatureCard(
                 name = stringResource(R.string.permissions_ring_header),
                 description = stringResource(R.string.permissions_ring_description),
-                isGranted = notificationsGranted && doNotDisturbGranted && overlayGranted,
+                isGranted = notificationsGranted && doNotDisturbGranted && overlayGranted && hasUnifiedPushProvider,
                 onGrant = { ServiceManager.startUnifiedPushConnection(context) },
             ) {
+                UnifiedPushCard()
                 PermissionCard(
                     name = stringResource(R.string.permissions_notifications_label),
                     isGranted = notificationsGranted,
@@ -156,9 +163,10 @@ fun Permissions(modifier: Modifier = Modifier, onPermissionsChange: () -> Unit =
             FeatureCard(
                 name = stringResource(R.string.permissions_lock_header),
                 description = stringResource(R.string.permissions_lock_description),
-                isGranted = notificationsGranted && adminGranted,
+                isGranted = notificationsGranted && adminGranted && hasUnifiedPushProvider,
                 onGrant = { ServiceManager.startUnifiedPushConnection(context) },
             ) {
+                UnifiedPushCard()
                 PermissionCard(
                     name = stringResource(R.string.permissions_notifications_label),
                     isGranted = notificationsGranted,
@@ -177,6 +185,15 @@ fun Permissions(modifier: Modifier = Modifier, onPermissionsChange: () -> Unit =
                         onPermissionsChange()
                     },
                 )
+            }
+
+            FeatureCard(
+                name = stringResource(R.string.permissions_flash_header),
+                description = stringResource(R.string.permissions_flash_description),
+                isGranted = hasUnifiedPushProvider,
+                onGrant = { ServiceManager.startUnifiedPushConnection(context) },
+            ) {
+                UnifiedPushCard()
             }
         }
     }
