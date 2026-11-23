@@ -16,7 +16,6 @@
 package app.onloc.android.components.settings
 
 import android.content.Intent
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -39,6 +38,8 @@ import app.onloc.android.R
 import org.unifiedpush.android.connector.UnifiedPush
 
 private const val UNIFIED_PUSH_URL = "https://unifiedpush.org/"
+private const val TEXT_SECTION_WEIGHT = 1.5f
+private const val BUTTON_SECTION_WEIGHT = 1f
 
 @Composable
 fun UnifiedPushCard(modifier: Modifier = Modifier) {
@@ -58,19 +59,19 @@ fun UnifiedPushCard(modifier: Modifier = Modifier) {
         Text(
             text = stringResource(R.string.permissions_unified_push_label),
             style = MaterialTheme.typography.titleSmall,
-            modifier = Modifier.weight(1.5f),
+            modifier = Modifier.weight(TEXT_SECTION_WEIGHT),
         )
         OutlinedButton(
             onClick = { context.startActivity(Intent(Intent.ACTION_VIEW, UNIFIED_PUSH_URL.toUri())) },
             enabled = !hasUnifiedPushProvider,
-            modifier = Modifier.weight(1f),
+            modifier = Modifier.weight(BUTTON_SECTION_WEIGHT),
         ) {
             Text(
                 if (hasUnifiedPushProvider) {
                     stringResource(R.string.permissions_registered_button_label)
                 } else {
                     stringResource(R.string.permissions_learn_more_button_label)
-                }
+                },
             )
         }
     }

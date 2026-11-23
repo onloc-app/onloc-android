@@ -27,6 +27,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import app.onloc.android.R
 
+private const val TEXT_SECTION_WEIGHT = 1.5f
+private const val BUTTON_SECTION_WEIGHT = 1f
+
 @Composable
 fun PermissionCard(name: String, isGranted: Boolean, onGrantClick: () -> Unit, modifier: Modifier = Modifier) {
     Row(
@@ -34,11 +37,11 @@ fun PermissionCard(name: String, isGranted: Boolean, onGrantClick: () -> Unit, m
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
-        Text(text = name, style = MaterialTheme.typography.titleSmall, modifier = Modifier.weight(1.5f))
+        Text(text = name, style = MaterialTheme.typography.titleSmall, modifier = Modifier.weight(TEXT_SECTION_WEIGHT))
         OutlinedButton(
             onClick = onGrantClick,
             enabled = !isGranted,
-            modifier = Modifier.weight(1f),
+            modifier = Modifier.weight(BUTTON_SECTION_WEIGHT),
         ) {
             Text(
                 if (isGranted) {
